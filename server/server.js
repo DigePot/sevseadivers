@@ -3,6 +3,10 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import sequelize from './models/index.js';
 import userRouter from './routes/userRoutes.js';
+import courseRouter from './routes/courseRoutes.js';
+import bookingRouter from './routes/bookingRoutes.js';
+import serviceRouter from './routes/serviceRoutes.js';
+import tripRouter from './routes/tripRoutes.js';
 
 
 dotenv.config({ path: './config/.env' });
@@ -16,6 +20,10 @@ app.use(express.json());
 
 // Routes
 app.use('/api/users', userRouter);
+app.use('/api/courses', courseRouter);
+app.use('/api/bookings', bookingRouter);
+app.use('/api/services', serviceRouter);
+app.use('/api/trips', tripRouter);
 
 app.get('/', (req, res) => {
   res.send('✅ Server is running and connected to Sequelize');
