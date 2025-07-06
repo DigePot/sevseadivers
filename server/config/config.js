@@ -1,5 +1,5 @@
-import dotenv from 'dotenv';
-dotenv.config({ path: './config/.env' });
+import dotenv from "dotenv"
+dotenv.config({ path: "./config/.env" })
 
 const common = {
   username: process.env.DB_USER,
@@ -7,11 +7,11 @@ const common = {
   database: process.env.DB_NAME,
   host: process.env.DB_HOST,
   port: Number(process.env.DB_PORT),
-  dialect: 'postgres', 
-  logging: false,       
-};
+  dialect: "postgres",
+  logging: false,
+}
 
 export default {
   development: { ...common },
   production: { ...common },
-};
+}
