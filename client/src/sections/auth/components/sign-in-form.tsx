@@ -44,9 +44,9 @@ export const SignInForm: React.FC = () => {
   const handleRoleBasedRedirect = (role: string) => {
     if (returnTo) return returnTo
     switch (role.toLocaleLowerCase()) {
-      case "ADMIN":
+      case "admin":
         return "/dashboard"
-      case "STAFF":
+      case "staff":
         return "/staff-dashboard"
       default:
         return "/"

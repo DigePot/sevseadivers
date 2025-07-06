@@ -78,7 +78,7 @@ export const SignUpForm: React.FC = () => {
         phoneNumber: data.phoneNumber,
         password: data.password,
         confirmPassword: data.confirmPassword,
-        role: "staff",
+        role: "",
       })
       console.log(res.data)
 
