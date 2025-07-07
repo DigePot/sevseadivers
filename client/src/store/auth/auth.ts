@@ -1,10 +1,12 @@
-import { createApi } from "@reduxjs/toolkit/query/react"
-import { baseQueryWithReauth } from "../../utils/base-query-with-re-auth"
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
 import type { UserDT } from "../../types/common"
+import { API } from "../api"
+
+const token = localStorage.getItem("auth_token")
 
 export const authApi = createApi({
   reducerPath: "authApi",
-  baseQuery: baseQueryWithReauth,
+  baseQuery: fetchBaseQuery({ baseUrl: `${API}` }),
   tagTypes: ["auth"],
   endpoints: (builder) => ({
     signUp: builder.mutation<any, any>({
@@ -19,6 +21,9 @@ export const authApi = createApi({
       query: ({ id }) => ({
         url: `/users/${id}`,
         method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       }),
       providesTags: ["auth"],
     }),

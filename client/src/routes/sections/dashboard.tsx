@@ -5,12 +5,19 @@ import { Outlet } from "react-router"
 
 import { DashboardLayout } from "../../layouts/dashboard"
 
-import { AuthGuard, RoleBasedGuard } from "../../sections/auth/guard"
+import { AuthGuard } from "../../sections/auth/guard"
 
 // ----------------------------------------------------------------------
 
 // Overview
 const IndexPage = lazy(() => import("../../pages/dashboard"))
+const StaffListPage = lazy(() => import("../../pages/dashboard/staff/list"))
+const StaffCreatePage = lazy(() => import("../../pages/dashboard/staff/new"))
+const StaffEditPage = lazy(() => import("../../pages/dashboard/staff/edit"))
+
+const TripListPage = lazy(() => import("../../pages/dashboard/trip/list"))
+const TripCreatePage = lazy(() => import("../../pages/dashboard/trip/new"))
+const TripEditPage = lazy(() => import("../../pages/dashboard/trip/edit"))
 
 // ----------------------------------------------------------------------
 
@@ -26,20 +33,25 @@ export const dashboardRoutes: RouteObject[] = [
   {
     path: "dashboard",
     element: (
-      <RoleBasedGuard allowedRoles={["admin"]}>
-        <AuthGuard>{dashboardLayout()}</AuthGuard>,
-      </RoleBasedGuard>
+      <AuthGuard allowedRoles={["admin"]}>{dashboardLayout()}</AuthGuard>
     ),
+
     children: [
       { index: true, element: <IndexPage /> },
       {
         path: "Staff",
         children: [
-          { index: true, element: <div>Building</div> },
-          { path: "profile", element: <div>Building</div> },
-          { path: "list", element: <div>Building</div> },
-          { path: "new", element: <div>Building</div> },
-          { path: ":id/edit", element: <div>Building</div> },
+          { index: true, path: "list", element: <StaffListPage /> },
+          { path: "new", element: <StaffCreatePage /> },
+          { path: ":id/edit", element: <StaffEditPage /> },
+        ],
+      },
+      {
+        path: "Trip",
+        children: [
+          { index: true, path: "list", element: <TripListPage /> },
+          { path: "new", element: <TripCreatePage /> },
+          { path: ":id/edit", element: <TripEditPage /> },
         ],
       },
     ],

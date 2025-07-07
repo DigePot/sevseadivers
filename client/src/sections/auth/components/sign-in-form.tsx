@@ -68,6 +68,7 @@ export const SignInForm: React.FC = () => {
 
       // Redirect user based on their role
       router.push(handleRoleBasedRedirect(role))
+      router.refresh()
     } catch (error: any) {
       // const e = getErrorMessage(error)
       // setGlobalError(`Login failed: Try again please`) // Set global error message

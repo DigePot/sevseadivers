@@ -4,6 +4,7 @@ import { logout } from "../../../store/auth/auth-slice"
 import { useDispatch } from "react-redux"
 import { useRouter } from "../../../routes/hooks"
 import type { AppDispatch } from "../../../store"
+import { paths } from "../../../routes/paths"
 
 export function useLogout() {
   const dispatch: AppDispatch = useDispatch()
@@ -14,12 +15,9 @@ export function useLogout() {
     try {
       dispatch(logout())
 
-      //   onClose?.();
-      // router.replace('/');
-      router.refresh()
+      window.location.href = paths.auth.jwt.signIn
     } catch (error) {
       console.error(error)
-      // toast.error('Unable to logout!');
     }
   }, [dispatch, router])
 

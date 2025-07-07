@@ -1,9 +1,5 @@
-import React, { useCallback } from "react"
-import { useDispatch } from "react-redux"
-import { useRouter } from "../routes/hooks"
-import { paths } from "../routes/paths"
-import type { AppDispatch } from "../store"
-import { logout } from "../store/auth/auth-slice"
+import React from "react"
+import { useLogout } from "../sections/auth/hooks"
 
 export interface SignOutButtonProps {
   className?: string
@@ -15,18 +11,7 @@ export const SignOutButton: React.FC<SignOutButtonProps> = ({
   onClick,
   ...props
 }) => {
-  const dispatch: AppDispatch = useDispatch()
-  const router = useRouter()
-
-  const handleLogout = useCallback(async () => {
-    try {
-      dispatch(logout())
-
-      window.location.href = paths.auth.jwt.signIn
-    } catch (error) {
-      console.error(error)
-    }
-  }, [dispatch, router])
+  const { handleLogout } = useLogout()
 
   return (
     <button

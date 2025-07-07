@@ -2,8 +2,6 @@ import { paths } from "./routes/paths"
 
 import packageJson from "../package.json"
 
-// ----------------------------------------------------------------------
-
 export type ConfigValue = {
   appName: string
   appVersion: string
@@ -15,8 +13,6 @@ export type ConfigValue = {
     redirectPath: string
   }
 }
-
-// ----------------------------------------------------------------------
 
 export const CONFIG: ConfigValue = {
   appName: "Sevsea",

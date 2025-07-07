@@ -4,7 +4,7 @@ import { lazy, Suspense } from "react"
 import { Outlet } from "react-router"
 
 import { StaffLayout } from "../../layouts/staff"
-import { AuthGuard, RoleBasedGuard } from "../../sections/auth/guard"
+import { AuthGuard } from "../../sections/auth/guard"
 
 // ----------------------------------------------------------------------
 
@@ -24,11 +24,8 @@ const staffLayout = () => (
 export const staffRoutes: RouteObject[] = [
   {
     path: "staff-dashboard",
-    element: (
-      <RoleBasedGuard allowedRoles={["staff"]}>
-        <AuthGuard>{staffLayout()}</AuthGuard>,
-      </RoleBasedGuard>
-    ),
+    element: <AuthGuard allowedRoles={["staff"]}>{staffLayout()}</AuthGuard>,
+
     children: [
       { index: true, element: <IndexPage /> },
       {

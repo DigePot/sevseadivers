@@ -22,14 +22,17 @@ export const paths = {
     general: {
       app: `${ROOTS.DASHBOARD}/app`,
     },
-    user: {
-      root: `${ROOTS.DASHBOARD}/user`,
-      new: `${ROOTS.DASHBOARD}/user/new`,
-      list: `${ROOTS.DASHBOARD}/user/list`,
-      cards: `${ROOTS.DASHBOARD}/user/cards`,
-      profile: `${ROOTS.DASHBOARD}/user/profile`,
-      account: `${ROOTS.DASHBOARD}/user/account`,
-      edit: (id: string) => `${ROOTS.DASHBOARD}/user/${id}/edit`,
+    staff: {
+      root: `${ROOTS.DASHBOARD}/staff`,
+      new: `${ROOTS.DASHBOARD}/staff/new`,
+      list: `${ROOTS.DASHBOARD}/staff/list`,
+      edit: (id: string) => `${ROOTS.DASHBOARD}/staff/${id}/edit`,
+    },
+    trip: {
+      root: `${ROOTS.DASHBOARD}/trip`,
+      new: `${ROOTS.DASHBOARD}/trip/new`,
+      list: `${ROOTS.DASHBOARD}/trip/list`,
+      edit: (id: string) => `${ROOTS.DASHBOARD}/trip/${id}/edit`,
     },
   },
 }
