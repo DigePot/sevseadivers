@@ -34,6 +34,20 @@ export const register = tryCatch(async (req, res, next) => {
     return next(new AppError("Password and confirm password do not match", 400))
   }
 
+  // Role validation
+  const allowedRoles = ["staff", "admin", "client"]
+  const assignedRole = role
+  if (!allowedRoles.includes(assignedRole)) {
+    return next(
+      new AppError(
+        `Invalid role "${assignedRole}". Must be one of: ${allowedRoles.join(
+          ", "
+        )}`,
+        400
+      )
+    )
+  }
+
   const existingUser = await User.findOne({ where: { username } })
   if (existingUser) {
     return next(new AppError("Username already exists", 409))
@@ -52,7 +66,8 @@ export const register = tryCatch(async (req, res, next) => {
     email,
     fullName,
     phoneNumber,
-    role: role || "client",
+    // role: role || "client",
+    role: assignedRole,
   })
 
   const token = jwt.sign(

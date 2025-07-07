@@ -1,10 +1,15 @@
-import { DataTypes } from 'sequelize';
+import { DataTypes } from "sequelize"
 
 const defineUser = (sequelize) => {
-  const User = sequelize.define('User', {
+  const User = sequelize.define("User", {
     username: { type: DataTypes.STRING, allowNull: false, unique: true },
     password: { type: DataTypes.STRING, allowNull: false },
-    role: { type: DataTypes.STRING, allowNull: false },
+    // role: { type: DataTypes.STRING, allowNull: false },
+    role: {
+      type: DataTypes.ENUM("staff", "admin", "client"),
+      allowNull: false,
+      defaultValue: "client",
+    },
     email: { type: DataTypes.STRING, allowNull: false, unique: true },
     fullName: { type: DataTypes.STRING, allowNull: false },
     phoneNumber: { type: DataTypes.STRING, allowNull: true },
@@ -29,8 +34,8 @@ const defineUser = (sequelize) => {
     },
     createdAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
     updatedAt: { type: DataTypes.DATE, defaultValue: DataTypes.NOW },
-  });
-  return User;
-};
+  })
+  return User
+}
 
-export default defineUser;
+export default defineUser
