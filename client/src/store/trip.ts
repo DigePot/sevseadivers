@@ -19,10 +19,31 @@ export const tripApi = createApi({
       }),
       providesTags: ["trip"],
     }),
+    getTrip: builder.query<Trip, string>({
+      query: (id) => ({
+        url: `/trips/${id}`,
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }),
+      providesTags: ["trip"],
+    }),
     createTrip: builder.mutation<Trip, FormData>({
       query: (formData) => ({
         url: `/trips`,
         method: "POST",
+        body: formData,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }),
+      invalidatesTags: ["trip"],
+    }),
+    updateTrip: builder.mutation<Trip, { id: number; formData: FormData }>({
+      query: ({ id, formData }) => ({
+        url: `/trips/${id}`,
+        method: "PUT",
         body: formData,
         headers: {
           Authorization: `Bearer ${token}`,
@@ -45,6 +66,8 @@ export const tripApi = createApi({
 
 export const {
   useGetTripsQuery,
+  useGetTripQuery,
   useCreateTripMutation,
   useDeleteTripMutation,
+  useUpdateTripMutation,
 } = tripApi

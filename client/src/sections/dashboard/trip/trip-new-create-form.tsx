@@ -117,15 +117,25 @@ export function TripNewCreateForm() {
     try {
       setIsSubmitting(true)
 
-      // Create mock URL for the image
-      const mockImageUrl = URL.createObjectURL(selectedFile)
+      // Create FormData object
+      const formData = new FormData()
 
-      // Create trip with JSON data
-      await createTrip({
-        ...data,
-        imageUrl: mockImageUrl,
-      } as any).unwrap()
+      // Append other form data
+      formData.append("title", data.title)
+      formData.append("description", data.description)
+      formData.append("destination", data.destination)
+      formData.append("date", data.date)
+      formData.append("activityType", data.activityType)
+      formData.append("price", data.price.toString())
+      formData.append("duration", data.duration)
 
+      // Append the image file
+      formData.append("media", selectedFile)
+
+      // Send the form data to the backend API to create the trip
+      await createTrip(formData).unwrap()
+
+      // Reset form and UI state after successful submission
       reset()
       handleRemoveImage()
       router.push(paths.dashboard.trip.list)
@@ -144,12 +154,6 @@ export function TripNewCreateForm() {
       <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6">
         Create New Trip
       </h1>
-
-      {errors.root && (
-        <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-lg">
-          {errors.root.message}
-        </div>
-      )}
 
       <form onSubmit={onSubmit} className="space-y-6">
         {/* Image Upload */}
@@ -458,6 +462,12 @@ export function TripNewCreateForm() {
           </button>
         </div>
       </form>
+
+      {errors.root && (
+        <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-lg">
+          {errors.root.message}
+        </div>
+      )}
     </div>
   )
 }
