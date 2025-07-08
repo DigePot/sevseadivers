@@ -3,7 +3,12 @@ import tryCatch from '../utils/tryCatch.js';
 import AppError from '../utils/appErorr.js';
 
 export const createCourse = tryCatch(async (req, res, next) => {
-  const { title, description, imageUrl, price, duration } = req.body;
+  const { title, description, price, duration } = req.body;
+  let imageUrl = req.body.imageUrl;
+  
+  if (req.file) {
+    imageUrl = `/upload/${req.file.filename}`;
+  }
   if (!title || !description || !price || !duration) {
     return next(new AppError('Title, description, price, and duration are required', 400));
   }

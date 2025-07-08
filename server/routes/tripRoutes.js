@@ -8,13 +8,14 @@ import {
 } from '../controllers/TripController.js';
 import authenticateToken from '../middleware/auth.js';
 import isAdmin from '../middleware/isAdmin.js';
+import upload from '../middleware/upload.js';
 
 const router = express.Router();
 
-router.post('/', authenticateToken, isAdmin, createTrip);
+router.post('/', authenticateToken, isAdmin, upload.single('media'), createTrip);
 router.get('/', getAllTrips);
 router.get('/:id', getTripById);
-router.put('/:id', authenticateToken, isAdmin, updateTrip);
+router.put('/:id', authenticateToken, isAdmin, upload.single('media'), updateTrip);
 router.delete('/:id', authenticateToken, isAdmin, deleteTrip);
 
 export default router; 
