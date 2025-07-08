@@ -7,6 +7,7 @@ import courseRouter from './routes/courseRoutes.js';
 import bookingRouter from './routes/bookingRoutes.js';
 import serviceRouter from './routes/serviceRoutes.js';
 import tripRouter from './routes/tripRoutes.js';
+import  adminRoutes from './routes/adminRoutes.js';
 
 dotenv.config({ path: './config/.env' });
 
@@ -20,6 +21,8 @@ app.use('/api/courses', courseRouter);
 app.use('/api/bookings', bookingRouter);
 app.use('/api/services', serviceRouter);
 app.use('/api/trips', tripRouter);
+app.use('/api/admin', adminRoutes);
+
 
 app.get('/', (req, res) => {
   res.send('✅ Server is running and connected to Sequelize');
