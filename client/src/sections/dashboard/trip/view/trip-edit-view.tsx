@@ -1,13 +1,12 @@
-import { paths } from "../../../../routes/paths"
-
+import type { Trip } from "../../../../types/trip"
 import { TripEditForm } from "../trip-edit-form"
 
 // ----------------------------------------------------------------------
 
 type Props = {
-  user?: any
+  currentTrip?: Trip
 }
 
-export function UserEditView({ user: currentUser }: Props) {
-  return <TripEditForm currentTrip={currentUser} />
+export function UserEditView({ currentTrip: currentTrip }: Props) {
+  return <TripEditForm currentTrip={currentTrip} />
 }

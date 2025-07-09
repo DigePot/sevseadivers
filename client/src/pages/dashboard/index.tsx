@@ -1,8 +1,7 @@
 import { Helmet } from "react-helmet-async"
 
 import { CONFIG } from "../../global-config"
-
-// import { OverviewAppView } from 'src/sections/overview/app/view';
+import { DashboardOverviewView } from "../../sections/dashboard/overview/views"
 
 // ----------------------------------------------------------------------
 
@@ -15,8 +14,7 @@ export default function OverviewAppPage() {
         <title> {metadata.title}</title>
       </Helmet>
 
-      {/* <OverviewAppView /> */}
-      <div>Admin Dashboard</div>
+      <DashboardOverviewView />
     </>
   )
 }

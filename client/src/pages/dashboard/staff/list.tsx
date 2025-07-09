@@ -1,6 +1,7 @@
 import { Helmet } from "react-helmet-async"
 
 import { CONFIG } from "../../../global-config"
+import { StaffListView } from "../../../sections/dashboard/staff/view"
 
 // ----------------------------------------------------------------------
 
@@ -13,8 +14,7 @@ export default function Page() {
         <title> {metadata.title}</title>
       </Helmet>
 
-      {/* <StaffListView /> */}
-      <div>Staff List</div>
+      <StaffListView />
     </>
   )
 }

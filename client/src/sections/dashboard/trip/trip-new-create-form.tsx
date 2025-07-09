@@ -328,7 +328,7 @@ export function TripNewCreateForm() {
             >
               Activity Type *
             </label>
-            <select
+            <input
               id="activityType"
               {...register("activityType")}
               className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:outline-none ${
@@ -336,14 +336,8 @@ export function TripNewCreateForm() {
                   ? "border-red-300 focus:ring-red-200"
                   : "border-gray-300 focus:border-blue-500 focus:ring-blue-200"
               }`}
-            >
-              <option value="">Select activity</option>
-              <option value="Adventure">Adventure</option>
-              <option value="Leisure">Leisure</option>
-              <option value="Business">Business</option>
-              <option value="Cultural">Cultural</option>
-              <option value="Sports">Sports</option>
-            </select>
+              placeholder="Activity"
+            />
             {errors.activityType && (
               <p className="text-red-500 text-sm">
                 {errors.activityType.message}

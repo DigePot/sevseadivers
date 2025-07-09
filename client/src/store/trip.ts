@@ -2,20 +2,24 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
 import { API } from "./api"
 import type { Trip } from "../types/trip"
 
-const token = localStorage.getItem("auth_token")
-
 export const tripApi = createApi({
   reducerPath: "tripApi",
-  baseQuery: fetchBaseQuery({ baseUrl: `${API}` }),
+  baseQuery: fetchBaseQuery({
+    baseUrl: `${API}`,
+    prepareHeaders: (headers) => {
+      const token = localStorage.getItem("auth_token")
+      if (token) {
+        headers.set("Authorization", `Bearer ${token}`)
+      }
+      return headers
+    },
+  }),
   tagTypes: ["trip"],
   endpoints: (builder) => ({
     getTrips: builder.query<Trip[], void>({
       query: () => ({
         url: `/trips`,
         method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
       }),
       providesTags: ["trip"],
     }),
@@ -23,9 +27,6 @@ export const tripApi = createApi({
       query: (id) => ({
         url: `/trips/${id}`,
         method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
       }),
       providesTags: ["trip"],
     }),
@@ -34,9 +35,6 @@ export const tripApi = createApi({
         url: `/trips`,
         method: "POST",
         body: formData,
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
       }),
       invalidatesTags: ["trip"],
     }),
@@ -45,9 +43,6 @@ export const tripApi = createApi({
         url: `/trips/${id}`,
         method: "PUT",
         body: formData,
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
       }),
       invalidatesTags: ["trip"],
     }),
@@ -55,9 +50,6 @@ export const tripApi = createApi({
       query: (id) => ({
         url: `/trips/${id}`,
         method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
       }),
       invalidatesTags: ["trip"],
     }),

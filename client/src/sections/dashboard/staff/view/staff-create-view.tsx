@@ -1,7 +1,7 @@
-import { TripNewCreateForm } from "../trip-new-create-form"
+import { StaffNewCreateForm } from "../staff-new-create-form"
 
 // ----------------------------------------------------------------------
 
 export function TripCreateView() {
-  return <TripNewCreateForm />
+  return <StaffNewCreateForm />
 }
