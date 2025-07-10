@@ -207,7 +207,7 @@ export const getAnalytics = tryCatch(async (req, res) => {
 })
 
 // Generate comprehensive reports
-export const generateReport = tryCatch(async (req, res) => {
+export const generateReport = tryCatch(async (req, res, next) => {
   const { type, startDate, endDate } = req.query
 
   const start = startDate
