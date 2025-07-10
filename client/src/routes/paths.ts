@@ -42,5 +42,11 @@ export const paths = {
       list: `${ROOTS.DASHBOARD}/course/list`,
       edit: (id: string) => `${ROOTS.DASHBOARD}/course/${id}/edit`,
     },
+    gallery: {
+      root: `${ROOTS.DASHBOARD}/gallery`,
+      new: `${ROOTS.DASHBOARD}/gallery/new`,
+      list: `${ROOTS.DASHBOARD}/gallery/list`,
+      edit: (id: string) => `${ROOTS.DASHBOARD}/gallery/${id}/edit`,
+    },
   },
 }

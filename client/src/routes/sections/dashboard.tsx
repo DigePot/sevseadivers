@@ -29,6 +29,12 @@ const CourseListPage = lazy(() => import("../../pages/dashboard/course/list"))
 const CourseCreatePage = lazy(() => import("../../pages/dashboard/course/new"))
 const CourseEditPage = lazy(() => import("../../pages/dashboard/course/edit"))
 
+const GalleryListPage = lazy(() => import("../../pages/dashboard/gallery/list"))
+const GalleryCreatePage = lazy(
+  () => import("../../pages/dashboard/gallery/new")
+)
+const GalleryEditPage = lazy(() => import("../../pages/dashboard/gallery/edit"))
+
 // ----------------------------------------------------------------------
 
 const dashboardLayout = () => (
@@ -72,6 +78,14 @@ export const dashboardRoutes: RouteObject[] = [
           { index: true, path: "list", element: <CourseListPage /> },
           { path: "new", element: <CourseCreatePage /> },
           { path: ":id/edit", element: <CourseEditPage /> },
+        ],
+      },
+      {
+        path: "Gallery",
+        children: [
+          { index: true, path: "list", element: <GalleryListPage /> },
+          { path: "new", element: <GalleryCreatePage /> },
+          { path: ":id/edit", element: <GalleryEditPage /> },
         ],
       },
     ],

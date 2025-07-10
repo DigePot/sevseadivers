@@ -3,6 +3,7 @@ import { authApi } from "./auth/auth"
 import { adminApi } from "./admin"
 import { tripApi } from "./trip"
 import { courseApi } from "./course"
+import { galleryApi } from "./gallery"
 import authReducer from "./auth/auth-slice"
 
 export const store = configureStore({
@@ -12,6 +13,7 @@ export const store = configureStore({
     [tripApi.reducerPath]: tripApi.reducer,
     [adminApi.reducerPath]: adminApi.reducer,
     [courseApi.reducerPath]: courseApi.reducer,
+    [galleryApi.reducerPath]: galleryApi.reducer,
   },
   devTools: false,
   middleware: (getDefaultMiddleware) =>
@@ -19,7 +21,8 @@ export const store = configureStore({
       authApi.middleware,
       tripApi.middleware,
       adminApi.middleware,
-      courseApi.middleware
+      courseApi.middleware,
+      galleryApi.middleware
     ),
 })
 

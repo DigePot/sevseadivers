@@ -1,4 +1,4 @@
-export * from "./trip-edit-view"
+export * from "./course-edit-view"
 
 export * from "./course-list-view"
 

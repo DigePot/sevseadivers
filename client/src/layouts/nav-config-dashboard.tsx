@@ -5,6 +5,7 @@ import {
   FiFileText,
   FiGlobe,
   FiHome,
+  FiImage,
   FiUsers,
 } from "react-icons/fi"
 import { paths } from "../routes/paths"
@@ -70,6 +71,15 @@ export const navData: NavSection[] = [
         children: [
           { title: "List", path: paths.dashboard.course.list },
           { title: "Create", path: paths.dashboard.course.new },
+        ],
+      },
+      {
+        title: "Gallery",
+        path: paths.dashboard.gallery.root,
+        icon: <FiImage />,
+        children: [
+          { title: "List", path: paths.dashboard.gallery.list },
+          { title: "Create", path: paths.dashboard.gallery.new },
         ],
       },
     ],
