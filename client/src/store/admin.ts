@@ -1,7 +1,9 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
-import { API } from "../api"
-import type { Staff } from "../../types/staff"
-import type { DashboardStats } from "../../types/dashboard-stats"
+import { API } from "./api"
+import type { Staff } from "../types/staff"
+import type { DashboardStats } from "../types/dashboard-stats"
+import type { AdminAnalytics } from "../types/admin-analytic"
+import type { Report } from "../types/report"
 
 export const adminApi = createApi({
   reducerPath: "adminApi",
@@ -59,6 +61,27 @@ export const adminApi = createApi({
       }),
       providesTags: ["admin"],
     }),
+    getAdminAnalytics: builder.query<AdminAnalytics, void>({
+      query: () => ({
+        url: `/admin/analytics`,
+        method: "GET",
+      }),
+      providesTags: ["admin"],
+    }),
+    generateReport: builder.query<
+      Report,
+      { type: string; startDate?: string; endDate?: string }
+    >({
+      query: ({ type, startDate, endDate }) => ({
+        url: `/admin/reports`,
+        method: "GET",
+        params: {
+          type,
+          startDate,
+          endDate,
+        },
+      }),
+    }),
   }),
 })
 
@@ -69,4 +92,7 @@ export const {
   useCreateStaffMutation,
   useUpdateStaffMutation,
   useGetDashboardStatsQuery,
+  useGetAdminAnalyticsQuery,
+  // useGenerateReportQuery,
+  useLazyGenerateReportQuery,
 } = adminApi

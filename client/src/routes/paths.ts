@@ -21,6 +21,8 @@ export const paths = {
     root: ROOTS.DASHBOARD,
     general: {
       app: `${ROOTS.DASHBOARD}/app`,
+      analytic: `${ROOTS.DASHBOARD}/analytic`,
+      report: `${ROOTS.DASHBOARD}/report`,
     },
     staff: {
       root: `${ROOTS.DASHBOARD}/staff`,
@@ -33,6 +35,12 @@ export const paths = {
       new: `${ROOTS.DASHBOARD}/trip/new`,
       list: `${ROOTS.DASHBOARD}/trip/list`,
       edit: (id: string) => `${ROOTS.DASHBOARD}/trip/${id}/edit`,
+    },
+    course: {
+      root: `${ROOTS.DASHBOARD}/course`,
+      new: `${ROOTS.DASHBOARD}/course/new`,
+      list: `${ROOTS.DASHBOARD}/course/list`,
+      edit: (id: string) => `${ROOTS.DASHBOARD}/course/${id}/edit`,
     },
   },
 }

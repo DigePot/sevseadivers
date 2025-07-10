@@ -8,18 +8,15 @@ import {
   FiTrendingUp,
   FiUsers,
 } from "react-icons/fi"
-import type { DashboardStats } from "../../../../types/dashboard-stats"
+import type { DashboardStats } from "../../../../../types/dashboard-stats"
 import { useDashboardStats } from "../hooks/use-dashboard-stats"
+import Spinner from "../../../../../components/Spinner"
 
 export const DashboardOverviewView: React.FC = () => {
   const { dashboardStats, error, isLoading } = useDashboardStats()
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-96">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    )
+    return <Spinner />
   }
 
   if (error || !dashboardStats) {
@@ -297,22 +294,22 @@ const RecentBookingsTable: React.FC<RecentBookingsTableProps> = ({
             <tr key={booking.id} className="hover:bg-gray-50">
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm font-medium text-gray-900">
-                  {booking.User.fullName}
+                  {booking.User?.fullName}
                 </div>
                 <div className="text-sm text-gray-500">
-                  {booking.User.username}
+                  {booking.User?.username}
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm text-gray-900">
-                  {booking.Course.title}
+                  {booking.Course?.title}
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {formatDate(booking.bookingDate)}
+                {formatDate(booking?.bookingDate)}
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <StatusBadge status={booking.status} />
+                <StatusBadge status={booking?.status} />
               </td>
             </tr>
           ))}

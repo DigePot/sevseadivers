@@ -1,4 +1,4 @@
-import { useGetOneStaffQuery } from "../../../../store/admin/admin"
+import { useGetOneStaffQuery } from "../../../../store/admin"
 import type { Staff } from "../../../../types/staff"
 
 export const useOneStaff = (id: string) => {

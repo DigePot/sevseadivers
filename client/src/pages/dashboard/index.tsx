@@ -1,7 +1,7 @@
 import { Helmet } from "react-helmet-async"
 
 import { CONFIG } from "../../global-config"
-import { DashboardOverviewView } from "../../sections/dashboard/overview/views"
+import { DashboardOverviewView } from "../../sections/dashboard/general/overview/views"
 
 // ----------------------------------------------------------------------
 

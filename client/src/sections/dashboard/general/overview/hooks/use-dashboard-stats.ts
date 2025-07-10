@@ -1,5 +1,5 @@
-import { useGetDashboardStatsQuery } from "../../../../store/admin/admin"
-import type { DashboardStats } from "../../../../types/dashboard-stats"
+import { useGetDashboardStatsQuery } from "../../../../../store/admin"
+import type { DashboardStats } from "../../../../../types/dashboard-stats"
 
 export const useDashboardStats = () => {
   const { data, error, isLoading } = useGetDashboardStatsQuery()

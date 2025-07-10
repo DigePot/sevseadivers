@@ -1,4 +1,4 @@
-import { useGetAllStaffQuery } from "../../../../store/admin/admin"
+import { useGetAllStaffQuery } from "../../../../store/admin"
 import type { Staff } from "../../../../types/staff"
 
 export const useAllStaff = () => {

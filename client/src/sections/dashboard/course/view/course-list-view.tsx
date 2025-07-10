@@ -1,3 +1,4 @@
+// src/sections/dashboard/general/course/views/course-list-view.tsx
 import React, { useEffect, useMemo, useState } from "react"
 import {
   FiAlertTriangle,
@@ -6,72 +7,77 @@ import {
   FiChevronLeft,
   FiChevronRight,
   FiChevronUp,
+  FiClock,
+  FiDollarSign,
   FiFilter,
-  FiMail,
-  FiPhone,
   FiSearch,
+  FiTrash2,
+  FiEdit,
 } from "react-icons/fi"
-import { Link } from "react-router"
+import { useDeleteCourseMutation } from "../../../../store/course"
+import type { Course } from "../../../../types/course"
+import { useCourses } from "../hooks/use-courses"
+import { Link } from "react-router-dom"
 import { paths } from "../../../../routes/paths"
-import { useDeleteStaffMutation } from "../../../../store/admin"
-import type { Staff } from "../../../../types/staff"
-import { useAllStaff } from "../hooks/use-all-staff"
 
 // ============================================================================
 // Type Definitions
 // ============================================================================
 
-type SortConfig = { key: keyof Staff; direction: string }
-type FiltersState = {
-  role: string
-  createdAt: string
+type CourseSortConfig = { key: keyof Course; direction: string }
+
+type CourseFiltersState = {
+  minPrice: string
+  maxPrice: string
+  duration: string
 }
 
 // ============================================================================
-// Main Component: StaffListView
+// Main Controller Component: CourseListView
 // ============================================================================
 
-export const StaffListView: React.FC = () => {
+export const CourseListView: React.FC = () => {
   // --- Hooks ---
-  const [deleteStaff, { isLoading: isDeleting }] = useDeleteStaffMutation()
-  const { allStaff, isLoading, error } = useAllStaff()
+  const [deleteCourse, { isLoading: isDeleting }] = useDeleteCourseMutation()
+  const { allCourses, isLoading, error } = useCourses()
 
   // --- State ---
   const [searchTerm, setSearchTerm] = useState("")
-  const [filters, setFilters] = useState<FiltersState>({
-    role: "",
-    createdAt: "",
+  const [filters, setFilters] = useState<CourseFiltersState>({
+    minPrice: "",
+    maxPrice: "",
+    duration: "",
   })
-  const [sortConfig, setSortConfig] = useState<SortConfig | null>(null)
+  const [sortConfig, setSortConfig] = useState<CourseSortConfig | null>(null)
   const [showFilters, setShowFilters] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(10)
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const [staffToDelete, setStaffToDelete] = useState<number | null>(null)
+  const [courseToDeleteId, setCourseToDeleteId] = useState<number | null>(null)
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 
   // --- Handlers ---
-  const handleOpenDeleteModal = (staffId: number) => {
-    setStaffToDelete(staffId)
-    setIsDeleteModalOpen(true)
+  const handleOpenDeleteModal = (courseId: number) => {
+    setCourseToDeleteId(courseId)
+    setShowDeleteConfirmation(true)
   }
 
   const handleCancelDelete = () => {
-    setIsDeleteModalOpen(false)
-    setStaffToDelete(null)
+    setShowDeleteConfirmation(false)
+    setCourseToDeleteId(null)
   }
 
   const handleConfirmDelete = async () => {
-    if (staffToDelete !== null) {
+    if (courseToDeleteId !== null) {
       try {
-        await deleteStaff(staffToDelete).unwrap()
+        await deleteCourse(courseToDeleteId).unwrap()
         handleCancelDelete()
       } catch (err) {
-        console.error("Failed to delete staff:", err)
+        console.error("Failed to delete the course:", err)
       }
     }
   }
 
-  const handleSort = (key: keyof Staff) => {
+  const handleSort = (key: keyof Course) => {
     let direction = "ascending"
     if (sortConfig?.key === key && sortConfig.direction === "ascending") {
       direction = "descending"
@@ -80,7 +86,7 @@ export const StaffListView: React.FC = () => {
   }
 
   const resetFilters = () => {
-    setFilters({ role: "", createdAt: "" })
+    setFilters({ minPrice: "", maxPrice: "", duration: "" })
     setSearchTerm("")
     setSortConfig(null)
   }
@@ -94,65 +100,75 @@ export const StaffListView: React.FC = () => {
   }
 
   const handleFilterChange = (
-    filterName: keyof FiltersState,
+    filterName: keyof CourseFiltersState,
     value: string
   ) => {
     setFilters((prev) => ({ ...prev, [filterName]: value }))
   }
 
   // --- Memoized Derived State ---
-  const filteredStaff = useMemo(() => {
-    if (!allStaff) return []
-    let result = [...allStaff]
+  const filteredCourses = useMemo(() => {
+    if (!allCourses) return []
+    let result = [...allCourses]
 
-    // Search logic
     if (searchTerm) {
       const term = searchTerm.toLowerCase()
       result = result.filter(
-        (staff) =>
-          staff.fullName.toLowerCase().includes(term) ||
-          staff.email.toLowerCase().includes(term) ||
-          staff.phoneNumber.toLowerCase().includes(term) ||
-          staff.role.toLowerCase().includes(term)
+        (course) =>
+          course.title.toLowerCase().includes(term) ||
+          course.description.toLowerCase().includes(term)
       )
     }
 
-    // Filter logic
-    if (filters.role)
-      result = result.filter((staff) => staff.role === filters.role)
-    if (filters.createdAt)
+    if (filters.minPrice)
       result = result.filter(
-        (staff) => staff.createdAt.split("T")[0] === filters.createdAt
+        (course) => course.price >= Number(filters.minPrice)
+      )
+    if (filters.maxPrice)
+      result = result.filter(
+        (course) => course.price <= Number(filters.maxPrice)
       )
 
-    // Sorting logic
+    if (filters.duration) {
+      result = result.filter((course) =>
+        course.duration.toLowerCase().includes(filters.duration.toLowerCase())
+      )
+    }
+
     if (sortConfig) {
       result.sort((a, b) => {
         const valA = a[sortConfig.key]
         const valB = b[sortConfig.key]
 
-        if (valA === null || valA === undefined) return 1
-        if (valB === null || valB === undefined) return -1
+        if (typeof valA === "string" && typeof valB === "string") {
+          return sortConfig.direction === "ascending"
+            ? valA.localeCompare(valB)
+            : valB.localeCompare(valA)
+        }
 
-        if (valA < valB) return sortConfig.direction === "ascending" ? -1 : 1
-        if (valA > valB) return sortConfig.direction === "ascending" ? 1 : -1
+        if (typeof valA === "number" && typeof valB === "number") {
+          return sortConfig.direction === "ascending"
+            ? valA - valB
+            : valB - valA
+        }
+
         return 0
       })
     }
 
     return result
-  }, [allStaff, searchTerm, filters, sortConfig])
+  }, [allCourses, searchTerm, filters, sortConfig])
 
-  const roles = useMemo(() => {
-    if (!allStaff) return []
-    return [...new Set(allStaff.map((staff) => staff.role))]
-  }, [allStaff])
+  const courseDurations = useMemo(() => {
+    if (!allCourses) return []
+    return [...new Set(allCourses.map((course) => course.duration))]
+  }, [allCourses])
 
-  const totalItems = filteredStaff.length
+  const totalItems = filteredCourses.length
   const totalPages = Math.ceil(totalItems / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems)
-  const currentItems = filteredStaff.slice(startIndex, endIndex)
+  const currentItems = filteredCourses.slice(startIndex, endIndex)
 
   // --- Effects ---
   useEffect(() => {
@@ -160,12 +176,12 @@ export const StaffListView: React.FC = () => {
   }, [searchTerm, filters, sortConfig, itemsPerPage])
 
   // --- Render Logic ---
-  if (isLoading) return <LoadingState />
-  if (error) return <ErrorState error={error} />
+  if (isLoading) return <CourseLoadingState />
+  if (error) return <CourseErrorState error={error} />
 
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-      <StaffListHeader
+      <CourseListHeader
         searchTerm={searchTerm}
         onSearchChange={(e) => setSearchTerm(e.target.value)}
         showFilters={showFilters}
@@ -173,49 +189,49 @@ export const StaffListView: React.FC = () => {
         onResetFilters={resetFilters}
       />
 
-      <FilterPanel
+      <CourseFilterPanel
         isOpen={showFilters}
         filters={filters}
         onFilterChange={handleFilterChange}
-        roles={roles}
+        courseDurations={courseDurations}
         onResetFilters={resetFilters}
       />
 
       {totalItems > 0 ? (
         <>
-          <StaffListSummary
+          <CourseListSummary
             startIndex={startIndex}
             endIndex={endIndex}
             totalItems={totalItems}
             itemsPerPage={itemsPerPage}
             onItemsPerPageChange={handleItemsPerPageChange}
           />
-          <StaffTable
-            staffMembers={currentItems}
+          <CourseTable
+            courses={currentItems}
             onSort={handleSort}
             sortConfig={sortConfig}
             onDelete={handleOpenDeleteModal}
             isDeleting={isDeleting}
-            deletingId={staffToDelete}
+            deletingId={courseToDeleteId}
           />
-          <StaffCardList
-            staffMembers={currentItems}
+          <CourseCardList
+            courses={currentItems}
             onDelete={handleOpenDeleteModal}
             isDeleting={isDeleting}
-            deletingId={staffToDelete}
+            deletingId={courseToDeleteId}
           />
-          <PaginationControls
+          <CoursePaginationControls
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={handlePageChange}
           />
         </>
       ) : (
-        <EmptyState onResetFilters={resetFilters} />
+        <CourseEmptyState onResetFilters={resetFilters} />
       )}
 
-      <DeleteConfirmationModal
-        isOpen={isDeleteModalOpen}
+      <CourseDeleteConfirmationModal
+        isOpen={showDeleteConfirmation}
         isDeleting={isDeleting}
         onClose={handleCancelDelete}
         onConfirm={handleConfirmDelete}
@@ -225,50 +241,49 @@ export const StaffListView: React.FC = () => {
 }
 
 // ============================================================================
-// Subcomponents
+// Presentational Sub-components & Their Prop Interfaces
 // ============================================================================
 
-const LoadingState = () => (
+const CourseLoadingState = () => (
   <div className="flex justify-center items-center h-64">
-    <h1>Loading...</h1>
+    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
   </div>
 )
 
-const ErrorState: React.FC<{ error: any }> = ({ error }) => (
+const CourseErrorState: React.FC<{ error: any }> = ({ error }) => (
   <div className="bg-red-50 rounded-xl p-6 text-center">
-    <h3 className="text-red-800 font-medium">Error loading staff</h3>
+    <h3 className="text-red-800 font-medium">Error loading courses</h3>
     <p className="text-red-600 mt-2">
       {error?.data?.message || "Please try again later"}
     </p>
   </div>
 )
 
-const EmptyState: React.FC<{ onResetFilters: () => void }> = ({
+const CourseEmptyState: React.FC<{ onResetFilters: () => void }> = ({
   onResetFilters,
 }) => (
   <div className="text-center py-12">
     <div className="text-gray-500 mb-4">
-      No staff members found matching your criteria.
+      No courses found matching your criteria.
     </div>
     <button
       onClick={onResetFilters}
-      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
     >
       Reset Filters
     </button>
   </div>
 )
 
-// --- StaffListHeader ---
-interface StaffListHeaderProps {
+// --- CourseListHeader ---
+interface CourseListHeaderProps {
   searchTerm: string
   onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   showFilters: boolean
   onToggleFilters: () => void
   onResetFilters: () => void
 }
-
-const StaffListHeader: React.FC<StaffListHeaderProps> = ({
+const CourseListHeader: React.FC<CourseListHeaderProps> = ({
   searchTerm,
   onSearchChange,
   showFilters,
@@ -281,7 +296,7 @@ const StaffListHeader: React.FC<StaffListHeaderProps> = ({
         <FiSearch className="absolute inset-y-0 left-3 h-5 w-5 text-gray-400 pointer-events-none" />
         <input
           type="text"
-          placeholder="Search staff..."
+          placeholder="Search courses..."
           value={searchTerm}
           onChange={onSearchChange}
           className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -290,14 +305,14 @@ const StaffListHeader: React.FC<StaffListHeaderProps> = ({
       <div className="flex gap-3">
         <button
           onClick={onToggleFilters}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg"
+          className="flex items-center gap-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors"
         >
           <FiFilter /> Filters{" "}
           {showFilters ? <FiChevronUp /> : <FiChevronDown />}
         </button>
         <button
           onClick={onResetFilters}
-          className="px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-lg"
+          className="px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-lg transition-colors"
         >
           Reset
         </button>
@@ -306,61 +321,69 @@ const StaffListHeader: React.FC<StaffListHeaderProps> = ({
   </div>
 )
 
-// --- FilterPanel ---
-interface FilterPanelProps {
+// --- CourseFilterPanel ---
+interface CourseFilterPanelProps {
   isOpen: boolean
-  filters: FiltersState
-  onFilterChange: (name: keyof FiltersState, value: string) => void
-  roles: string[]
+  filters: CourseFiltersState
+  onFilterChange: (name: keyof CourseFiltersState, value: string) => void
+  courseDurations: string[]
   onResetFilters: () => void
 }
-
-const FilterPanel: React.FC<FilterPanelProps> = ({
+const CourseFilterPanel: React.FC<CourseFilterPanelProps> = ({
   isOpen,
   filters,
   onFilterChange,
-  roles,
+  courseDurations,
   onResetFilters,
 }) => {
   if (!isOpen) return null
-
   return (
     <div className="p-4 border-b border-gray-200">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4 bg-blue-50 rounded-lg">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-blue-50 rounded-lg">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Role
+            Price Range
+          </label>
+          <div className="flex gap-2">
+            <input
+              type="number"
+              placeholder="Min Price"
+              value={filters.minPrice}
+              onChange={(e) => onFilterChange("minPrice", e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2"
+            />
+            <input
+              type="number"
+              placeholder="Max Price"
+              value={filters.maxPrice}
+              onChange={(e) => onFilterChange("maxPrice", e.target.value)}
+              className="w-full border border-gray-300 rounded-lg px-3 py-2"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Duration
           </label>
           <select
-            value={filters.role}
-            onChange={(e) => onFilterChange("role", e.target.value)}
+            value={filters.duration}
+            onChange={(e) => onFilterChange("duration", e.target.value)}
             className="w-full border border-gray-300 rounded-lg px-3 py-2"
           >
-            <option value="">All Roles</option>
-            {roles.map((role) => (
-              <option key={role} value={role}>
-                {role}
+            <option value="">All Durations</option>
+            {courseDurations.map((duration) => (
+              <option key={duration} value={duration}>
+                {duration}
               </option>
             ))}
           </select>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Created Date
-          </label>
-          <input
-            type="date"
-            value={filters.createdAt}
-            onChange={(e) => onFilterChange("createdAt", e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2"
-          />
-        </div>
-
         <div className="flex items-end">
           <button
             onClick={onResetFilters}
-            className="w-full py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+            className="w-full py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
           >
             Clear Filters
           </button>
@@ -370,14 +393,15 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
   )
 }
 
-// --- StaffListSummary ---
-const StaffListSummary: React.FC<{
+// --- CourseListSummary ---
+interface CourseListSummaryProps {
   startIndex: number
   endIndex: number
   totalItems: number
   itemsPerPage: number
   onItemsPerPageChange: (e: React.ChangeEvent<HTMLSelectElement>) => void
-}> = ({
+}
+const CourseListSummary: React.FC<CourseListSummaryProps> = ({
   startIndex,
   endIndex,
   totalItems,
@@ -388,10 +412,10 @@ const StaffListSummary: React.FC<{
     <div className="text-gray-700 mb-2 sm:mb-0">
       Showing <span className="font-medium">{startIndex + 1}</span> to{" "}
       <span className="font-medium">{endIndex}</span> of{" "}
-      <span className="font-medium">{totalItems}</span> staff members
+      <span className="font-medium">{totalItems}</span> courses
     </div>
     <div className="flex items-center gap-2">
-      <span className="text-gray-700">Items per page:</span>
+      <span className="text-gray-700">Courses per page:</span>
       <select
         value={itemsPerPage}
         onChange={onItemsPerPageChange}
@@ -406,16 +430,17 @@ const StaffListSummary: React.FC<{
   </div>
 )
 
-// --- StaffTable ---
-const StaffTable: React.FC<{
-  staffMembers: Staff[]
-  onSort: (key: keyof Staff) => void
-  sortConfig: SortConfig | null
+// --- CourseTable ---
+interface CourseTableProps {
+  courses: Course[]
+  onSort: (key: keyof Course) => void
+  sortConfig: CourseSortConfig | null
   onDelete: (id: number) => void
   isDeleting: boolean
   deletingId: number | null
-}> = ({
-  staffMembers,
+}
+const CourseTable: React.FC<CourseTableProps> = ({
+  courses,
   onSort,
   sortConfig,
   onDelete,
@@ -426,38 +451,36 @@ const StaffTable: React.FC<{
     <table className="min-w-full divide-y divide-gray-200">
       <thead className="bg-gray-50">
         <tr>
-          {["fullName", "role", "email", "phoneNumber", "createdAt"].map(
-            (key) => (
-              <th
-                key={key}
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => onSort(key as keyof Staff)}
-              >
-                <div className="flex items-center gap-1">
-                  {key === "createdAt" ? "Created" : key.replace("Number", "")}
-                  {sortConfig?.key === key &&
-                    (sortConfig.direction === "ascending" ? (
-                      <FiChevronUp />
-                    ) : (
-                      <FiChevronDown />
-                    ))}
-                </div>
-              </th>
-            )
-          )}
+          {["title", "price", "duration", "createdAt"].map((key) => (
+            <th
+              key={key}
+              scope="col"
+              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+              onClick={() => onSort(key as keyof Course)}
+            >
+              <div className="flex items-center gap-1">
+                {key === "createdAt" ? "Created" : key}
+                {sortConfig?.key === key &&
+                  (sortConfig.direction === "ascending" ? (
+                    <FiChevronUp />
+                  ) : (
+                    <FiChevronDown />
+                  ))}
+              </div>
+            </th>
+          ))}
           <th scope="col" className="relative px-6 py-3">
             <span className="sr-only">Actions</span>
           </th>
         </tr>
       </thead>
       <tbody className="bg-white divide-y divide-gray-200">
-        {staffMembers.map((staff) => (
-          <StaffTableRow
-            key={staff.id}
-            staff={staff}
+        {courses.map((course) => (
+          <CourseTableRow
+            key={course.id}
+            course={course}
             onDelete={onDelete}
-            isDeleting={isDeleting && deletingId === staff.id}
+            isDeleting={isDeleting && deletingId === course.id}
           />
         ))}
       </tbody>
@@ -465,163 +488,177 @@ const StaffTable: React.FC<{
   </div>
 )
 
-// --- StaffTableRow ---
-const StaffTableRow: React.FC<{
-  staff: Staff
+// --- CourseTableRow ---
+interface CourseTableRowProps {
+  course: Course
   onDelete: (id: number) => void
   isDeleting: boolean
-}> = ({ staff, onDelete, isDeleting }) => (
+}
+const CourseTableRow: React.FC<CourseTableRowProps> = ({
+  course,
+  onDelete,
+  isDeleting,
+}) => (
   <tr className="hover:bg-gray-50">
     <td className="px-6 py-4 whitespace-nowrap">
       <div className="flex items-center">
-        <img
-          className="h-10 w-10 rounded-full object-cover"
-          src={
-            staff.profilePicture ||
-            "https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909_960_720.png"
-          }
-          alt={staff.fullName}
-        />
+        {course.imageUrl ? (
+          <img
+            className="h-16 w-16 rounded-lg object-cover border flex-shrink-0"
+            src={course.imageUrl}
+            alt={course.title}
+          />
+        ) : (
+          <div className="bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16" />
+        )}
         <div className="ml-4">
           <div className="text-sm font-medium text-gray-900">
-            {staff.fullName}
+            {course.title}
           </div>
-          <div className="text-sm text-gray-500">@{staff.username}</div>
+          <div className="text-sm text-gray-500 max-w-xs truncate">
+            {course.description}
+          </div>
         </div>
       </div>
     </td>
     <td className="px-6 py-4 whitespace-nowrap">
-      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-        {staff.role}
-      </span>
+      <div className="flex items-center text-sm font-medium">
+        <FiDollarSign className="mr-1.5 h-4 w-4 text-yellow-500" />$
+        {course.price}
+      </div>
     </td>
-    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-      <div className="flex items-center">
-        <FiMail className="mr-1.5 h-4 w-4 text-blue-500" />
-        {staff.email}
+    <td className="px-6 py-4 whitespace-nowrap">
+      <div className="flex items-center text-sm">
+        <FiClock className="mr-1.5 h-4 w-4 text-green-500" />
+        {course.duration}
       </div>
     </td>
     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-      <div className="flex items-center">
-        <FiPhone className="mr-1.5 h-4 w-4 text-green-500" />
-        {staff.phoneNumber}
-      </div>
-    </td>
-    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-      <div className="flex items-center">
-        <FiCalendar className="mr-1.5 h-4 w-4 text-purple-500" />
-        {new Date(staff.createdAt).toLocaleDateString()}
-      </div>
+      {new Date(course.createdAt).toLocaleDateString()}
     </td>
     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
       <Link
-        to={paths.dashboard.staff.edit(staff.id.toString())}
+        to={paths.dashboard.course.edit(course.id.toString())}
         className="text-blue-600 hover:text-blue-900 mr-4 cursor-pointer"
       >
-        Edit
+        <FiEdit className="inline mr-1" /> Edit
       </Link>
       <button
-        onClick={() => onDelete(staff.id)}
+        onClick={() => onDelete(course.id)}
         disabled={isDeleting}
         className="text-red-600 hover:text-red-900 disabled:text-gray-400 cursor-pointer"
       >
+        <FiTrash2 className="inline mr-1" />
         {isDeleting ? "Deleting..." : "Delete"}
       </button>
     </td>
   </tr>
 )
 
-// --- StaffCardList ---
-const StaffCardList: React.FC<{
-  staffMembers: Staff[]
+// --- CourseCardList ---
+interface CourseCardListProps {
+  courses: Course[]
   onDelete: (id: number) => void
   isDeleting: boolean
   deletingId: number | null
-}> = ({ staffMembers, onDelete, isDeleting, deletingId }) => (
+}
+const CourseCardList: React.FC<CourseCardListProps> = ({
+  courses,
+  onDelete,
+  isDeleting,
+  deletingId,
+}) => (
   <div className="md:hidden grid grid-cols-1 gap-4 p-4">
-    {staffMembers.map((staff) => (
-      <StaffCard
-        key={staff.id}
-        staff={staff}
+    {courses.map((course) => (
+      <CourseCard
+        key={course.id}
+        course={course}
         onDelete={onDelete}
-        isDeleting={isDeleting && deletingId === staff.id}
+        isDeleting={isDeleting && deletingId === course.id}
       />
     ))}
   </div>
 )
 
-// --- StaffCard ---
-const StaffCard: React.FC<{
-  staff: Staff
+// --- CourseCard ---
+interface CourseCardProps {
+  course: Course
   onDelete: (id: number) => void
   isDeleting: boolean
-}> = ({ staff, onDelete, isDeleting }) => (
+}
+const CourseCard: React.FC<CourseCardProps> = ({
+  course,
+  onDelete,
+  isDeleting,
+}) => (
   <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
     <div className="p-4">
       <div className="flex items-start">
-        <img
-          className="h-12 w-12 rounded-full object-cover"
-          src={staff.profilePicture || "/default-avatar.png"}
-          alt={staff.fullName}
-        />
+        {course.imageUrl ? (
+          <img
+            className="h-16 w-16 rounded-lg object-cover border"
+            src={course.imageUrl}
+            alt={course.title}
+          />
+        ) : (
+          <div className="bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16" />
+        )}
         <div className="ml-4 flex-1">
           <div className="flex justify-between">
-            <div>
-              <h3 className="text-sm font-medium text-gray-900">
-                {staff.fullName}
-              </h3>
-              <p className="text-xs text-gray-500">@{staff.username}</p>
-            </div>
+            <h3 className="text-sm font-medium text-gray-900">
+              {course.title}
+            </h3>
             <div className="flex gap-2">
               <Link
-                to={paths.dashboard.staff.edit(staff.id.toString())}
+                to={paths.dashboard.course.edit(course.id.toString())}
                 className="text-blue-600 hover:text-blue-800 text-sm"
               >
-                Edit
+                <FiEdit />
               </Link>
               <button
-                onClick={() => onDelete(staff.id)}
+                onClick={() => onDelete(course.id)}
                 disabled={isDeleting}
                 className="text-red-600 hover:text-red-800 text-sm disabled:text-gray-400 cursor-pointer"
               >
-                {isDeleting ? "..." : "Delete"}
+                {isDeleting ? "..." : <FiTrash2 />}
               </button>
             </div>
           </div>
-
-          <div className="mt-3 grid grid-cols-1 gap-2 text-xs text-gray-600">
-            <div className="flex items-center">
-              <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800 mr-2">
-                {staff.role}
-              </span>
-              <FiCalendar className="mr-1.5 h-3 w-3 text-purple-500" />
-              <span>{new Date(staff.createdAt).toLocaleDateString()}</span>
-            </div>
-
-            <div className="flex items-center">
-              <FiMail className="mr-1.5 h-3 w-3 text-blue-500" />
-              <span className="truncate">{staff.email}</span>
-            </div>
-
-            <div className="flex items-center">
-              <FiPhone className="mr-1.5 h-3 w-3 text-green-500" />
-              <span>{staff.phoneNumber}</span>
-            </div>
-          </div>
+          <p className="mt-1 text-xs text-gray-500 line-clamp-2">
+            {course.description}
+          </p>
+        </div>
+      </div>
+      <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-gray-600">
+        <div className="flex items-center">
+          <FiDollarSign className="mr-1.5 h-3 w-3 text-yellow-500" />
+          <span>${course.price}</span>
+        </div>
+        <div className="flex items-center">
+          <FiClock className="mr-1.5 h-3 w-3 text-green-500" />
+          <span>{course.duration}</span>
+        </div>
+        <div className="flex items-center">
+          <FiCalendar className="mr-1.5 h-3 w-3 text-blue-500" />
+          <span>{new Date(course.createdAt).toLocaleDateString()}</span>
         </div>
       </div>
     </div>
   </div>
 )
 
-// --- PaginationControls --- (Reuse from TripListView)
-const PaginationControls: React.FC<{
+// --- CoursePaginationControls ---
+interface CoursePaginationControlsProps {
   currentPage: number
   totalPages: number
   onPageChange: (page: number) => void
-}> = ({ currentPage, totalPages, onPageChange }) => {
+}
+const CoursePaginationControls: React.FC<CoursePaginationControlsProps> = ({
+  currentPage,
+  totalPages,
+  onPageChange,
+}) => {
   if (totalPages <= 1) return null
-
   const pageNumbers = useMemo(() => {
     if (totalPages <= 5)
       return Array.from({ length: totalPages }, (_, i) => i + 1)
@@ -636,7 +673,6 @@ const PaginationControls: React.FC<{
       currentPage + 2,
     ]
   }, [currentPage, totalPages])
-
   return (
     <div className="border-t border-gray-200 px-4 py-3 flex items-center justify-between sm:px-6">
       <div className="flex-1 flex justify-between md:hidden">
@@ -690,15 +726,17 @@ const PaginationControls: React.FC<{
   )
 }
 
-// --- DeleteConfirmationModal --- (Reuse from TripListView)
-const DeleteConfirmationModal: React.FC<{
+// --- CourseDeleteConfirmationModal ---
+interface CourseDeleteConfirmationModalProps {
   isOpen: boolean
   onClose: () => void
   onConfirm: () => void
   isDeleting: boolean
-}> = ({ isOpen, onClose, onConfirm, isDeleting }) => {
+}
+const CourseDeleteConfirmationModal: React.FC<
+  CourseDeleteConfirmationModalProps
+> = ({ isOpen, onClose, onConfirm, isDeleting }) => {
   if (!isOpen) return null
-
   return (
     <div
       className="relative z-10"
@@ -720,11 +758,12 @@ const DeleteConfirmationModal: React.FC<{
                     className="text-lg font-semibold leading-6 text-gray-900"
                     id="modal-title"
                   >
-                    Delete Staff Member
+                    Confirm Delete
                   </h3>
                   <div className="mt-2">
                     <p className="text-sm text-gray-500">
-                      Are you sure? This action cannot be undone.
+                      Are you sure you want to delete this course? This action
+                      cannot be undone.
                     </p>
                   </div>
                 </div>
@@ -735,7 +774,7 @@ const DeleteConfirmationModal: React.FC<{
                 type="button"
                 onClick={onConfirm}
                 disabled={isDeleting}
-                className="inline-flex cursor-pointer w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto disabled:opacity-50"
+                className="inline-flex cursor-pointer w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto disabled:opacity-50 transition-colors"
               >
                 {isDeleting ? "Deleting..." : "Delete"}
               </button>
@@ -743,7 +782,7 @@ const DeleteConfirmationModal: React.FC<{
                 type="button"
                 onClick={onClose}
                 disabled={isDeleting}
-                className="mt-3 inline-flex cursor-pointer w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto disabled:opacity-50"
+                className="mt-3 inline-flex cursor-pointer w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto disabled:opacity-50 transition-colors"
               >
                 Cancel
               </button>

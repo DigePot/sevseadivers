@@ -11,6 +11,12 @@ import { AuthGuard } from "../../sections/auth/guard"
 
 // Overview
 const IndexPage = lazy(() => import("../../pages/dashboard"))
+const AnalyticPage = lazy(
+  () => import("../../pages/dashboard/general/analytics/index")
+)
+const ReportPage = lazy(
+  () => import("../../pages/dashboard/general/report/index")
+)
 const StaffListPage = lazy(() => import("../../pages/dashboard/staff/list"))
 const StaffCreatePage = lazy(() => import("../../pages/dashboard/staff/new"))
 const StaffEditPage = lazy(() => import("../../pages/dashboard/staff/edit"))
@@ -18,6 +24,10 @@ const StaffEditPage = lazy(() => import("../../pages/dashboard/staff/edit"))
 const TripListPage = lazy(() => import("../../pages/dashboard/trip/list"))
 const TripCreatePage = lazy(() => import("../../pages/dashboard/trip/new"))
 const TripEditPage = lazy(() => import("../../pages/dashboard/trip/edit"))
+
+const CourseListPage = lazy(() => import("../../pages/dashboard/course/list"))
+const CourseCreatePage = lazy(() => import("../../pages/dashboard/course/new"))
+const CourseEditPage = lazy(() => import("../../pages/dashboard/course/edit"))
 
 // ----------------------------------------------------------------------
 
@@ -38,6 +48,8 @@ export const dashboardRoutes: RouteObject[] = [
 
     children: [
       { index: true, element: <IndexPage /> },
+      { path: "analytic", element: <AnalyticPage /> },
+      { path: "report", element: <ReportPage /> },
       {
         path: "Staff",
         children: [
@@ -52,6 +64,14 @@ export const dashboardRoutes: RouteObject[] = [
           { index: true, path: "list", element: <TripListPage /> },
           { path: "new", element: <TripCreatePage /> },
           { path: ":id/edit", element: <TripEditPage /> },
+        ],
+      },
+      {
+        path: "Course",
+        children: [
+          { index: true, path: "list", element: <CourseListPage /> },
+          { path: "new", element: <CourseCreatePage /> },
+          { path: ":id/edit", element: <CourseEditPage /> },
         ],
       },
     ],

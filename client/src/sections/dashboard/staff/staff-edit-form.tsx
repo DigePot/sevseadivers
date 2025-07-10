@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form"
 import { z as zod } from "zod"
 import { useRouter } from "../../../routes/hooks"
 import { paths } from "../../../routes/paths"
-import { useUpdateStaffMutation } from "../../../store/admin/admin"
+import { useUpdateStaffMutation } from "../../../store/admin"
 import type { Staff } from "../../../types/staff"
 import { extractErrorMessage } from "../../../utils/extract-error-message"
 
