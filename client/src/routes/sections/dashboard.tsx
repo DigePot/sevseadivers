@@ -35,6 +35,8 @@ const GalleryCreatePage = lazy(
 )
 const GalleryEditPage = lazy(() => import("../../pages/dashboard/gallery/edit"))
 
+const BookingPage = lazy(() => import("../../pages/dashboard/booking/index"))
+
 // ----------------------------------------------------------------------
 
 const dashboardLayout = () => (
@@ -88,6 +90,7 @@ export const dashboardRoutes: RouteObject[] = [
           { path: ":id/edit", element: <GalleryEditPage /> },
         ],
       },
+      { path: "booking", element: <BookingPage /> },
     ],
   },
 ]

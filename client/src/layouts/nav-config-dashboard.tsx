@@ -1,6 +1,7 @@
 import type { JSX } from "react"
 import {
   FiBarChart,
+  FiBookmark,
   FiBookOpen,
   FiFileText,
   FiGlobe,
@@ -81,6 +82,11 @@ export const navData: NavSection[] = [
           { title: "List", path: paths.dashboard.gallery.list },
           { title: "Create", path: paths.dashboard.gallery.new },
         ],
+      },
+      {
+        title: "Booking",
+        path: paths.dashboard.booking,
+        icon: <FiBookmark />,
       },
     ],
   },

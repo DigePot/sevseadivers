@@ -4,6 +4,7 @@ import type { Staff } from "../types/staff"
 import type { DashboardStats } from "../types/dashboard-stats"
 import type { AdminAnalytics } from "../types/admin-analytic"
 import type { Report } from "../types/report"
+import type { Booking } from "../types/booking"
 
 export const adminApi = createApi({
   reducerPath: "adminApi",
@@ -82,6 +83,13 @@ export const adminApi = createApi({
         },
       }),
     }),
+    getAllBooking: builder.query<Booking[], void>({
+      query: () => ({
+        url: `/bookings`,
+        method: "GET",
+      }),
+      providesTags: ["admin"],
+    }),
   }),
 })
 
@@ -95,4 +103,5 @@ export const {
   useGetAdminAnalyticsQuery,
   // useGenerateReportQuery,
   useLazyGenerateReportQuery,
+  useGetAllBookingQuery,
 } = adminApi

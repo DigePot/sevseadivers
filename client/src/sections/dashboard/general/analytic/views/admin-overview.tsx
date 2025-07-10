@@ -32,6 +32,32 @@ export const AdminAnalyticView: React.FC = () => {
     )
   }
 
+  // Convert all string counts to numbers
+  // Convert all string counts to numbers and ensure they're numbers throughout
+  const convertedAnalytics = {
+    ...adminAnalytics,
+    bookingsByPeriod: adminAnalytics.bookingsByPeriod.map((item) => ({
+      ...item,
+      count: Number(item.count) || 0, // Convert count to a number explicitly
+    })),
+    usersByPeriod: adminAnalytics.usersByPeriod.map((item) => ({
+      ...item,
+      count: Number(item.count) || 0, // Convert count to a number explicitly
+    })),
+    topCourses: adminAnalytics.topCourses.map((item) => ({
+      ...item,
+      bookingCount: Number(item.bookingCount) || 0, // Convert bookingCount to a number explicitly
+      Course: item.Course || {
+        title: "Unknown Course",
+        price: 0,
+      },
+    })),
+    userRoles: adminAnalytics.userRoles.map((item) => ({
+      ...item,
+      count: Number(item.count) || 0, // Convert count to a number explicitly
+    })),
+  }
+
   const {
     period,
     bookingsByPeriod,
@@ -39,7 +65,7 @@ export const AdminAnalyticView: React.FC = () => {
     revenue,
     topCourses,
     userRoles,
-  } = adminAnalytics
+  } = convertedAnalytics
 
   // Format date without external library
   const formatDate = (dateString: string) => {
@@ -99,10 +125,7 @@ export const AdminAnalyticView: React.FC = () => {
               <div>
                 <h3 className="text-gray-500 text-sm">Total Bookings</h3>
                 <p className="text-xl font-bold mt-1">
-                  {bookingsByPeriod?.reduce(
-                    (sum, item) => sum + (item?.count || 0),
-                    0
-                  ) || 0}
+                  {bookingsByPeriod.reduce((sum, item) => sum + item.count, 0)}
                 </p>
               </div>
             </div>
@@ -116,10 +139,7 @@ export const AdminAnalyticView: React.FC = () => {
               <div>
                 <h3 className="text-gray-500 text-sm">New Users</h3>
                 <p className="text-xl font-bold mt-1">
-                  {usersByPeriod?.reduce(
-                    (sum, item) => sum + (item?.count || 0),
-                    0
-                  ) || 0}
+                  {usersByPeriod.reduce((sum, item) => sum + item.count, 0)}
                 </p>
               </div>
             </div>
@@ -132,9 +152,7 @@ export const AdminAnalyticView: React.FC = () => {
               </div>
               <div>
                 <h3 className="text-gray-500 text-sm">Top Courses</h3>
-                <p className="text-xl font-bold mt-1">
-                  {topCourses?.length || 0}
-                </p>
+                <p className="text-xl font-bold mt-1">{topCourses.length}</p>
               </div>
             </div>
           </div>
@@ -147,7 +165,7 @@ export const AdminAnalyticView: React.FC = () => {
               <div>
                 <h3 className="text-gray-500 text-sm">User Roles</h3>
                 <p className="text-xl font-bold mt-1">
-                  {userRoles?.length || 0}
+                  {userRoles.reduce((sum, role) => sum + role.count, 0)}
                 </p>
               </div>
             </div>
@@ -165,10 +183,7 @@ export const AdminAnalyticView: React.FC = () => {
             </h3>
             <span className="text-sm text-gray-500">{periodLabel}</span>
           </div>
-          <BookingsChart
-            data={bookingsByPeriod || []}
-            formatDate={formatDate}
-          />
+          <BookingsChart data={bookingsByPeriod} formatDate={formatDate} />
         </div>
 
         {/* Users Chart */}
@@ -179,7 +194,7 @@ export const AdminAnalyticView: React.FC = () => {
             </h3>
             <span className="text-sm text-gray-500">{periodLabel}</span>
           </div>
-          <UsersChart data={usersByPeriod || []} formatDate={formatDate} />
+          <UsersChart data={usersByPeriod} formatDate={formatDate} />
         </div>
       </div>
 
@@ -193,7 +208,7 @@ export const AdminAnalyticView: React.FC = () => {
             </h3>
             <span className="text-sm text-gray-500">By bookings</span>
           </div>
-          <TopCoursesList courses={topCourses || []} />
+          <TopCoursesList courses={topCourses} />
         </div>
 
         {/* User Roles */}
@@ -204,7 +219,7 @@ export const AdminAnalyticView: React.FC = () => {
             </h3>
             <span className="text-sm text-gray-500">Platform roles</span>
           </div>
-          <UserRolesChart roles={userRoles || []} />
+          <UserRolesChart roles={userRoles} />
         </div>
       </div>
     </div>
@@ -230,19 +245,19 @@ const BookingsChart: React.FC<ChartProps> = ({ data, formatDate }) => {
   }
 
   // Find max value for scaling
-  const maxValue = Math.max(...data?.map((item) => item?.count || 0), 1)
+  const maxValue = Math.max(...data.map((item) => item.count), 1)
 
   return (
     <div className="space-y-4">
       <div className="flex items-end h-48 gap-2 pt-8 border-b border-gray-200">
-        {data?.map((item, index) => (
+        {data.map((item, index) => (
           <div key={index} className="flex flex-col items-center flex-1">
             <div
               className="w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t-lg"
-              style={{ height: `${((item?.count || 0) / maxValue) * 90}%` }}
+              style={{ height: `${(item.count / maxValue) * 90}%` }}
             ></div>
             <div className="text-xs text-gray-500 mt-2">
-              {formatDate(item?.date || "")}
+              {formatDate(item.date)}
             </div>
           </div>
         ))}
@@ -265,19 +280,19 @@ const UsersChart: React.FC<ChartProps> = ({ data, formatDate }) => {
   }
 
   // Find max value for scaling
-  const maxValue = Math.max(...data?.map((item) => item?.count || 0), 1)
+  const maxValue = Math.max(...data.map((item) => item.count), 1)
 
   return (
     <div className="space-y-4">
       <div className="flex items-end h-48 gap-2 pt-8 border-b border-gray-200">
-        {data?.map((item, index) => (
+        {data.map((item, index) => (
           <div key={index} className="flex flex-col items-center flex-1">
             <div
               className="w-full bg-gradient-to-t from-green-500 to-green-400 rounded-t-lg"
-              style={{ height: `${((item?.count || 0) / maxValue) * 90}%` }}
+              style={{ height: `${(item.count / maxValue) * 90}%` }}
             ></div>
             <div className="text-xs text-gray-500 mt-2">
-              {formatDate(item?.date || "")}
+              {formatDate(item.date)}
             </div>
           </div>
         ))}
@@ -335,24 +350,27 @@ const TopCoursesList: React.FC<TopCoursesListProps> = ({ courses }) => {
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {courses?.map((course, index) => (
+          {courses.map((course, index) => (
             <tr key={index} className="hover:bg-gray-50">
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm font-medium text-gray-900">
-                  {course?.Course?.title}
+                  {course.Course?.title || "Unknown Course"}
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm text-gray-900">
-                  {course?.bookingCount}
+                  {course.bookingCount}
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                ${course?.Course?.price?.toFixed(2)}
+                ${course.Course?.price?.toFixed(2) || "0.00"}
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm font-semibold text-green-600">
-                  ${(course?.bookingCount * course?.Course?.price)?.toFixed(2)}
+                  $
+                  {(course.bookingCount * (course.Course?.price || 0)).toFixed(
+                    2
+                  )}
                 </div>
               </td>
             </tr>
@@ -377,15 +395,15 @@ const UserRolesChart: React.FC<UserRolesChartProps> = ({ roles }) => {
   }
 
   // Calculate total for percentages
-  const total = roles?.reduce((sum, role) => sum + (role?.count || 0), 0) || 0
+  const total = roles.reduce((sum, role) => sum + role.count, 0)
   const colors = ["#6366F1", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6"]
 
   // Precompute segments
   const segments = []
   let startAngle = 0
 
-  for (const [index, role] of (roles || []).entries()) {
-    const percentage = (role?.count / total) * 100
+  for (const [index, role] of roles.entries()) {
+    const percentage = (role.count / total) * 100
     if (percentage > 0) {
       const endAngle = startAngle + (percentage * 360) / 100
       const path = describeArc(50, 50, 40, startAngle, endAngle)
@@ -400,8 +418,8 @@ const UserRolesChart: React.FC<UserRolesChartProps> = ({ roles }) => {
       <div className="relative w-48 h-48 mx-auto">
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center">
-            <div className="text-2xl font-bold">{total}</div>
-            <div className="text-gray-500 text-sm">Total Users</div>
+            <div className="text-2xl text-white font-bold">{total}</div>
+            <div className="text-white font-bold text-sm">Total Users</div>
           </div>
         </div>
         <svg viewBox="0 0 100 100" className="w-full h-full">
@@ -413,7 +431,7 @@ const UserRolesChart: React.FC<UserRolesChartProps> = ({ roles }) => {
 
       {/* Legend */}
       <div className="space-y-2 mt-6">
-        {roles?.map((role, index) => (
+        {roles.map((role, index) => (
           <div key={index} className="flex items-center">
             <div
               className="w-4 h-4 rounded-full mr-3"
@@ -422,10 +440,10 @@ const UserRolesChart: React.FC<UserRolesChartProps> = ({ roles }) => {
             <div className="flex-1">
               <div className="flex justify-between">
                 <span className="text-sm font-medium capitalize">
-                  {role?.role}
+                  {role.role}
                 </span>
                 <span className="text-sm text-gray-500">
-                  {role?.count} users
+                  {role.count} users
                 </span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2 mt-1">
@@ -433,7 +451,7 @@ const UserRolesChart: React.FC<UserRolesChartProps> = ({ roles }) => {
                   className="h-2 rounded-full"
                   style={{
                     backgroundColor: colors[index % colors.length],
-                    width: `${(role?.count / total) * 100}%`,
+                    width: `${(role.count / total) * 100}%`,
                   }}
                 ></div>
               </div>
