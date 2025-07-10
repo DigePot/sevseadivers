@@ -8,6 +8,7 @@ import bookingRouter from "./routes/bookingRoutes.js"
 import serviceRouter from "./routes/serviceRoutes.js"
 import tripRouter from "./routes/tripRoutes.js"
 import adminRoutes from "./routes/adminRoutes.js"
+import galleryRoutes from "./routes/GalleryRoutes.js"
 import path from "path"
 import { fileURLToPath } from "url"
 import { dirname } from "path"
@@ -32,6 +33,7 @@ app.use("/api/bookings", bookingRouter)
 app.use("/api/services", serviceRouter)
 app.use("/api/trips", tripRouter)
 app.use("/api/admin", adminRoutes)
+app.use("/api/gallery", galleryRoutes)
 
 app.get("/", (req, res) => {
   res.send("✅ Server is running and connected to Sequelize")
