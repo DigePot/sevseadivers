@@ -41,11 +41,13 @@ export const DashboardOverviewView: React.FC = () => {
   // Format date without date-fns
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    })
+    return (
+      date?.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      }) || ""
+    )
   }
 
   return (
@@ -58,37 +60,37 @@ export const DashboardOverviewView: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
           <StatCard
             title="Total Users"
-            value={overview.totalUsers}
+            value={overview?.totalUsers}
             icon={<FiUsers className="w-5 h-5" />}
             color="blue"
           />
           <StatCard
             title="Total Bookings"
-            value={overview.totalBookings}
+            value={overview?.totalBookings}
             icon={<FiCalendar className="w-5 h-5" />}
             color="green"
           />
           <StatCard
             title="Total Courses"
-            value={overview.totalCourses}
+            value={overview?.totalCourses}
             icon={<FiGrid className="w-5 h-5" />}
             color="purple"
           />
           <StatCard
             title="Total Services"
-            value={overview.totalServices}
+            value={overview?.totalServices}
             icon={<FiShoppingBag className="w-5 h-5" />}
             color="yellow"
           />
           <StatCard
             title="Total Trips"
-            value={overview.totalTrips}
+            value={overview?.totalTrips}
             icon={<FiActivity className="w-5 h-5" />}
             color="red"
           />
           <StatCard
             title="Gallery Items"
-            value={overview.totalGalleryItems}
+            value={overview?.totalGalleryItems}
             icon={<FiImage className="w-5 h-5" />}
             color="indigo"
           />
@@ -99,9 +101,9 @@ export const DashboardOverviewView: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-1">
           <GrowthCard
-            current={growth.currentMonthBookings}
-            previous={growth.lastMonthBookings}
-            growth={growth.bookingGrowth}
+            current={growth?.currentMonthBookings}
+            previous={growth?.lastMonthBookings}
+            growth={growth?.bookingGrowth}
           />
         </div>
 
@@ -112,11 +114,11 @@ export const DashboardOverviewView: React.FC = () => {
                 Recent Bookings
               </h3>
               <div className="text-sm text-gray-500">
-                {recent.bookings.length} bookings
+                {recent?.bookings?.length || 0} bookings
               </div>
             </div>
             <RecentBookingsTable
-              bookings={recent.bookings}
+              bookings={recent?.bookings || []}
               formatDate={formatDate}
             />
           </div>
@@ -128,10 +130,10 @@ export const DashboardOverviewView: React.FC = () => {
         <div className="flex items-center justify-between mb-6">
           <h3 className="text-lg font-semibold text-gray-800">Recent Users</h3>
           <div className="text-sm text-gray-500">
-            {recent.users.length} users
+            {recent?.users?.length || 0} users
           </div>
         </div>
-        <RecentUsersTable users={recent.users} formatDate={formatDate} />
+        <RecentUsersTable users={recent?.users || []} formatDate={formatDate} />
       </div>
     </div>
   )
@@ -186,7 +188,7 @@ const GrowthCard: React.FC<GrowthCardProps> = ({
   previous,
   growth,
 }) => {
-  const isPositive = !growth.includes("-") && growth !== "0%"
+  const isPositive = !growth?.includes("-") && growth !== "0%"
   const changeText =
     previous === 0
       ? "No previous data"
@@ -250,7 +252,7 @@ const RecentBookingsTable: React.FC<RecentBookingsTableProps> = ({
   bookings,
   formatDate,
 }) => {
-  if (bookings.length === 0) {
+  if (!bookings?.length) {
     return (
       <div className="text-center py-8 text-gray-500">
         No recent bookings found
@@ -290,19 +292,19 @@ const RecentBookingsTable: React.FC<RecentBookingsTableProps> = ({
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {bookings.map((booking) => (
-            <tr key={booking.id} className="hover:bg-gray-50">
+          {bookings?.map((booking) => (
+            <tr key={booking?.id} className="hover:bg-gray-50">
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm font-medium text-gray-900">
-                  {booking.User?.fullName}
+                  {booking?.User?.fullName}
                 </div>
                 <div className="text-sm text-gray-500">
-                  {booking.User?.username}
+                  {booking?.User?.username}
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm text-gray-900">
-                  {booking.Course?.title}
+                  {booking?.Course?.title}
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -328,7 +330,7 @@ const RecentUsersTable: React.FC<RecentUsersTableProps> = ({
   users,
   formatDate,
 }) => {
-  if (users.length === 0) {
+  if (!users?.length) {
     return (
       <div className="text-center py-8 text-gray-500">
         No recent users found
@@ -368,29 +370,29 @@ const RecentUsersTable: React.FC<RecentUsersTableProps> = ({
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
-          {users.map((user) => (
-            <tr key={user.id} className="hover:bg-gray-50">
+          {users?.map((user) => (
+            <tr key={user?.id} className="hover:bg-gray-50">
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="flex items-center">
                   <div className="bg-gray-200 border-2 border-dashed rounded-xl w-10 h-10" />
                   <div className="ml-4">
                     <div className="text-sm font-medium text-gray-900">
-                      {user.fullName}
+                      {user?.fullName}
                     </div>
                     <div className="text-sm text-gray-500">
-                      @{user.username}
+                      @{user?.username}
                     </div>
                   </div>
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {user.email}
+                {user?.email}
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <RoleBadge role={user.role} />
+                <RoleBadge role={user?.role} />
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                {formatDate(user.createdAt)}
+                {formatDate(user?.createdAt)}
               </td>
             </tr>
           ))}
@@ -410,14 +412,14 @@ const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
   }
 
   const config = statusConfig[
-    status.toLowerCase() as keyof typeof statusConfig
+    status?.toLowerCase() as keyof typeof statusConfig
   ] || { text: status, color: "bg-gray-100 text-gray-800" }
 
   return (
     <span
-      className={`px-3 py-1 rounded-full text-xs font-medium ${config.color}`}
+      className={`px-3 py-1 rounded-full text-xs font-medium ${config?.color}`}
     >
-      {config.text}
+      {config?.text}
     </span>
   )
 }
@@ -430,16 +432,16 @@ const RoleBadge: React.FC<{ role: string }> = ({ role }) => {
     guest: { text: "Guest", color: "bg-gray-100 text-gray-800" },
   }
 
-  const config = roleConfig[role.toLowerCase() as keyof typeof roleConfig] || {
+  const config = roleConfig[role?.toLowerCase() as keyof typeof roleConfig] || {
     text: role,
     color: "bg-gray-100 text-gray-800",
   }
 
   return (
     <span
-      className={`px-3 py-1 rounded-full text-xs font-medium ${config.color}`}
+      className={`px-3 py-1 rounded-full text-xs font-medium ${config?.color}`}
     >
-      {config.text}
+      {config?.text}
     </span>
   )
 }
