@@ -1,27 +1,37 @@
-import { DataTypes } from 'sequelize';
+import { DataTypes } from "sequelize"
 
 const defineBooking = (sequelize) => {
-  const Booking = sequelize.define('Booking', {
-    id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
-      primaryKey: true,
+  const Booking = sequelize.define(
+    "Booking",
+    {
+      id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+      },
+      status: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: "pending",
+        validate: {
+          isIn: {
+            args: [["pending", "completed", "cancelled"]],
+            msg: "Status must be one of: pending, completed, cancelled",
+          },
+        },
+      },
+      bookingDate: {
+        type: DataTypes.DATE,
+        allowNull: false,
+        defaultValue: DataTypes.NOW,
+      },
     },
-    status: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      defaultValue: 'booked',
-    },
-    bookingDate: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-  }, {
-    timestamps: true,
-  });
+    {
+      timestamps: true,
+    }
+  )
 
-  return Booking;
-};
+  return Booking
+}
 
-export default defineBooking; 
+export default defineBooking
