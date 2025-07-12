@@ -143,6 +143,14 @@ export const SignInForm: React.FC = () => {
           Forgot Password?
         </Link>
       </div>
+
+      {/* Contextual Sign Up Link */}
+      <div className="mt-4 text-center text-sm">
+        Don’t have an account?{" "}
+        <Link to="/auth/sign-up" className="text-cyan-600 hover:underline">
+          Sign Up
+        </Link>
+      </div>
     </form>
   )
 }

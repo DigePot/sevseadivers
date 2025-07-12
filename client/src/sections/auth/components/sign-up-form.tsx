@@ -8,6 +8,7 @@ import { useRouter, useSearchParams } from "../../../routes/hooks"
 import { API } from "../../../store/api"
 import { setCredentials } from "../../../store/auth/auth-slice"
 import { extractErrorMessage } from "../../../utils/extract-error-message"
+import { Link } from "react-router-dom"
 
 // Define Zod schema for validation
 export const SignUpSchema = zod.object({
@@ -205,6 +206,14 @@ export const SignUpForm: React.FC = () => {
         >
           {isSubmitting ? "..." : "Sign Up"}
         </button>
+      </div>
+
+      {/* Contextual Sign In Link */}
+      <div className="mt-4 text-center text-sm">
+        Already have an account?{" "}
+        <Link to="/auth/sign-in" className="text-cyan-600 hover:underline">
+          Sign In
+        </Link>
       </div>
     </form>
   )
