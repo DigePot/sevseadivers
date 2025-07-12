@@ -1,7 +1,7 @@
 import { Helmet } from "react-helmet-async"
 
 import { CONFIG } from "../../../global-config"
-import { BookingListView } from "../../../sections/dashboard/Booking/view"
+import { BookingListView } from "../../../sections/dashboard/booking/view"
 
 // ----------------------------------------------------------------------
 

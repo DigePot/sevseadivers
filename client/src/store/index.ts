@@ -4,6 +4,7 @@ import { adminApi } from "./admin"
 import { tripApi } from "./trip"
 import { courseApi } from "./course"
 import { galleryApi } from "./gallery"
+import { bookingApi } from "./booking"
 import authReducer from "./auth/auth-slice"
 
 export const store = configureStore({
@@ -14,6 +15,7 @@ export const store = configureStore({
     [adminApi.reducerPath]: adminApi.reducer,
     [courseApi.reducerPath]: courseApi.reducer,
     [galleryApi.reducerPath]: galleryApi.reducer,
+    [bookingApi.reducerPath]: bookingApi.reducer,
   },
   devTools: false,
   middleware: (getDefaultMiddleware) =>
@@ -22,7 +24,8 @@ export const store = configureStore({
       tripApi.middleware,
       adminApi.middleware,
       courseApi.middleware,
-      galleryApi.middleware
+      galleryApi.middleware,
+      bookingApi.middleware
     ),
 })
 

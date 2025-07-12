@@ -12,7 +12,11 @@ import {
   FiX,
 } from "react-icons/fi"
 import type { Booking } from "../../../../types/booking"
-import { useAllBooking } from "../hooks/use-all-booking"
+import { useAllBooking } from "../hooks"
+import { useUpdateBookingStatusMutation } from "../../../../store/booking"
+
+// Define BookingStatus type for type safety
+type BookingStatus = Booking["status"]
 
 // ============================================================================
 // Type Definitions
@@ -31,13 +35,20 @@ type FiltersState = {
   endDate: string
 }
 
+interface StatusSelectorProps {
+  currentStatus: BookingStatus
+  onStatusChange: (status: BookingStatus) => void
+  isUpdating: boolean
+}
+
 // ============================================================================
 // Main Component: BookingListView
 // ============================================================================
 
 export const BookingListView: React.FC = () => {
   // --- Hooks ---
-  const { allBooking, isLoading, error } = useAllBooking()
+  const { allBooking, isLoading, error, refetch } = useAllBooking()
+  const [updateBookingStatus] = useUpdateBookingStatusMutation()
 
   // --- State ---
   const [searchTerm, setSearchTerm] = useState("")
@@ -52,7 +63,7 @@ export const BookingListView: React.FC = () => {
   const [showFilters, setShowFilters] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(10)
-  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null) // For modal
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null)
 
   // --- Handlers ---
   const handleSort = (key: SortConfig["key"]) => {
@@ -98,6 +109,23 @@ export const BookingListView: React.FC = () => {
     setSelectedBooking(null)
   }
 
+  // Update booking status handler
+  const handleStatusUpdate = async (id: number, newStatus: BookingStatus) => {
+    try {
+      await updateBookingStatus({ id, status: newStatus }).unwrap()
+      refetch()
+
+      // Update selected booking if it's the one being updated
+      if (selectedBooking?.id === id) {
+        setSelectedBooking((prev) =>
+          prev ? { ...prev, status: newStatus } : prev
+        )
+      }
+    } catch (error) {
+      console.error("Failed to update booking status:", error)
+    }
+  }
+
   // --- Memoized Derived State ---
   const filteredBookings = useMemo(() => {
     if (!allBooking) return []
@@ -109,10 +137,10 @@ export const BookingListView: React.FC = () => {
       result = result.filter(
         (booking) =>
           booking.User.fullName?.toLowerCase().includes(term) ||
-          booking.User.username.toLowerCase().includes(term) ||
+          booking.User.username?.toLowerCase().includes(term) ||
           booking.User.email?.toLowerCase().includes(term) ||
           booking.Course?.title?.toLowerCase().includes(term) ||
-          booking.status.toLowerCase().includes(term)
+          booking.status?.toLowerCase().includes(term)
       )
     }
 
@@ -126,7 +154,7 @@ export const BookingListView: React.FC = () => {
             ?.toLowerCase()
             .includes(filters.userName.toLowerCase()) ||
           booking.User.username
-            .toLowerCase()
+            ?.toLowerCase()
             .includes(filters.userName.toLowerCase())
       )
     if (filters.courseTitle)
@@ -174,7 +202,7 @@ export const BookingListView: React.FC = () => {
     return result
   }, [allBooking, searchTerm, filters, sortConfig])
 
-  const statusOptions = ["booked", "cancelled"]
+  const statusOptions: BookingStatus[] = ["pending", "completed", "cancelled"]
   const userNames = useMemo(() => {
     if (!allBooking) return []
     const names = allBooking
@@ -272,6 +300,7 @@ export const BookingListView: React.FC = () => {
         <BookingDetailsModal
           booking={selectedBooking}
           onClose={closeBookingDetails}
+          onStatusUpdate={handleStatusUpdate}
         />
       )}
     </div>
@@ -284,7 +313,7 @@ export const BookingListView: React.FC = () => {
 
 const LoadingState = () => (
   <div className="flex justify-center items-center h-64">
-    <h1>Loading...</h1>
+    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
   </div>
 )
 
@@ -306,7 +335,7 @@ const EmptyState: React.FC<{ onResetFilters: () => void }> = ({
     </div>
     <button
       onClick={onResetFilters}
-      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
     >
       Reset Filters
     </button>
@@ -343,14 +372,14 @@ const BookingListHeader: React.FC<BookingListHeaderProps> = ({
       <div className="flex gap-3">
         <button
           onClick={onToggleFilters}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg"
+          className="flex items-center gap-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors"
         >
           <FiFilter /> Filters{" "}
           {showFilters ? <FiChevronUp /> : <FiChevronDown />}
         </button>
         <button
           onClick={onResetFilters}
-          className="px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-lg"
+          className="px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-lg transition-colors"
         >
           Reset
         </button>
@@ -364,7 +393,7 @@ interface FilterPanelProps {
   isOpen: boolean
   filters: FiltersState
   onFilterChange: (name: keyof FiltersState, value: string) => void
-  statusOptions: string[]
+  statusOptions: BookingStatus[]
   userNames: string[]
   courseTitles: string[]
 }
@@ -387,7 +416,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
           <select
             value={filters.status}
             onChange={(e) => onFilterChange("status", e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="">All Statuses</option>
             {statusOptions.map((status) => (
@@ -404,7 +433,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
           <select
             value={filters.userName}
             onChange={(e) => onFilterChange("userName", e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="">All Users</option>
             {userNames.map((name) => (
@@ -421,7 +450,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
           <select
             value={filters.courseTitle}
             onChange={(e) => onFilterChange("courseTitle", e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2"
+            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
           >
             <option value="">All Courses</option>
             {courseTitles.map((title) => (
@@ -441,14 +470,14 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
               placeholder="Start"
               value={filters.startDate}
               onChange={(e) => onFilterChange("startDate", e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
             />
             <input
               type="date"
               placeholder="End"
               value={filters.endDate}
               onChange={(e) => onFilterChange("endDate", e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
         </div>
@@ -482,7 +511,7 @@ const BookingListSummary: React.FC<{
       <select
         value={itemsPerPage}
         onChange={onItemsPerPageChange}
-        className="border border-gray-300 rounded-md px-2 py-1"
+        className="border border-gray-300 rounded-md px-2 py-1 focus:ring-blue-500 focus:border-blue-500"
       >
         <option value="5">5</option>
         <option value="10">10</option>
@@ -523,7 +552,7 @@ const BookingTable: React.FC<BookingTableProps> = ({
               <th
                 key={header.key}
                 scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                 onClick={() => onSort(header.key)}
               >
                 <div className="flex items-center gap-1">
@@ -595,18 +624,23 @@ const BookingTableRow: React.FC<BookingTableRowProps> = ({
       <td className="px-6 py-4 whitespace-nowrap">
         <span
           className={`px-2 py-1 text-xs rounded-full ${
-            booking.status === "booked"
+            booking.status === "completed"
               ? "bg-green-100 text-green-800"
-              : "bg-red-100 text-red-800"
+              : booking.status === "pending"
+              ? "bg-yellow-100 text-yellow-800"
+              : booking.status === "cancelled"
+              ? "bg-red-100 text-red-800"
+              : "bg-gray-100 text-gray-800"
           }`}
         >
           {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
         </span>
       </td>
+
       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
         <button
           onClick={() => onViewDetails(booking)}
-          className="text-blue-600 hover:text-blue-900 cursor-pointer"
+          className="text-blue-600 hover:text-blue-900 cursor-pointer font-medium"
         >
           View Details
         </button>
@@ -660,9 +694,13 @@ const BookingCard: React.FC<BookingCardProps> = ({
           </div>
           <span
             className={`px-2 py-1 text-xs rounded-full ${
-              booking.status === "booked"
+              booking.status === "completed"
                 ? "bg-green-100 text-green-800"
-                : "bg-red-100 text-red-800"
+                : booking.status === "pending"
+                ? "bg-yellow-100 text-yellow-800"
+                : booking.status === "cancelled"
+                ? "bg-red-100 text-red-800"
+                : "bg-gray-100 text-gray-800"
             }`}
           >
             {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
@@ -683,7 +721,7 @@ const BookingCard: React.FC<BookingCardProps> = ({
         <div className="mt-4">
           <button
             onClick={() => onViewDetails(booking)}
-            className="text-sm text-blue-600 hover:text-blue-800 cursor-pointer"
+            className="text-sm text-blue-600 hover:text-blue-800 cursor-pointer font-medium"
           >
             View Details
           </button>
@@ -693,15 +731,79 @@ const BookingCard: React.FC<BookingCardProps> = ({
   )
 }
 
+// Status Selector Component
+const StatusSelector: React.FC<StatusSelectorProps> = ({
+  currentStatus,
+  onStatusChange,
+  isUpdating,
+}) => {
+  const statusOptions: {
+    value: BookingStatus
+    label: string
+    color: string
+  }[] = [
+    {
+      value: "pending",
+      label: "Pending",
+      color: "bg-yellow-100 text-yellow-800",
+    },
+    {
+      value: "completed",
+      label: "Completed",
+      color: "bg-green-100 text-green-800",
+    },
+    {
+      value: "cancelled",
+      label: "Cancelled",
+      color: "bg-red-100 text-red-800",
+    },
+  ]
+
+  return (
+    <div className="flex flex-wrap gap-2">
+      {statusOptions.map((status) => (
+        <button
+          key={status.value}
+          onClick={() => onStatusChange(status.value)}
+          disabled={isUpdating}
+          className={`px-3 py-1.5 text-sm rounded-full transition-all ${
+            status.color
+          } ${
+            currentStatus === status.value
+              ? "ring-2 ring-offset-1 ring-blue-500"
+              : "opacity-80 hover:opacity-100"
+          } ${isUpdating ? "opacity-60 cursor-not-allowed" : ""}`}
+        >
+          {status.label}
+          {isUpdating && currentStatus === status.value && (
+            <span className="ml-2 animate-pulse">Updating...</span>
+          )}
+        </button>
+      ))}
+    </div>
+  )
+}
+
 // --- BookingDetailsModal ---
 interface BookingDetailsModalProps {
   booking: Booking
   onClose: () => void
+  onStatusUpdate: (id: number, status: BookingStatus) => void
 }
 const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
   booking,
   onClose,
+  onStatusUpdate,
 }) => {
+  const [isUpdating, setIsUpdating] = useState(false)
+  const [localStatus, setLocalStatus] = useState(booking.status)
+  const [error, setError] = useState<string | null>(null)
+
+  // Update local status when booking prop changes
+  useEffect(() => {
+    setLocalStatus(booking.status)
+  }, [booking])
+
   const userName = booking.User.fullName || booking.User.username
   const userEmail = booking.User.email || "No email"
   const courseTitle = booking.Course?.title || "No Course"
@@ -709,6 +811,26 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
   const bookingDate = new Date(booking.bookingDate).toLocaleDateString()
   const createdAt = new Date(booking.createdAt).toLocaleString()
   const updatedAt = new Date(booking.updatedAt).toLocaleString()
+
+  const handleStatusChange = async (newStatus: BookingStatus) => {
+    if (newStatus === localStatus) return
+
+    setIsUpdating(true)
+    setError(null) // Clear previous errors
+
+    try {
+      setLocalStatus(newStatus)
+      await onStatusUpdate(booking.id, newStatus)
+    } catch (err: any) {
+      console.error("Failed to update status:", err)
+      setError(
+        err?.data?.message || "Failed to update status. Please try again later."
+      )
+      setLocalStatus(booking.status) // Revert to original status
+    } finally {
+      setIsUpdating(false)
+    }
+  }
 
   return (
     <>
@@ -729,7 +851,7 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
             <h2 className="text-xl font-bold">Booking Details</h2>
             <button
               onClick={onClose}
-              className="text-gray-500 hover:text-gray-700"
+              className="text-gray-500 hover:text-gray-700 transition-colors"
             >
               <FiX size={24} />
             </button>
@@ -737,6 +859,14 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
 
           {/* Modal Body */}
           <div className="p-4 md:p-6">
+            {/* Error Message */}
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg">
+                <p className="font-medium">Update Error:</p>
+                <p>{error}</p>
+              </div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* User Info */}
               <div className="bg-gray-50 p-4 rounded-lg">
@@ -767,19 +897,16 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
                   <p>
                     <span className="font-medium">Date:</span> {bookingDate}
                   </p>
-                  <p>
+                  <div>
                     <span className="font-medium">Status:</span>
-                    <span
-                      className={`ml-2 px-2 py-1 text-xs rounded-full ${
-                        booking.status === "booked"
-                          ? "bg-green-100 text-green-800"
-                          : "bg-red-100 text-red-800"
-                      }`}
-                    >
-                      {booking.status.charAt(0).toUpperCase() +
-                        booking.status.slice(1)}
-                    </span>
-                  </p>
+                    <div className="mt-2">
+                      <StatusSelector
+                        currentStatus={localStatus}
+                        onStatusChange={handleStatusChange}
+                        isUpdating={isUpdating}
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -815,7 +942,7 @@ const BookingDetailsModal: React.FC<BookingDetailsModalProps> = ({
           <div className="p-4 md:p-6 border-t flex justify-end">
             <button
               onClick={onClose}
-              className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg"
+              className="px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
             >
               Close
             </button>
