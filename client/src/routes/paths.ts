@@ -1,6 +1,7 @@
 const ROOTS = {
   AUTH: "/auth",
   DASHBOARD: "/dashboard",
+  STAFF: "/staff-dashboard",
 }
 
 // ----------------------------------------------------------------------
@@ -49,5 +50,13 @@ export const paths = {
       edit: (id: string) => `${ROOTS.DASHBOARD}/gallery/${id}/edit`,
     },
     booking: `${ROOTS.DASHBOARD}/booking`,
+  },
+  // STAFF
+  staff: {
+    root: `${ROOTS.STAFF}/booking`,
+  },
+  // SHARED
+  shared: {
+    root: `/profile`,
   },
 }

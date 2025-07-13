@@ -7,6 +7,7 @@ import {
   FiGlobe,
   FiHome,
   FiImage,
+  FiUser,
   FiUsers,
 } from "react-icons/fi"
 import { paths } from "../routes/paths"
@@ -87,6 +88,11 @@ export const navData: NavSection[] = [
         title: "Booking",
         path: paths.dashboard.booking,
         icon: <FiBookmark />,
+      },
+      {
+        title: "Profile",
+        path: paths.shared.root,
+        icon: <FiUser />,
       },
     ],
   },

@@ -8,7 +8,6 @@ import { AuthGuard } from "../../sections/auth/guard"
 
 // ----------------------------------------------------------------------
 
-// Overview
 const IndexPage = lazy(() => import("../../pages/staff-dashboard"))
 
 // ----------------------------------------------------------------------
@@ -26,18 +25,6 @@ export const staffRoutes: RouteObject[] = [
     path: "staff-dashboard",
     element: <AuthGuard allowedRoles={["staff"]}>{staffLayout()}</AuthGuard>,
 
-    children: [
-      { index: true, element: <IndexPage /> },
-      {
-        path: "Staff",
-        children: [
-          { index: true, element: <div>Building</div> },
-          { path: "profile", element: <div>Building</div> },
-          { path: "list", element: <div>Building</div> },
-          { path: "new", element: <div>Building</div> },
-          { path: ":id/edit", element: <div>Building</div> },
-        ],
-      },
-    ],
+    children: [{ index: true, element: <IndexPage /> }],
   },
 ]

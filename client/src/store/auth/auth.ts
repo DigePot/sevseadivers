@@ -27,7 +27,22 @@ export const authApi = createApi({
       }),
       providesTags: ["auth"],
     }),
+
+    updateMyProfile: builder.mutation<any, { id: number; body: any }>({
+      query: ({ id, body }) => ({
+        url: `/users/${id}`,
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body,
+      }),
+    }),
   }),
 })
 
-export const { useSignUpMutation, useGetUserQuery } = authApi
+export const {
+  useSignUpMutation,
+  useGetUserQuery,
+  useUpdateMyProfileMutation,
+} = authApi

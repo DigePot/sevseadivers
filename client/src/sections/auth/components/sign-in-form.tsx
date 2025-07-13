@@ -130,7 +130,7 @@ export const SignInForm: React.FC = () => {
           type="submit"
           className="w-full py-3 bg-[#1AB2E5] text-white cursor-pointer font-bold rounded-md hover:bg-[#1AB2E5]/80 focus:outline-none"
         >
-          {isSubmitting ? "..." : "Sign In"}
+          {isSubmitting ? "Signing..." : "Sign In"}
         </button>
       </div>
 

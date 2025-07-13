@@ -1,7 +1,7 @@
 import { Helmet } from "react-helmet-async"
 
 import { CONFIG } from "../../global-config"
-import { BookingListView } from "../../sections/staff-dashboard/booking/view"
+import { ProfileView } from "../../sections/shared/profile/view"
 
 // ----------------------------------------------------------------------
 
@@ -14,7 +14,7 @@ export default function OverviewAppPage() {
         <title> {metadata.title}</title>
       </Helmet>
 
-      <BookingListView />
+      <ProfileView />
     </>
   )
 }
