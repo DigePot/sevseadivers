@@ -143,6 +143,7 @@ export const getUserById = tryCatch(async (req, res, next) => {
 
 // Update user
 export const updateUser = tryCatch(async (req, res, next) => {
+  console.log("req.body", req.body)
   const user = await User.findByPk(req.params.id)
 
   if (!user) {
@@ -151,13 +152,22 @@ export const updateUser = tryCatch(async (req, res, next) => {
 
   const { password, ...rest } = req.body
 
-  if (password) {
+  // convert empty strings to null
+  for (const key in rest) {
+    if (rest[key] === "") {
+      rest[key] = null
+    }
+  }
+
+  if (password && password.trim() !== "") {
     rest.password = await bcrypt.hash(password, saltRounds)
   }
 
   await user.update(rest)
 
-  res.json(user)
+  const { password: _, ...updatedUser } = user.get({ plain: true })
+
+  res.json(updatedUser)
 })
 
 // Delete user
@@ -237,16 +247,17 @@ export const resetPassword = tryCatch(async (req, res, next) => {
   res.json({ message: "Password reset successful" })
 })
 
-
 export const getProfile = async (req, res) => {
   try {
-    const user = req.user; 
+    const user = req.user
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" })
     }
 
-    res.status(200).json({ user });
+    res.status(200).json({ user })
   } catch (error) {
-    res.status(500).json({ message: 'Error fetching profile', error: error.message });
+    res
+      .status(500)
+      .json({ message: "Error fetching profile", error: error.message })
   }
-};
+}
