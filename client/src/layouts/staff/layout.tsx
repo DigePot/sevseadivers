@@ -172,9 +172,16 @@ export const StaffLayout: React.FC<StaffLayoutProps> = ({ children }) => {
         )}
       >
         <div className="flex justify-between items-center p-4 border-b border-white/30 flex-shrink-0">
-          <span className="text-xl font-bold text-slate-900">
-            {CONFIG.appName}
-          </span>
+          <Link
+            className="flex items-center space-x-2 text-xl font-bold text-cyan-600 font-sans"
+            to="/"
+          >
+            {/* Wave emoji icon */}
+            <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-cyan-100 text-2xl">
+              🌊
+            </span>
+            <span>{CONFIG.appName}</span>
+          </Link>
           <button
             onClick={toggleSidebar}
             className="md:hidden text-2xl text-slate-800"
@@ -224,9 +231,12 @@ export const StaffLayout: React.FC<StaffLayoutProps> = ({ children }) => {
             >
               <FiMenu />
             </button>
-            <h1 className="text-xl font-bold text-slate-800">
-              {CONFIG.appName}
-            </h1>
+            <Link
+              className="flex items-center space-x-2 text-xl font-bold text-cyan-600 font-sans"
+              to="/"
+            >
+              <span>{CONFIG.appName}</span>
+            </Link>
           </div>
 
           <div className="flex items-center space-x-4">
@@ -255,7 +265,12 @@ export const StaffLayout: React.FC<StaffLayoutProps> = ({ children }) => {
           <button onClick={toggleSidebar} className="text-gray-600 text-2xl">
             <FiMenu />
           </button>
-          <span className="text-lg font-semibold">{CONFIG.appName}</span>
+          <Link
+            className="flex items-center space-x-2 text-xl font-bold text-cyan-600 font-sans"
+            to="/"
+          >
+            <span>{CONFIG.appName}</span>
+          </Link>
         </div>
 
         <main className="flex-1 overflow-auto p-4 bg-white md:bg-transparent">
