@@ -59,4 +59,14 @@ export const paths = {
   shared: {
     root: `/profile`,
   },
+  // MAIN
+  main: {
+    root: "/",
+    courses: `/courses`,
+    about: `/about-us`,
+    trips: `/trips`,
+    services: `/services`,
+    gallery: `/gallery`,
+    contact: `/contact-us`,
+  },
 }

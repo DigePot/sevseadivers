@@ -1,8 +1,7 @@
 import { Helmet } from "react-helmet-async"
 
-import { CONFIG } from "../../global-config"
-
-// import { ContactView } from 'src/sections/contact/view';
+import { CONFIG } from "../../../global-config"
+import { GalleryView } from "../../../sections/main/gallery/view"
 
 // ----------------------------------------------------------------------
 
@@ -15,8 +14,7 @@ export default function Page() {
         <title> {metadata.title}</title>
       </Helmet>
 
-      {/* <ContactView /> */}
-      <div>ContactView</div>
+      <GalleryView />
     </>
   )
 }
