@@ -1,8 +1,11 @@
+import { paths } from "../routes/paths"
+
 export const navData = [
-  { title: "Home", path: "/", icon: "🏠" },
-  { title: "About", path: "/about-us", icon: "ℹ️" },
-  { title: "Courses", path: "/courses", icon: "📚" },
-  { title: "Trips", path: "/trips", icon: "🌊" },
-  { title: "Services", path: "/services", icon: "🛠️" },
-  { title: "Gallery", path: "/gallery", icon: "📸" },
+  { title: "Home", path: paths.main.root, icon: "🏠" },
+  { title: "Courses", path: paths.main.courses, icon: "📚" },
+  { title: "Trips", path: paths.main.trips, icon: "🌊" },
+  { title: "Services", path: paths.main.services, icon: "🛠️" },
+  { title: "Gallery", path: paths.main.gallery, icon: "📸" },
+  { title: "About", path: paths.main.about, icon: "ℹ️" },
+  { title: "Contact", path: paths.main.contact, icon: "📸" },
 ]

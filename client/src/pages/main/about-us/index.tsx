@@ -1,6 +1,6 @@
 import { Helmet } from "react-helmet-async"
-import { CONFIG } from "../../global-config"
-import {AboutView} from "../../sections/about/view/AboutView";
+import { CONFIG } from "../../../global-config"
+import { AboutView } from "../../../sections/about/view/AboutView"
 
 const metadata = { title: `About us - ${CONFIG.appName}` }
 

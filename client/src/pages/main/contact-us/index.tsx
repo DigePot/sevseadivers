@@ -1,23 +1,20 @@
 import { Helmet } from "react-helmet-async"
 
-import { HomeView } from "../sections/main/home/view"
+import { CONFIG } from "../../../global-config"
+import { ContactView } from "../../../sections/main/contact-us/view"
 
 // ----------------------------------------------------------------------
 
-const metadata = {
-  title: "Sevsea: Sevsea",
-  description: "Sevsea",
-}
+const metadata = { title: `Contact us - ${CONFIG.appName}` }
 
 export default function Page() {
   return (
     <>
       <Helmet>
         <title> {metadata.title}</title>
-        <meta name="description" content={metadata.description} />
       </Helmet>
 
-      <HomeView />
+      <ContactView />
     </>
   )
 }
