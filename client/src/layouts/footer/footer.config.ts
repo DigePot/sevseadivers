@@ -1,3 +1,9 @@
+import {
+  FaInstagram,
+  FaFacebook,
+  FaTwitter,
+} from "react-icons/fa";
+
 export const footerLinks = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about" },
@@ -8,7 +14,7 @@ export const footerLinks = [
 ];
 
 export const footerSocials = [
-  { label: "Instagram", href: "https://instagram.com/", icon: "instagram" },
-  { label: "Facebook", href: "https://facebook.com/", icon: "facebook" },
-  { label: "Twitter", href: "https://twitter.com/", icon: "twitter" },
-]; 
+  { label: "Instagram", href: "https://instagram.com/", icon: FaInstagram },
+  { label: "Facebook", href: "https://facebook.com/", icon: FaFacebook },
+  { label: "Twitter", href: "https://twitter.com/", icon: FaTwitter },
+];

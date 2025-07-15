@@ -11,7 +11,7 @@ import { API } from "../../../store/api"
 import { setCredentials } from "../../../store/auth/auth-slice"
 import { extractErrorMessage } from "../../../utils/extract-error-message"
 
-// Define Zod schema for validation
+// Zod validation schema
 export const SignInSchema = zod.object({
   email: zod
     .string()
@@ -41,6 +41,7 @@ export const SignInForm: React.FC = () => {
     defaultValues: { email: "", password: "" },
   })
 
+  // Redirect user based on role or returnTo param
   const handleRoleBasedRedirect = (role: string) => {
     if (returnTo) return returnTo
     switch (role.toLocaleLowerCase()) {
@@ -53,30 +54,24 @@ export const SignInForm: React.FC = () => {
     }
   }
 
-  // Handling form submission
   const onSubmit = async (data: SignInSchemaType) => {
+    setGlobalError("")
     try {
       const res = await axios.post(`${API}/users/login`, {
         email: data.email,
         password: data.password,
       })
-      console.log(res.data)
 
       const { token } = res.data
       const { role, email, id } = res.data.user
-      dispatch(setCredentials({ token: token, role, email, id }))
+      dispatch(setCredentials({ token, role, email, id }))
 
-      // Redirect user based on their role
       router.push(handleRoleBasedRedirect(role))
       router.refresh()
     } catch (error: any) {
-      // const e = getErrorMessage(error)
-      // setGlobalError(`Login failed: Try again please`) // Set global error message
-
-      console.log("error", error.response)
       if (error.response) {
-        const errorMessage = extractErrorMessage(error.response.data) // Extract the message from HTML
-        setGlobalError(errorMessage) // Set global error message
+        const errorMessage = extractErrorMessage(error.response.data)
+        setGlobalError(errorMessage)
       } else {
         setGlobalError("An unknown error occurred")
       }
@@ -85,72 +80,98 @@ export const SignInForm: React.FC = () => {
 
   return (
     <form
-      onSubmit={handleSubmit(onSubmit)} // Using handleSubmit to handle validation and submission
-      className="space-y-4 max-w-lg w-full bg-white p-6 rounded-xl shadow-lg"
+      onSubmit={handleSubmit(onSubmit)}
+      className="space-y-6 max-w-md mx-auto bg-white p-8 rounded-xl shadow-lg"
+      noValidate
+      aria-live="polite"
     >
-      {/* Global Error Message */}
+      {/* Global Error */}
       {globalError && (
-        <div className="text-red-500 text-center mb-4">
-          <p>{globalError}</p>
+        <div
+          role="alert"
+          className="text-red-600 bg-red-100 p-3 rounded-md text-center font-semibold"
+        >
+          {globalError}
         </div>
       )}
 
-      {/* Form Header */}
-      <h2 className="text-xl font-semibold text-center">Sign In</h2>
+      {/* Header */}
+      <h2 className="text-2xl font-bold text-center text-gray-900">
+        Sign In
+      </h2>
 
-      {/* Email Field */}
+      {/* Email input */}
       <div>
+        <label htmlFor="email" className="block mb-1 font-semibold text-gray-700">
+          Email
+        </label>
         <input
+          id="email"
           type="email"
-          placeholder="Email"
+          placeholder="Enter your email"
           {...register("email")}
-          className="mt-1 p-3 w-full bg-gray-100 rounded-md border border-gray-300 focus:ring-2 focus:ring-[#1AB2E5] focus:outline-none"
+          aria-invalid={errors.email ? "true" : "false"}
+          aria-describedby={errors.email ? "email-error" : undefined}
+          className={`w-full px-4 py-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-cyan-500 transition ${
+            errors.email ? "border-red-500" : "border-gray-300"
+          }`}
         />
         {errors.email && (
-          <p className="text-red-500 text-sm">{errors.email.message}</p>
+          <p id="email-error" className="mt-1 text-red-600 text-sm">
+            {errors.email.message}
+          </p>
         )}
       </div>
 
-      {/* Password Field */}
+      {/* Password input */}
       <div>
+        <label htmlFor="password" className="block mb-1 font-semibold text-gray-700">
+          Password
+        </label>
         <input
+          id="password"
           type="password"
-          placeholder="Password"
+          placeholder="Enter your password"
           {...register("password")}
-          className="mt-1 p-3 w-full bg-gray-100 rounded-md border border-gray-300 focus:ring-2 focus:ring-[#1AB2E5] focus:outline-none"
+          aria-invalid={errors.password ? "true" : "false"}
+          aria-describedby={errors.password ? "password-error" : undefined}
+          className={`w-full px-4 py-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-cyan-500 transition ${
+            errors.password ? "border-red-500" : "border-gray-300"
+          }`}
         />
         {errors.password && (
-          <p className="text-red-500 text-sm">{errors.password.message}</p>
+          <p id="password-error" className="mt-1 text-red-600 text-sm">
+            {errors.password.message}
+          </p>
         )}
       </div>
 
-      {/* Submit Button */}
-      <div>
-        <button
-          type="submit"
-          className="w-full py-3 bg-[#1AB2E5] text-white cursor-pointer font-bold rounded-md hover:bg-[#1AB2E5]/80 focus:outline-none"
-        >
-          {isSubmitting ? "Signing..." : "Sign In"}
-        </button>
-      </div>
+      {/* Submit button */}
+      <button
+        type="submit"
+        disabled={isSubmitting}
+        className="w-full py-3 bg-cyan-600 text-white font-bold rounded-md shadow hover:bg-cyan-700 focus:outline-none focus:ring-4 focus:ring-cyan-400 disabled:opacity-50 disabled:cursor-not-allowed transition"
+      >
+        {isSubmitting ? "Signing in..." : "Sign In"}
+      </button>
 
-      {/* Forgot Password Link */}
+      {/* Forgot Password */}
       <div className="text-center">
         <Link
           to="/forgot-password"
-          className="text-sm text-[#1AB2E5] hover:text-[#121717] font-semibold"
+          className="text-cyan-600 hover:underline font-semibold text-sm"
         >
           Forgot Password?
         </Link>
       </div>
 
-      {/* Contextual Sign Up Link */}
-      <div className="mt-4 text-center text-sm">
+      {/* Sign Up link */}
+      <p className="mt-4 text-center text-sm text-gray-700">
         Don’t have an account?{" "}
-        <Link to="/auth/sign-up" className="text-cyan-600 hover:underline">
+        <Link to="/auth/sign-up" className="text-cyan-600 hover:underline font-semibold">
           Sign Up
         </Link>
-      </div>
+      </p>
     </form>
   )
 }

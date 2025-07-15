@@ -1,23 +1,33 @@
 import React from "react";
 import { footerLinks } from "./footer.config";
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion";
 
 const FooterQuickLinks: React.FC = () => (
-  <nav>
-    <h3 className="font-semibold mb-2 text-cyan-700">Quick Links</h3>
-    <ul className="space-y-2">
-      {footerLinks.map((link) => (
-        <li key={link.label}>
+  <motion.nav
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ duration: 0.6 }}
+    aria-label="Quick Links"
+  >
+    <h3 className="font-semibold mb-4 text-cyan-600 text-lg tracking-wide">
+      Quick Links
+    </h3>
+    <ul className="space-y-3">
+      {footerLinks.map(({ label, href }) => (
+        <li key={label}>
           <Link
-            to={link.href}
-            className="text-gray-500 hover:text-cyan-500 transition"
+            to={href}
+            className="text-gray-600 dark:text-gray-300 font-medium transition
+                       hover:text-cyan-600 focus:text-cyan-600 focus:outline-none
+                       transform hover:scale-105 focus:scale-105 duration-300"
           >
-            {link.label}
+            {label}
           </Link>
         </li>
       ))}
     </ul>
-  </nav>
+  </motion.nav>
 );
 
-export default FooterQuickLinks; 
+export default FooterQuickLinks;

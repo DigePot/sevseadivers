@@ -1,220 +1,188 @@
-import { zodResolver } from "@hookform/resolvers/zod"
-import axios from "axios"
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { useDispatch } from "react-redux"
-import { z as zod } from "zod"
-import { useRouter, useSearchParams } from "../../../routes/hooks"
-import { API } from "../../../store/api"
-import { setCredentials } from "../../../store/auth/auth-slice"
-import { extractErrorMessage } from "../../../utils/extract-error-message"
-import { Link } from "react-router-dom"
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { motion, AnimatePresence } from "framer-motion";
+import { Link } from "react-router-dom";
+import axios from "axios";
+import { z as zod } from "zod";
+import {
+  FaUserCircle,
+  FaUser,
+  FaEnvelope,
+  FaPhone,
+  FaLock,
+  FaCheckCircle,
+} from "react-icons/fa";
 
-// Define Zod schema for validation
-export const SignUpSchema = zod.object({
-  fullName: zod.string().min(1, { message: "Full Name is required!" }),
-  username: zod.string().min(1, { message: "User Name is required!" }),
-  email: zod
-    .string()
-    .min(1, { message: "Email is required!" })
-    .email({ message: "Email must be a valid email address!" }),
-  phoneNumber: zod.string().min(1, { message: "Phone Number is required!" }),
-  password: zod
-    .string()
-    .min(1, { message: "Password is required!" })
-    .min(6, { message: "Password must be at least 6 characters!" }),
-  confirmPassword: zod
-    .string()
-    .min(1, { message: "Confirm Password is required!" })
-    .min(6, { message: "Password must be at least 6 characters!" }),
-})
+export const SignUpSchema = zod
+  .object({
+    fullName: zod.string().min(1, "Full Name is required!"),
+    username: zod.string().min(1, "User Name is required!"),
+    email: zod.string().min(1, "Email is required!").email("Invalid email address!"),
+    phoneNumber: zod.string().min(1, "Phone Number is required!"),
+    password: zod.string().min(6, "Password must be at least 6 characters!"),
+    confirmPassword: zod.string().min(6, "Confirm Password is required!"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    path: ["confirmPassword"],
+    message: "Passwords do not match",
+  });
 
-export type SignUpSchemaType = zod.infer<typeof SignUpSchema>
+export type SignUpSchemaType = zod.infer<typeof SignUpSchema>;
+
+const iconMap: Record<string, React.ReactNode> = {
+  fullName: <FaUserCircle className="text-cyan-500" />,
+  username: <FaUser className="text-cyan-500" />,
+  email: <FaEnvelope className="text-cyan-500" />,
+  phoneNumber: <FaPhone className="text-cyan-500" />,
+  password: <FaLock className="text-cyan-500" />,
+  confirmPassword: <FaCheckCircle className="text-cyan-500" />,
+};
 
 export const SignUpForm: React.FC = () => {
-  const [globalError, setGlobalError] = useState<string>("")
-  const router = useRouter()
-  const searchParams = useSearchParams()
-  const returnTo = searchParams.get("returnTo")
-  const dispatch = useDispatch()
+  const [globalError, setGlobalError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const {
     register,
     handleSubmit,
-    formState: { isSubmitting, errors },
-    watch,
+    formState: { errors },
   } = useForm<SignUpSchemaType>({
     resolver: zodResolver(SignUpSchema),
-    defaultValues: {
-      fullName: "",
-      username: "",
-      email: "",
-      phoneNumber: "",
-      password: "",
-      confirmPassword: "",
-    },
-  })
-
-  const password = watch("password")
-  const confirmPassword = watch("confirmPassword")
-
-  const handleRoleBasedRedirect = (role: string) => {
-    if (returnTo) return returnTo
-    switch (role.toLocaleLowerCase()) {
-      case "admin":
-        return "/dashboard"
-      case "staff":
-        return "/staff-dashboard"
-      default:
-        return "/"
-    }
-  }
+  });
 
   const onSubmit = async (data: SignUpSchemaType) => {
+    setGlobalError("");
+    setIsSubmitting(true);
     try {
-      const res = await axios.post(`${API}/users/register`, {
-        fullName: data.fullName,
-        username: data.username,
-        email: data.email,
-        phoneNumber: data.phoneNumber,
-        password: data.password,
-        confirmPassword: data.confirmPassword,
-        role: "client",
-      })
-      console.log(res.data)
-
-      const { token } = res.data
-      const { role, email, id } = res.data.user
-      dispatch(setCredentials({ token, role, email, id }))
-
-      // Redirect based on user role after successful signup
-      router.push(handleRoleBasedRedirect(role))
-    } catch (error: any) {
-      console.log("error", error.response)
-      if (error.response) {
-        const errorMessage = extractErrorMessage(error.response.data) // Extract the message from HTML
-        setGlobalError(errorMessage) // Set global error message
-      } else {
-        setGlobalError("An unknown error occurred")
-      }
+      await axios.post("/api/users/register", data);
+      alert("Registration successful! Please check your email.");
+    } catch (err: any) {
+      setGlobalError(err.response?.data?.message || "Something went wrong");
+    } finally {
+      setIsSubmitting(false);
     }
-  }
+  };
+
+  const fields: (keyof SignUpSchemaType)[] = [
+    "fullName",
+    "username",
+    "email",
+    "phoneNumber",
+    "password",
+    "confirmPassword",
+  ];
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)} // Using handleSubmit to handle validation and submission
-      className="space-y-4 max-w-lg w-full bg-white p-6 rounded-xl shadow-lg"
+    <motion.form
+      onSubmit={handleSubmit(onSubmit)}
+      className="max-w-lg mx-auto bg-gradient-to-br from-cyan-100 to-blue-200 p-10 rounded-xl shadow-xl"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+      noValidate
+      aria-live="assertive"
     >
-      {/* Global Error Message */}
-      {globalError && (
-        <div className="text-red-500 text-center mb-4">
-          <p>{globalError}</p>
-        </div>
-      )}
+      <h2 className="text-4xl font-extrabold text-center text-cyan-700 mb-10 tracking-wide">
+        Create Your Account
+      </h2>
 
-      {/* Form Header */}
-      <h2 className="text-xl font-semibold text-center">Sign Up</h2>
-
-      {/* Full Name Field */}
-      <div>
-        <input
-          type="text"
-          placeholder="Full Name"
-          {...register("fullName")}
-          className="mt-1 p-3 w-full bg-gray-100 rounded-md border border-gray-300 focus:ring-2 focus:ring-[#1AB2E5] focus:outline-none"
-        />
-        {errors.fullName && (
-          <p className="text-red-500 text-sm">{errors.fullName.message}</p>
+      <AnimatePresence>
+        {globalError && (
+          <motion.div
+            className="bg-red-200 text-red-800 px-5 py-3 mb-6 rounded-lg text-center font-semibold"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            role="alert"
+          >
+            {globalError}
+          </motion.div>
         )}
-      </div>
+      </AnimatePresence>
 
-      {/* User Name Field */}
-      <div>
-        <input
-          type="text"
-          placeholder="Username"
-          {...register("username")}
-          className="mt-1 p-3 w-full bg-gray-100 rounded-md border border-gray-300 focus:ring-2 focus:ring-[#1AB2E5] focus:outline-none"
-        />
-        {errors.username && (
-          <p className="text-red-500 text-sm">{errors.username.message}</p>
-        )}
-      </div>
+      {fields.map((name) => {
+        const label = name
+          .replace(/([A-Z])/g, " $1")
+          .replace(/^./, (str) => str.toUpperCase());
 
-      {/* Email Field */}
-      <div>
-        <input
-          type="email"
-          placeholder="Email"
-          {...register("email")}
-          className="mt-1 p-3 w-full bg-gray-100 rounded-md border border-gray-300 focus:ring-2 focus:ring-[#1AB2E5] focus:outline-none"
-        />
-        {errors.email && (
-          <p className="text-red-500 text-sm">{errors.email.message}</p>
-        )}
-      </div>
+        const type = name.toLowerCase().includes("password")
+          ? "password"
+          : name.toLowerCase() === "email"
+          ? "email"
+          : "text";
 
-      {/* Phone Number Field */}
-      <div>
-        <input
-          type="tel"
-          placeholder="Phone Number"
-          {...register("phoneNumber")}
-          className="mt-1 p-3 w-full bg-gray-100 rounded-md border border-gray-300 focus:ring-2 focus:ring-[#1AB2E5] focus:outline-none"
-        />
-        {errors.phoneNumber && (
-          <p className="text-red-500 text-sm">{errors.phoneNumber.message}</p>
-        )}
-      </div>
+        const autoComplete =
+          name === "email"
+            ? "email"
+            : name === "password" || name === "confirmPassword"
+            ? "new-password"
+            : "off";
 
-      {/* Password Field */}
-      <div>
-        <input
-          type="password"
-          placeholder="Password"
-          {...register("password")}
-          className="mt-1 p-3 w-full bg-gray-100 rounded-md border border-gray-300 focus:ring-2 focus:ring-[#1AB2E5] focus:outline-none"
-        />
-        {errors.password && (
-          <p className="text-red-500 text-sm">{errors.password.message}</p>
-        )}
-      </div>
+        const hasError = Boolean(errors[name]);
 
-      {/* Confirm Password Field */}
-      <div>
-        <input
-          type="password"
-          placeholder="Confirm Password"
-          {...register("confirmPassword")}
-          className="mt-1 p-3 w-full bg-gray-100 rounded-md border border-gray-300 focus:ring-2 focus:ring-[#1AB2E5] focus:outline-none"
-        />
-        {errors.confirmPassword && (
-          <p className="text-red-500 text-sm">
-            {errors.confirmPassword.message}
-          </p>
-        )}
-        {password !== confirmPassword && confirmPassword && (
-          <p className="text-red-500 text-sm">Passwords do not match</p>
-        )}
-      </div>
+        return (
+          <motion.div
+            key={name}
+            className="mb-6"
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
+          >
+            <label
+              htmlFor={name}
+              className="block mb-2 font-semibold text-gray-700"
+            >
+              {label}
+            </label>
+            <div
+              className={`relative flex items-center rounded-lg border ${
+                hasError ? "border-red-500" : "border-gray-300"
+              } bg-white focus-within:ring-2 focus-within:ring-cyan-400 transition-shadow`}
+            >
+              <span className="absolute left-3 text-cyan-500 pointer-events-none">
+                {iconMap[name]}
+              </span>
+              <input
+                id={name}
+                type={type}
+                autoComplete={autoComplete}
+                aria-invalid={hasError ? "true" : "false"}
+                {...register(name)}
+                className={`w-full pl-10 pr-4 py-3 rounded-lg bg-transparent focus:outline-none transition ${
+                  hasError ? "placeholder-red-400" : "placeholder-gray-400"
+                }`}
+                placeholder={label}
+              />
+            </div>
+            {hasError && (
+              <motion.p
+                className="mt-1 text-red-600 text-sm font-medium"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                {errors[name]?.message as string}
+              </motion.p>
+            )}
+          </motion.div>
+        );
+      })}
 
-      {/* Submit Button */}
-      <div>
-        <button
-          type="submit"
-          className="w-full py-3 bg-[#1AB2E5] text-white cursor-pointer font-bold rounded-md hover:bg-[#1AB2E5]/80 focus:outline-none"
-        >
-          {isSubmitting ? "..." : "Sign Up"}
-        </button>
-      </div>
+      <button
+        type="submit"
+        disabled={isSubmitting}
+        className="w-full mt-6 py-3 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold shadow-lg hover:from-cyan-600 hover:to-blue-700 focus:outline-none focus:ring-4 focus:ring-cyan-400 focus:ring-opacity-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {isSubmitting ? "Signing up..." : "Sign Up"}
+      </button>
 
-      {/* Contextual Sign In Link */}
-      <div className="mt-4 text-center text-sm">
+      <p className="mt-6 text-center text-gray-600">
         Already have an account?{" "}
-        <Link to="/auth/sign-in" className="text-cyan-600 hover:underline">
+        <Link to="/auth/sign-in" className="text-cyan-700 hover:underline font-semibold">
           Sign In
         </Link>
-      </div>
-    </form>
-  )
-}
+      </p>
+    </motion.form>
+  );
+};

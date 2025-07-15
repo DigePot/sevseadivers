@@ -1,43 +1,92 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
 .hero-section {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 70vh;
-  background: linear-gradient(135deg, #0077b6 0%, #48cae4 100%);
+  min-height: 100vh;
+  background: linear-gradient(135deg, #03045e, #00b4d8, #90e0ef);
+  background-size: 400% 400%;
+  animation: gradientShift 10s ease infinite;
+  font-family: 'Poppins', sans-serif;
   color: #fff;
   text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background: rgba(255, 255, 255, 0.05);
+  filter: blur(150px);
+  border-radius: 50%;
+  top: -150px;
+  left: -150px;
+  z-index: 0;
 }
 
 .hero-content {
-  max-width: 600px;
-  padding: 2rem;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 16px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 1;
+  max-width: 700px;
+  padding: 3rem 2rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 24px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: fadeInUp 1s ease-out both;
 }
 
 .hero-content h1 {
-  font-size: 2.8rem;
+  font-size: 3.2rem;
+  font-weight: 600;
   margin-bottom: 1rem;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
 }
 
 .hero-content p {
   font-size: 1.2rem;
   margin-bottom: 2rem;
+  opacity: 0.9;
 }
 
 .hero-cta {
   background: #00b4d8;
   color: #fff;
   border: none;
-  padding: 0.8rem 2rem;
+  padding: 0.8rem 2.2rem;
   font-size: 1.1rem;
-  border-radius: 8px;
+  border-radius: 10px;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  box-shadow: 0 6px 12px rgba(0, 180, 216, 0.3);
 }
 
 .hero-cta:hover {
   background: #0096c7;
+  transform: translateY(-2px) scale(1.02);
+}
+
+/* Animations */
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

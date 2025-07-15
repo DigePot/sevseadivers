@@ -1,10 +1,11 @@
-import React from "react"
-import { useLogout } from "../sections/auth/hooks"
+import React from "react";
+import { FaSignOutAlt } from "react-icons/fa";
+import { useLogout } from "../sections/auth/hooks";
 
 export interface SignOutButtonProps {
-  className?: string
-  onClick?: React.MouseEventHandler<HTMLButtonElement>
-  children?: React.ReactNode
+  className?: string;
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
+  children?: React.ReactNode;
 }
 
 export const SignOutButton: React.FC<SignOutButtonProps> = ({
@@ -13,18 +14,33 @@ export const SignOutButton: React.FC<SignOutButtonProps> = ({
   children,
   ...props
 }) => {
-  const { handleLogout } = useLogout()
+  const { handleLogout } = useLogout();
 
   return (
     <button
       onClick={(e) => {
-        handleLogout()
-        if (onClick) onClick(e)
+        handleLogout();
+        if (onClick) onClick(e);
       }}
-      className={`inline-block bg-[#19b2e5]  text-[#121717] text-base font-bold px-4 py-2 rounded-xl hover:bg-gray-100 cursor-pointer transition ${className}`}
+      type="button"
+      className={`
+        flex flex-col items-center justify-center
+        bg-gradient-to-b from-cyan-500 to-blue-600
+        text-white
+        w-24 h-24 md:w-28 md:h-28
+        rounded-2xl shadow-lg
+        hover:from-cyan-600 hover:to-blue-700
+        transition duration-300 ease-in-out
+        active:scale-95
+        focus:outline-none focus:ring-4 focus:ring-cyan-400 focus:ring-opacity-50
+        ${className}
+      `}
       {...props}
     >
-      {children ? children : "Sign out"}
+      <FaSignOutAlt className="text-3xl mb-1" />
+      <span className="text-sm font-medium">
+        {children ?? "Sign Out"}
+      </span>
     </button>
-  )
-}
+  );
+};

@@ -3,17 +3,20 @@ import { footerLinks } from "./footer.config";
 import { Link } from "react-router-dom";
 
 const FooterLinks: React.FC = () => (
-  <nav className="flex flex-wrap justify-center gap-4 mb-4">
-    {footerLinks.map((link) => (
+  <nav className="flex flex-wrap justify-center gap-6 mb-6" aria-label="Footer navigation">
+    {footerLinks.map(({ label, href }) => (
       <Link
-        key={link.label}
-        to={link.href}
-        className="text-gray-400 hover:text-cyan-500 transition"
+        key={label}
+        to={href}
+        className="text-gray-400 hover:text-cyan-500 focus:text-cyan-500 focus:outline-none
+                   transition-transform transform hover:scale-110 focus:scale-110
+                   duration-300 font-medium"
+        tabIndex={0}
       >
-        {link.label}
+        {label}
       </Link>
     ))}
   </nav>
 );
 
-export default FooterLinks; 
+export default FooterLinks;
