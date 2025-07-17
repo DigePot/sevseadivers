@@ -1,6 +1,7 @@
 import React, { type ReactNode } from "react"
 import { CONFIG } from "../../global-config"
 import { Link } from "react-router"
+import { paths } from "../../routes/paths"
 
 interface AuthCenteredLayoutProps {
   children: ReactNode
@@ -20,7 +21,7 @@ export const AuthCenteredLayout: React.FC<AuthCenteredLayoutProps> = ({
         </Link>
         <div className="flex items-center space-x-4">
           <Link
-            to="/contact"
+            to={paths.contact}
             className="hover:text-[#1AB2E5] font-bold text-base"
           >
             Need help?

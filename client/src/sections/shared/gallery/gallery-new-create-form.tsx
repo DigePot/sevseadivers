@@ -1,93 +1,87 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useRef, useState, useEffect } from "react" // Added useEffect
+import { useEffect, useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { z as zod } from "zod"
+
 import { useRouter } from "../../../routes/hooks"
 import { paths } from "../../../routes/paths"
-import { useUpdateTripMutation } from "../../../store/trip"
-import type { Trip } from "../../../types/trip"
+import { useCreateGalleryMutation } from "../../../store/gallery"
+import { extractErrorMessage } from "../../../utils/extract-error-message"
 
 // ----------------------------------------------------------------------
 
-export const TripSchema = zod.object({
+export const NewGallerySchema = zod.object({
   title: zod.string().min(1, { message: "Title is required!" }),
   description: zod.string().min(1, { message: "Description is required!" }),
-  destination: zod.string().min(1, { message: "Destination is required!" }),
-  date: zod.string().min(1, { message: "Date is required!" }),
-  activityType: zod.string().min(1, { message: "Activity type is required!" }),
-  price: zod.number().min(0, { message: "Price must be positive" }),
-  duration: zod.string().min(1, { message: "Duration is required!" }),
+  mediaType: zod.enum(["image", "video"], {
+    required_error: "Media type is required.",
+  }),
+  // FIX: Add an optional 'root' field to allow setting form-level errors.
+  root: zod.string().optional(),
 })
 
-export type TripSchemaType = zod.infer<typeof TripSchema>
+export type NewGallerySchemaType = zod.infer<typeof NewGallerySchema>
 
 // ----------------------------------------------------------------------
 
-type Props = {
-  currentTrip?: Trip | null
-}
-
-export function TripEditForm({ currentTrip }: Props) {
-  console.log(currentTrip)
+export function GalleryNewCreateForm() {
   const router = useRouter()
-  const [updateTrip] = useUpdateTripMutation()
+  const [createGallery] = useCreateGalleryMutation()
 
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  // Initialize form with empty values first
+  const defaultValues: NewGallerySchemaType = {
+    title: "",
+    description: "",
+    mediaType: "image", // Default to 'image'
+  }
+
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
     setError,
-    // setValue,
-  } = useForm<TripSchemaType>({
-    resolver: zodResolver(TripSchema),
-    defaultValues: {
-      title: "",
-      description: "",
-      destination: "",
-      date: "",
-      activityType: "",
-      price: 0,
-      duration: "",
-    },
+    watch,
+    getValues,
+    resetField,
+  } = useForm<NewGallerySchemaType>({
+    resolver: zodResolver(NewGallerySchema),
+    defaultValues,
   })
 
-  // Reset form when currentTrip changes
-  useEffect(() => {
-    if (currentTrip) {
-      reset({
-        title: currentTrip.title,
-        description: currentTrip.description,
-        destination: currentTrip.destination,
-        date: new Date(currentTrip.date).toISOString().split("T")[0],
-        activityType: currentTrip.activityType,
-        price: currentTrip.price,
-        duration: currentTrip.duration,
-      })
+  const mediaType = watch("mediaType")
 
-      // Set image preview from current trip
-      if (currentTrip.imageUrl) {
-        setImagePreview(currentTrip.imageUrl)
-      }
+  useEffect(() => {
+    // When the mediaType changes, reset the file input to ensure the correct file type is uploaded.
+    if (selectedFile) {
+      handleRemoveImage()
     }
-  }, [currentTrip, reset])
+    // Also clear any previous file-related errors.
+    resetField("root")
+  }, [mediaType, resetField])
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      const validTypes = ["image/jpeg", "image/png", "image/gif"]
+      const currentMediaType = getValues("mediaType")
+      const validImageTypes = ["image/jpeg", "image/png", "image/gif"]
+      const validVideoTypes = ["video/mp4"]
       const maxSize = 10 * 1024 * 1024 // 10MB
 
-      if (!validTypes.includes(file.type)) {
+      let isValidType = false
+      if (currentMediaType === "image") {
+        isValidType = validImageTypes.includes(file.type)
+      } else if (currentMediaType === "video") {
+        isValidType = validVideoTypes.includes(file.type)
+      }
+
+      if (!isValidType) {
         setError("root", {
-          message:
-            "Invalid file type. Please upload a JPEG, PNG, or GIF image.",
+          message: `Invalid file type. Please upload a ${currentMediaType}.`,
         })
         return
       }
@@ -99,6 +93,7 @@ export function TripEditForm({ currentTrip }: Props) {
         return
       }
 
+      setError("root", { message: "" }) // Clear previous errors
       setSelectedFile(file)
       setImagePreview(URL.createObjectURL(file))
     }
@@ -126,16 +121,15 @@ export function TripEditForm({ currentTrip }: Props) {
     e.preventDefault()
     e.currentTarget.classList.remove("ring-2", "ring-blue-500")
 
-    const file = e.dataTransfer.files?.[0]
-    if (file) {
-      setSelectedFile(file)
-      setImagePreview(URL.createObjectURL(file))
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const event = { target: { files: e.dataTransfer.files } } as any
+      handleFileChange(event)
     }
   }
 
   const onSubmit = handleSubmit(async (data) => {
-    if (!imagePreview && !currentTrip?.imageUrl) {
-      setError("root", { message: "Please select an image" })
+    if (!selectedFile) {
+      setError("root", { message: "Please select an image or video file." })
       return
     }
 
@@ -145,60 +139,46 @@ export function TripEditForm({ currentTrip }: Props) {
       const formData = new FormData()
       formData.append("title", data.title)
       formData.append("description", data.description)
-      formData.append("destination", data.destination)
-      formData.append("date", data.date)
-      formData.append("activityType", data.activityType)
-      formData.append("price", data.price.toString())
-      formData.append("duration", data.duration)
+      formData.append("mediaType", data.mediaType)
+      formData.append("media", selectedFile)
 
-      // Only append new image if selected
-      if (selectedFile) {
-        formData.append("media", selectedFile)
-      }
+      await createGallery(formData).unwrap()
 
-      if (currentTrip?.id) {
-        await updateTrip({ id: currentTrip.id, formData }).unwrap()
-        router.push(paths.dashboard.trip.list)
-      }
+      reset()
+      handleRemoveImage()
+      router.push(paths.shared.gallery.list)
     } catch (error: any) {
-      console.error("Error updating trip:", error)
+      console.error("Error creating gallery item:", error)
       setError("root", {
-        message: error.data?.message || "Failed to update trip",
+        message:
+          extractErrorMessage(error.data) || "Failed to create gallery item",
       })
     } finally {
       setIsSubmitting(false)
     }
   })
 
-  if (!currentTrip) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <p className="text-lg text-gray-600">Loading trip details...</p>
-      </div>
-    )
-  }
-
   return (
-    <div className="">
+    <div>
       <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6">
-        Edit Trip: {currentTrip.title}
+        Create New Gallery Item
       </h1>
 
       <form onSubmit={onSubmit} className="space-y-6">
-        {/* Image Upload */}
+        {/* Media Upload */}
         <div className="space-y-4">
           <label className="block text-sm font-medium text-gray-700">
-            Trip Image *
+            Media File *
           </label>
 
           <div
             className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all
-                ${
-                  imagePreview
-                    ? "border-gray-300"
-                    : "border-blue-300 bg-blue-50 hover:bg-blue-100"
-                }
-                ${isSubmitting ? "opacity-70 pointer-events-none" : ""}`}
+              ${
+                imagePreview
+                  ? "border-gray-300"
+                  : "border-blue-300 bg-blue-50 hover:bg-blue-100"
+              }
+              ${isSubmitting ? "opacity-70 pointer-events-none" : ""}`}
             onClick={() => fileInputRef.current?.click()}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -208,18 +188,30 @@ export function TripEditForm({ currentTrip }: Props) {
               type="file"
               ref={fileInputRef}
               onChange={handleFileChange}
-              accept="image/jpeg, image/png, image/gif"
+              accept={
+                mediaType === "image"
+                  ? "image/jpeg, image/png, image/gif"
+                  : "video/mp4"
+              }
               className="hidden"
               disabled={isSubmitting}
             />
 
             {imagePreview ? (
               <div className="relative">
-                <img
-                  src={imagePreview}
-                  alt="Preview"
-                  className="mx-auto max-h-60 object-contain rounded-lg"
-                />
+                {selectedFile?.type.startsWith("video/") ? (
+                  <video
+                    src={imagePreview}
+                    controls
+                    className="mx-auto max-h-60 object-contain rounded-lg"
+                  />
+                ) : (
+                  <img
+                    src={imagePreview}
+                    alt="Preview"
+                    className="mx-auto max-h-60 object-contain rounded-lg"
+                  />
+                )}
                 <button
                   type="button"
                   onClick={(e) => {
@@ -266,15 +258,14 @@ export function TripEditForm({ currentTrip }: Props) {
                   </span>{" "}
                   or drag and drop
                 </p>
-                <p className="text-xs text-gray-500">
-                  JPEG, PNG, GIF (Max 10MB)
+                <p className="text-xs text-gray-500 uppercase">
+                  {mediaType === "image" ? "JPG, PNG, GIF" : "MP4"} (Max 10MB)
                 </p>
               </div>
             )}
           </div>
         </div>
 
-        {/* Grid Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Title */}
           <div className="space-y-2">
@@ -293,133 +284,35 @@ export function TripEditForm({ currentTrip }: Props) {
                   ? "border-red-300 focus:ring-red-200"
                   : "border-gray-300 focus:border-blue-500 focus:ring-blue-200"
               }`}
-              placeholder="Trip title"
+              placeholder="Gallery item title"
             />
             {errors.title && (
               <p className="text-red-500 text-sm">{errors.title.message}</p>
             )}
           </div>
 
-          {/* Destination */}
+          {/* Media Type */}
           <div className="space-y-2">
             <label
-              htmlFor="destination"
+              htmlFor="mediaType"
               className="block text-sm font-medium text-gray-700"
             >
-              Destination *
+              Media Type *
             </label>
-            <input
-              id="destination"
-              type="text"
-              {...register("destination")}
-              className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:outline-none ${
-                errors.destination
+            <select
+              id="mediaType"
+              {...register("mediaType")}
+              className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:outline-none capitalize ${
+                errors.mediaType
                   ? "border-red-300 focus:ring-red-200"
                   : "border-gray-300 focus:border-blue-500 focus:ring-blue-200"
               }`}
-              placeholder="Where are you going?"
-            />
-            {errors.destination && (
-              <p className="text-red-500 text-sm">
-                {errors.destination.message}
-              </p>
-            )}
-          </div>
-
-          {/* Date */}
-          <div className="space-y-2">
-            <label
-              htmlFor="date"
-              className="block text-sm font-medium text-gray-700"
             >
-              Date *
-            </label>
-            <input
-              id="date"
-              type="date"
-              {...register("date")}
-              className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:outline-none ${
-                errors.date
-                  ? "border-red-300 focus:ring-red-200"
-                  : "border-gray-300 focus:border-blue-500 focus:ring-blue-200"
-              }`}
-            />
-            {errors.date && (
-              <p className="text-red-500 text-sm">{errors.date.message}</p>
-            )}
-          </div>
-
-          {/* Activity Type */}
-          <div className="space-y-2">
-            <label
-              htmlFor="activityType"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Activity Type *
-            </label>
-            <input
-              id="activityType"
-              {...register("activityType")}
-              className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:outline-none ${
-                errors.activityType
-                  ? "border-red-300 focus:ring-red-200"
-                  : "border-gray-300 focus:border-blue-500 focus:ring-blue-200"
-              }`}
-              placeholder="Activity"
-            />
-            {errors.activityType && (
-              <p className="text-red-500 text-sm">
-                {errors.activityType.message}
-              </p>
-            )}
-          </div>
-
-          {/* Price */}
-          <div className="space-y-2">
-            <label
-              htmlFor="price"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Price ($) *
-            </label>
-            <input
-              id="price"
-              type="number"
-              step="0.01"
-              {...register("price", { valueAsNumber: true })}
-              className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:outline-none ${
-                errors.price
-                  ? "border-red-300 focus:ring-red-200"
-                  : "border-gray-300 focus:border-blue-500 focus:ring-blue-200"
-              }`}
-              placeholder="0.00"
-            />
-            {errors.price && (
-              <p className="text-red-500 text-sm">{errors.price.message}</p>
-            )}
-          </div>
-
-          {/* Duration */}
-          <div className="space-y-2">
-            <label
-              htmlFor="duration"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Duration *
-            </label>
-            <input
-              id="duration"
-              type="text"
-              {...register("duration")}
-              className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:outline-none ${
-                errors.duration
-                  ? "border-red-300 focus:ring-red-200"
-                  : "border-gray-300 focus:border-blue-500 focus:ring-blue-200"
-              }`}
-              placeholder="e.g., 5 days, 2 weeks"
-            />
-            {errors.duration && (
-              <p className="text-red-500 text-sm">{errors.duration.message}</p>
+              <option value="image">Image</option>
+              <option value="video">Video</option>
+            </select>
+            {errors.mediaType && (
+              <p className="text-red-500 text-sm">{errors.mediaType.message}</p>
             )}
           </div>
         </div>
@@ -441,7 +334,7 @@ export function TripEditForm({ currentTrip }: Props) {
                 ? "border-red-300 focus:ring-red-200"
                 : "border-gray-300 focus:border-blue-500 focus:ring-blue-200"
             }`}
-            placeholder="Describe the trip details..."
+            placeholder="Describe the gallery item..."
           />
           {errors.description && (
             <p className="text-red-500 text-sm">{errors.description.message}</p>
@@ -449,14 +342,7 @@ export function TripEditForm({ currentTrip }: Props) {
         </div>
 
         {/* Submit Button */}
-        <div className="pt-4 flex justify-between">
-          <button
-            type="button"
-            onClick={() => router.push(paths.dashboard.trip.list)}
-            className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-lg shadow-sm transition-colors"
-          >
-            Cancel
-          </button>
+        <div className="pt-4">
           <button
             type="submit"
             disabled={isSubmitting}
@@ -487,14 +373,14 @@ export function TripEditForm({ currentTrip }: Props) {
                   ></path>
                 </svg>
               )}
-              {isSubmitting ? "Updating Trip..." : "Update Trip"}
+              {isSubmitting ? "Creating Item..." : "Create Item"}
             </div>
           </button>
         </div>
       </form>
 
       {errors.root && (
-        <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-lg">
+        <div className="mt-6 p-4 bg-red-50 text-red-700 rounded-lg">
           {errors.root.message}
         </div>
       )}

@@ -3,16 +3,16 @@ import { Helmet } from "react-helmet-async"
 import { useParams } from "../../../routes/hooks"
 
 import { CONFIG } from "../../../global-config"
-import { useOneGallery } from "../../../sections/dashboard/gallery/hooks"
-import { GalleryEditView } from "../../../sections/dashboard/gallery/view"
+import { useCourse } from "../../../sections/shared/course/hooks"
+import { CourseEditView } from "../../../sections/shared/course/view"
 
 // ----------------------------------------------------------------------
 
-const metadata = { title: `Gallery edit | Dashboard - ${CONFIG.appName}` }
+const metadata = { title: `Course edit | Dashboard - ${CONFIG.appName}` }
 
 export default function Page() {
   const { id = "" } = useParams()
-  const { gallery } = useOneGallery(id)
+  const { course } = useCourse(id)
 
   return (
     <>
@@ -20,7 +20,7 @@ export default function Page() {
         <title> {metadata.title}</title>
       </Helmet>
 
-      <GalleryEditView currentGallery={gallery} />
+      <CourseEditView currentCourse={course} />
     </>
   )
 }

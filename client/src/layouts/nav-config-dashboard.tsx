@@ -59,34 +59,34 @@ export const navData: NavSection[] = [
       },
       {
         title: "Trip",
-        path: paths.dashboard.trip.root,
+        path: paths.shared.trip.root,
         icon: <FiGlobe />,
         children: [
-          { title: "List", path: paths.dashboard.trip.list },
-          { title: "Create", path: paths.dashboard.trip.new },
+          { title: "List", path: paths.shared.trip.list },
+          { title: "Create", path: paths.shared.trip.new },
         ],
       },
       {
         title: "Course",
-        path: paths.dashboard.course.root,
+        path: paths.shared.course.root,
         icon: <FiBookOpen />,
         children: [
-          { title: "List", path: paths.dashboard.course.list },
-          { title: "Create", path: paths.dashboard.course.new },
+          { title: "List", path: paths.shared.course.list },
+          { title: "Create", path: paths.shared.course.new },
         ],
       },
       {
         title: "Gallery",
-        path: paths.dashboard.gallery.root,
+        path: paths.shared.gallery.list,
         icon: <FiImage />,
         children: [
-          { title: "List", path: paths.dashboard.gallery.list },
-          { title: "Create", path: paths.dashboard.gallery.new },
+          { title: "List", path: paths.shared.gallery.list },
+          { title: "Create", path: paths.shared.gallery.new },
         ],
       },
       {
         title: "Booking",
-        path: paths.dashboard.booking,
+        path: paths.shared.booking,
         icon: <FiBookmark />,
       },
       {

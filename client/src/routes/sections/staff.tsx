@@ -5,16 +5,17 @@ import { Outlet } from "react-router"
 
 import { StaffLayout } from "../../layouts/staff"
 import { AuthGuard } from "../../sections/auth/guard"
+import Spinner from "../../components/Spinner"
 
 // ----------------------------------------------------------------------
 
-const IndexPage = lazy(() => import("../../pages/staff-dashboard"))
+const IndexPage = lazy(() => import("../../pages/shared/booking"))
 
 // ----------------------------------------------------------------------
 
 const staffLayout = () => (
   <StaffLayout>
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<Spinner />}>
       <Outlet />
     </Suspense>
   </StaffLayout>

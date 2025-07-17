@@ -1,42 +1,38 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { useForm } from "react-hook-form"
 import { z as zod } from "zod"
-
 import { useRouter } from "../../../routes/hooks"
 import { paths } from "../../../routes/paths"
-import { useCreateGalleryMutation } from "../../../store/gallery"
-import { extractErrorMessage } from "../../../utils/extract-error-message"
+import { useCreateCourseMutation } from "../../../store/course"
 
 // ----------------------------------------------------------------------
 
-export const NewGallerySchema = zod.object({
+export const NewCourseSchema = zod.object({
   title: zod.string().min(1, { message: "Title is required!" }),
   description: zod.string().min(1, { message: "Description is required!" }),
-  mediaType: zod.enum(["image", "video"], {
-    required_error: "Media type is required.",
-  }),
-  // FIX: Add an optional 'root' field to allow setting form-level errors.
-  root: zod.string().optional(),
+  price: zod.number().min(0, { message: "Price must be positive" }).optional(),
+  duration: zod.string().optional(),
 })
 
-export type NewGallerySchemaType = zod.infer<typeof NewGallerySchema>
+export type NewCourseSchemaType = zod.infer<typeof NewCourseSchema>
 
 // ----------------------------------------------------------------------
 
-export function GalleryNewCreateForm() {
+export function CourseNewCreateForm() {
   const router = useRouter()
-  const [createGallery] = useCreateGalleryMutation()
+  const [createCourse] = useCreateCourseMutation()
 
   const [imagePreview, setImagePreview] = useState<string | null>(null)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const defaultValues: NewGallerySchemaType = {
+  const defaultValues: NewCourseSchemaType = {
     title: "",
     description: "",
-    mediaType: "image", // Default to 'image'
+    price: undefined,
+    duration: undefined,
   }
 
   const {
@@ -45,43 +41,22 @@ export function GalleryNewCreateForm() {
     formState: { errors },
     reset,
     setError,
-    watch,
-    getValues,
-    resetField,
-  } = useForm<NewGallerySchemaType>({
-    resolver: zodResolver(NewGallerySchema),
+  } = useForm<NewCourseSchemaType>({
+    resolver: zodResolver(NewCourseSchema),
     defaultValues,
   })
-
-  const mediaType = watch("mediaType")
-
-  useEffect(() => {
-    // When the mediaType changes, reset the file input to ensure the correct file type is uploaded.
-    if (selectedFile) {
-      handleRemoveImage()
-    }
-    // Also clear any previous file-related errors.
-    resetField("root")
-  }, [mediaType, resetField])
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      const currentMediaType = getValues("mediaType")
-      const validImageTypes = ["image/jpeg", "image/png", "image/gif"]
-      const validVideoTypes = ["video/mp4"]
+      // Validate file type and size
+      const validTypes = ["image/jpeg", "image/png", "image/gif"]
       const maxSize = 10 * 1024 * 1024 // 10MB
 
-      let isValidType = false
-      if (currentMediaType === "image") {
-        isValidType = validImageTypes.includes(file.type)
-      } else if (currentMediaType === "video") {
-        isValidType = validVideoTypes.includes(file.type)
-      }
-
-      if (!isValidType) {
+      if (!validTypes.includes(file.type)) {
         setError("root", {
-          message: `Invalid file type. Please upload a ${currentMediaType}.`,
+          message:
+            "Invalid file type. Please upload a JPEG, PNG, or GIF image.",
         })
         return
       }
@@ -93,7 +68,6 @@ export function GalleryNewCreateForm() {
         return
       }
 
-      setError("root", { message: "" }) // Clear previous errors
       setSelectedFile(file)
       setImagePreview(URL.createObjectURL(file))
     }
@@ -121,37 +95,49 @@ export function GalleryNewCreateForm() {
     e.preventDefault()
     e.currentTarget.classList.remove("ring-2", "ring-blue-500")
 
-    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const event = { target: { files: e.dataTransfer.files } } as any
-      handleFileChange(event)
+    const file = e.dataTransfer.files?.[0]
+    if (file) {
+      setSelectedFile(file)
+      setImagePreview(URL.createObjectURL(file))
     }
   }
 
   const onSubmit = handleSubmit(async (data) => {
     if (!selectedFile) {
-      setError("root", { message: "Please select an image or video file." })
+      setError("root", { message: "Please select an image" })
       return
     }
 
     try {
       setIsSubmitting(true)
 
+      // Create FormData object
       const formData = new FormData()
+
+      // Append other form data
       formData.append("title", data.title)
       formData.append("description", data.description)
-      formData.append("mediaType", data.mediaType)
+      if (data.price !== undefined) {
+        formData.append("price", data.price.toString())
+      }
+      if (data.duration !== undefined) {
+        formData.append("duration", data.duration)
+      }
+
+      // Append the image file
       formData.append("media", selectedFile)
 
-      await createGallery(formData).unwrap()
+      // Send the form data to the backend API to create the course
+      await createCourse(formData).unwrap()
 
+      // Reset form and UI state after successful submission
       reset()
       handleRemoveImage()
-      router.push(paths.dashboard.gallery.list)
+      router.push(paths.shared.course.list)
     } catch (error: any) {
-      console.error("Error creating gallery item:", error)
+      console.error("Error creating course:", error)
       setError("root", {
-        message:
-          extractErrorMessage(error.data) || "Failed to create gallery item",
+        message: error.data?.message || "Failed to create course",
       })
     } finally {
       setIsSubmitting(false)
@@ -159,26 +145,26 @@ export function GalleryNewCreateForm() {
   })
 
   return (
-    <div>
+    <div className="">
       <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6">
-        Create New Gallery Item
+        Create New Course
       </h1>
 
       <form onSubmit={onSubmit} className="space-y-6">
-        {/* Media Upload */}
+        {/* Image Upload */}
         <div className="space-y-4">
           <label className="block text-sm font-medium text-gray-700">
-            Media File *
+            Course Image *
           </label>
 
           <div
             className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all
-              ${
-                imagePreview
-                  ? "border-gray-300"
-                  : "border-blue-300 bg-blue-50 hover:bg-blue-100"
-              }
-              ${isSubmitting ? "opacity-70 pointer-events-none" : ""}`}
+                  ${
+                    imagePreview
+                      ? "border-gray-300"
+                      : "border-blue-300 bg-blue-50 hover:bg-blue-100"
+                  }
+                  ${isSubmitting ? "opacity-70 pointer-events-none" : ""}`}
             onClick={() => fileInputRef.current?.click()}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -188,30 +174,18 @@ export function GalleryNewCreateForm() {
               type="file"
               ref={fileInputRef}
               onChange={handleFileChange}
-              accept={
-                mediaType === "image"
-                  ? "image/jpeg, image/png, image/gif"
-                  : "video/mp4"
-              }
+              accept="image/jpeg, image/png, image/gif"
               className="hidden"
               disabled={isSubmitting}
             />
 
             {imagePreview ? (
               <div className="relative">
-                {selectedFile?.type.startsWith("video/") ? (
-                  <video
-                    src={imagePreview}
-                    controls
-                    className="mx-auto max-h-60 object-contain rounded-lg"
-                  />
-                ) : (
-                  <img
-                    src={imagePreview}
-                    alt="Preview"
-                    className="mx-auto max-h-60 object-contain rounded-lg"
-                  />
-                )}
+                <img
+                  src={imagePreview}
+                  alt="Preview"
+                  className="mx-auto max-h-60 object-contain rounded-lg"
+                />
                 <button
                   type="button"
                   onClick={(e) => {
@@ -258,14 +232,15 @@ export function GalleryNewCreateForm() {
                   </span>{" "}
                   or drag and drop
                 </p>
-                <p className="text-xs text-gray-500 uppercase">
-                  {mediaType === "image" ? "JPG, PNG, GIF" : "MP4"} (Max 10MB)
+                <p className="text-xs text-gray-500">
+                  JPEG, PNG, GIF (Max 10MB)
                 </p>
               </div>
             )}
           </div>
         </div>
 
+        {/* Grid Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Title */}
           <div className="space-y-2">
@@ -284,35 +259,59 @@ export function GalleryNewCreateForm() {
                   ? "border-red-300 focus:ring-red-200"
                   : "border-gray-300 focus:border-blue-500 focus:ring-blue-200"
               }`}
-              placeholder="Gallery item title"
+              placeholder="Course title"
             />
             {errors.title && (
               <p className="text-red-500 text-sm">{errors.title.message}</p>
             )}
           </div>
 
-          {/* Media Type */}
+          {/* Price */}
           <div className="space-y-2">
             <label
-              htmlFor="mediaType"
+              htmlFor="price"
               className="block text-sm font-medium text-gray-700"
             >
-              Media Type *
+              Price ($)
             </label>
-            <select
-              id="mediaType"
-              {...register("mediaType")}
-              className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:outline-none capitalize ${
-                errors.mediaType
+            <input
+              id="price"
+              type="number"
+              step="0.01"
+              {...register("price", { valueAsNumber: true })}
+              className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:outline-none ${
+                errors.price
                   ? "border-red-300 focus:ring-red-200"
                   : "border-gray-300 focus:border-blue-500 focus:ring-blue-200"
               }`}
+              placeholder="Optional"
+            />
+            {errors.price && (
+              <p className="text-red-500 text-sm">{errors.price.message}</p>
+            )}
+          </div>
+
+          {/* Duration */}
+          <div className="space-y-2">
+            <label
+              htmlFor="duration"
+              className="block text-sm font-medium text-gray-700"
             >
-              <option value="image">Image</option>
-              <option value="video">Video</option>
-            </select>
-            {errors.mediaType && (
-              <p className="text-red-500 text-sm">{errors.mediaType.message}</p>
+              Duration
+            </label>
+            <input
+              id="duration"
+              type="text"
+              {...register("duration")}
+              className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:outline-none ${
+                errors.duration
+                  ? "border-red-300 focus:ring-red-200"
+                  : "border-gray-300 focus:border-blue-500 focus:ring-blue-200"
+              }`}
+              placeholder="Optional e.g., 1 hour, 3 weeks"
+            />
+            {errors.duration && (
+              <p className="text-red-500 text-sm">{errors.duration.message}</p>
             )}
           </div>
         </div>
@@ -334,7 +333,7 @@ export function GalleryNewCreateForm() {
                 ? "border-red-300 focus:ring-red-200"
                 : "border-gray-300 focus:border-blue-500 focus:ring-blue-200"
             }`}
-            placeholder="Describe the gallery item..."
+            placeholder="Describe the course content..."
           />
           {errors.description && (
             <p className="text-red-500 text-sm">{errors.description.message}</p>
@@ -373,14 +372,14 @@ export function GalleryNewCreateForm() {
                   ></path>
                 </svg>
               )}
-              {isSubmitting ? "Creating Item..." : "Create Item"}
+              {isSubmitting ? "Creating Course..." : "Create Course"}
             </div>
           </button>
         </div>
       </form>
 
       {errors.root && (
-        <div className="mt-6 p-4 bg-red-50 text-red-700 rounded-lg">
+        <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-lg">
           {errors.root.message}
         </div>
       )}

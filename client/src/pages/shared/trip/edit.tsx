@@ -3,8 +3,8 @@ import { Helmet } from "react-helmet-async"
 import { useParams } from "../../../routes/hooks"
 
 import { CONFIG } from "../../../global-config"
-import { TripEditForm } from "../../../sections/dashboard/trip/trip-edit-form"
-import { useTrip } from "../../../sections/dashboard/trip/hooks/use-trip"
+import { TripEditForm } from "../../../sections/shared/trip/trip-edit-form"
+import { useTrip } from "../../../sections/shared/trip/hooks/use-trip"
 
 // ----------------------------------------------------------------------
 

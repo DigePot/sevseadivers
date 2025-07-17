@@ -555,7 +555,7 @@ const GalleryTableRow: React.FC<GalleryTableRowProps> = ({
     </td>
     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
       <Link
-        to={paths.dashboard.gallery.edit(item.id.toString())}
+        to={paths.shared.gallery.edit(item.id.toString())}
         className="text-blue-600 cursor-pointer hover:text-blue-900 mr-4"
       >
         Edit

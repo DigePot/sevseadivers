@@ -1,11 +1,11 @@
 import { Helmet } from "react-helmet-async"
 
 import { CONFIG } from "../../../global-config"
-import { CourseListView } from "../../../sections/dashboard/course/view"
+import { GalleryListView } from "../../../sections/shared/gallery/view"
 
 // ----------------------------------------------------------------------
 
-const metadata = { title: `Course list | Dashboard - ${CONFIG.appName}` }
+const metadata = { title: `Gallery list | Dashboard - ${CONFIG.appName}` }
 
 export default function Page() {
   return (
@@ -14,7 +14,7 @@ export default function Page() {
         <title> {metadata.title}</title>
       </Helmet>
 
-      <CourseListView />
+      <GalleryListView />
     </>
   )
 }

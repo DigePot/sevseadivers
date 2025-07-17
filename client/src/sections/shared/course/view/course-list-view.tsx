@@ -1,3 +1,4 @@
+// src/sections/dashboard/general/course/views/course-list-view.tsx
 import React, { useEffect, useMemo, useState } from "react"
 import {
   FiAlertTriangle,
@@ -9,77 +10,74 @@ import {
   FiClock,
   FiDollarSign,
   FiFilter,
-  FiMapPin,
   FiSearch,
+  FiTrash2,
+  FiEdit,
 } from "react-icons/fi"
-import { useDeleteTripMutation } from "../../../../store/trip"
-import type { Trip } from "../../../../types/trip"
-import { useTrips } from "../hooks/use-trips"
-import { Link } from "react-router"
+import { useDeleteCourseMutation } from "../../../../store/course"
+import type { Course } from "../../../../types/course"
+import { useCourses } from "../hooks/use-courses"
+import { Link } from "react-router-dom"
 import { paths } from "../../../../routes/paths"
 
 // ============================================================================
 // Type Definitions
-// Centralizing type definitions for reusability and clarity.
 // ============================================================================
 
-type SortConfig = { key: keyof Trip; direction: string }
+type CourseSortConfig = { key: keyof Course; direction: string }
 
-// FIXED: Defined a reusable type for the filters state to fix TS error.
-type FiltersState = {
-  activityType: string
+type CourseFiltersState = {
   minPrice: string
   maxPrice: string
-  date: string
+  duration: string
 }
 
 // ============================================================================
-// Main Controller Component: TripListView
+// Main Controller Component: CourseListView
 // ============================================================================
 
-export const TripListView: React.FC = () => {
+export const CourseListView: React.FC = () => {
   // --- Hooks ---
-  const [deleteTrip, { isLoading: isDeleting }] = useDeleteTripMutation()
-  const { allTrips, isLoading, error } = useTrips()
+  const [deleteCourse, { isLoading: isDeleting }] = useDeleteCourseMutation()
+  const { allCourses, isLoading, error } = useCourses()
 
   // --- State ---
   const [searchTerm, setSearchTerm] = useState("")
-  const [filters, setFilters] = useState<FiltersState>({
-    activityType: "",
+  const [filters, setFilters] = useState<CourseFiltersState>({
     minPrice: "",
     maxPrice: "",
-    date: "",
+    duration: "",
   })
-  const [sortConfig, setSortConfig] = useState<SortConfig | null>(null)
+  const [sortConfig, setSortConfig] = useState<CourseSortConfig | null>(null)
   const [showFilters, setShowFilters] = useState(false)
   const [currentPage, setCurrentPage] = useState(1)
   const [itemsPerPage, setItemsPerPage] = useState(10)
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
-  const [tripToDelete, setTripToDelete] = useState<number | null>(null)
+  const [courseToDeleteId, setCourseToDeleteId] = useState<number | null>(null)
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
 
   // --- Handlers ---
-  const handleOpenDeleteModal = (tripId: number) => {
-    setTripToDelete(tripId)
-    setIsDeleteModalOpen(true)
+  const handleOpenDeleteModal = (courseId: number) => {
+    setCourseToDeleteId(courseId)
+    setShowDeleteConfirmation(true)
   }
 
   const handleCancelDelete = () => {
-    setIsDeleteModalOpen(false)
-    setTripToDelete(null)
+    setShowDeleteConfirmation(false)
+    setCourseToDeleteId(null)
   }
 
   const handleConfirmDelete = async () => {
-    if (tripToDelete !== null) {
+    if (courseToDeleteId !== null) {
       try {
-        await deleteTrip(tripToDelete).unwrap()
+        await deleteCourse(courseToDeleteId).unwrap()
         handleCancelDelete()
       } catch (err) {
-        console.error("Failed to delete the trip:", err)
+        console.error("Failed to delete the course:", err)
       }
     }
   }
 
-  const handleSort = (key: keyof Trip) => {
+  const handleSort = (key: keyof Course) => {
     let direction = "ascending"
     if (sortConfig?.key === key && sortConfig.direction === "ascending") {
       direction = "descending"
@@ -88,7 +86,7 @@ export const TripListView: React.FC = () => {
   }
 
   const resetFilters = () => {
-    setFilters({ activityType: "", minPrice: "", maxPrice: "", date: "" })
+    setFilters({ minPrice: "", maxPrice: "", duration: "" })
     setSearchTerm("")
     setSortConfig(null)
   }
@@ -102,62 +100,75 @@ export const TripListView: React.FC = () => {
   }
 
   const handleFilterChange = (
-    filterName: keyof FiltersState,
+    filterName: keyof CourseFiltersState,
     value: string
   ) => {
     setFilters((prev) => ({ ...prev, [filterName]: value }))
   }
 
   // --- Memoized Derived State ---
-  const filteredTrips = useMemo(() => {
-    if (!allTrips) return []
-    let result = [...allTrips]
+  const filteredCourses = useMemo(() => {
+    if (!allCourses) return []
+    let result = [...allCourses]
 
-    // Search and filter logic...
     if (searchTerm) {
       const term = searchTerm.toLowerCase()
       result = result.filter(
-        (trip) =>
-          trip.title.toLowerCase().includes(term) ||
-          trip.description.toLowerCase().includes(term) ||
-          trip.destination.toLowerCase().includes(term) ||
-          trip.activityType.toLowerCase().includes(term)
+        (course) =>
+          course.title.toLowerCase().includes(term) ||
+          course.description.toLowerCase().includes(term)
       )
     }
-    if (filters.activityType)
-      result = result.filter(
-        (trip) => trip.activityType === filters.activityType
-      )
-    if (filters.minPrice)
-      result = result.filter((trip) => trip.price >= Number(filters.minPrice))
-    if (filters.maxPrice)
-      result = result.filter((trip) => trip.price <= Number(filters.maxPrice))
-    if (filters.date)
-      result = result.filter((trip) => trip.date === filters.date)
 
-    // Sorting logic...
+    if (filters.minPrice)
+      result = result.filter(
+        (course) => course.price >= Number(filters.minPrice)
+      )
+    if (filters.maxPrice)
+      result = result.filter(
+        (course) => course.price <= Number(filters.maxPrice)
+      )
+
+    if (filters.duration) {
+      result = result.filter((course) =>
+        course.duration.toLowerCase().includes(filters.duration.toLowerCase())
+      )
+    }
+
     if (sortConfig) {
       result.sort((a, b) => {
         const valA = a[sortConfig.key]
         const valB = b[sortConfig.key]
-        if (valA < valB) return sortConfig.direction === "ascending" ? -1 : 1
-        if (valA > valB) return sortConfig.direction === "ascending" ? 1 : -1
+
+        if (typeof valA === "string" && typeof valB === "string") {
+          return sortConfig.direction === "ascending"
+            ? valA.localeCompare(valB)
+            : valB.localeCompare(valA)
+        }
+
+        if (typeof valA === "number" && typeof valB === "number") {
+          return sortConfig.direction === "ascending"
+            ? valA - valB
+            : valB - valA
+        }
+
         return 0
       })
     }
+
     return result
-  }, [allTrips, searchTerm, filters, sortConfig])
+  }, [allCourses, searchTerm, filters, sortConfig])
 
-  const activityTypes = useMemo(() => {
-    if (!allTrips) return []
-    return [...new Set(allTrips.map((trip) => trip.activityType))]
-  }, [allTrips])
+  const courseDurations = useMemo(() => {
+    if (!allCourses) return []
+    return [...new Set(allCourses.map((course) => course.duration))]
+  }, [allCourses])
 
-  const totalItems = filteredTrips.length
+  const totalItems = filteredCourses.length
   const totalPages = Math.ceil(totalItems / itemsPerPage)
   const startIndex = (currentPage - 1) * itemsPerPage
   const endIndex = Math.min(startIndex + itemsPerPage, totalItems)
-  const currentItems = filteredTrips.slice(startIndex, endIndex)
+  const currentItems = filteredCourses.slice(startIndex, endIndex)
 
   // --- Effects ---
   useEffect(() => {
@@ -165,12 +176,12 @@ export const TripListView: React.FC = () => {
   }, [searchTerm, filters, sortConfig, itemsPerPage])
 
   // --- Render Logic ---
-  if (isLoading) return <LoadingState />
-  if (error) return <ErrorState error={error} />
+  if (isLoading) return <CourseLoadingState />
+  if (error) return <CourseErrorState error={error} />
 
   return (
     <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-      <TripListHeader
+      <CourseListHeader
         searchTerm={searchTerm}
         onSearchChange={(e) => setSearchTerm(e.target.value)}
         showFilters={showFilters}
@@ -178,49 +189,49 @@ export const TripListView: React.FC = () => {
         onResetFilters={resetFilters}
       />
 
-      <FilterPanel
+      <CourseFilterPanel
         isOpen={showFilters}
         filters={filters}
         onFilterChange={handleFilterChange}
-        activityTypes={activityTypes}
+        courseDurations={courseDurations}
         onResetFilters={resetFilters}
       />
 
       {totalItems > 0 ? (
         <>
-          <TripListSummary
+          <CourseListSummary
             startIndex={startIndex}
             endIndex={endIndex}
             totalItems={totalItems}
             itemsPerPage={itemsPerPage}
             onItemsPerPageChange={handleItemsPerPageChange}
           />
-          <TripTable
-            trips={currentItems}
+          <CourseTable
+            courses={currentItems}
             onSort={handleSort}
             sortConfig={sortConfig}
             onDelete={handleOpenDeleteModal}
             isDeleting={isDeleting}
-            deletingId={tripToDelete}
+            deletingId={courseToDeleteId}
           />
-          <TripCardList
-            trips={currentItems}
+          <CourseCardList
+            courses={currentItems}
             onDelete={handleOpenDeleteModal}
             isDeleting={isDeleting}
-            deletingId={tripToDelete}
+            deletingId={courseToDeleteId}
           />
-          <PaginationControls
+          <CoursePaginationControls
             currentPage={currentPage}
             totalPages={totalPages}
             onPageChange={handlePageChange}
           />
         </>
       ) : (
-        <EmptyState onResetFilters={resetFilters} />
+        <CourseEmptyState onResetFilters={resetFilters} />
       )}
 
-      <DeleteConfirmationModal
-        isOpen={isDeleteModalOpen}
+      <CourseDeleteConfirmationModal
+        isOpen={showDeleteConfirmation}
         isDeleting={isDeleting}
         onClose={handleCancelDelete}
         onConfirm={handleConfirmDelete}
@@ -233,46 +244,46 @@ export const TripListView: React.FC = () => {
 // Presentational Sub-components & Their Prop Interfaces
 // ============================================================================
 
-const LoadingState = () => (
+const CourseLoadingState = () => (
   <div className="flex justify-center items-center h-64">
-    <h1>Loading...</h1>
+    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
   </div>
 )
 
-const ErrorState: React.FC<{ error: any }> = ({ error }) => (
+const CourseErrorState: React.FC<{ error: any }> = ({ error }) => (
   <div className="bg-red-50 rounded-xl p-6 text-center">
-    <h3 className="text-red-800 font-medium">Error loading trips</h3>
+    <h3 className="text-red-800 font-medium">Error loading courses</h3>
     <p className="text-red-600 mt-2">
       {error?.data?.message || "Please try again later"}
     </p>
   </div>
 )
 
-const EmptyState: React.FC<{ onResetFilters: () => void }> = ({
+const CourseEmptyState: React.FC<{ onResetFilters: () => void }> = ({
   onResetFilters,
 }) => (
   <div className="text-center py-12">
     <div className="text-gray-500 mb-4">
-      No trips found matching your criteria.
+      No courses found matching your criteria.
     </div>
     <button
       onClick={onResetFilters}
-      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
     >
       Reset Filters
     </button>
   </div>
 )
 
-// --- TripListHeader ---
-interface TripListHeaderProps {
+// --- CourseListHeader ---
+interface CourseListHeaderProps {
   searchTerm: string
   onSearchChange: (e: React.ChangeEvent<HTMLInputElement>) => void
   showFilters: boolean
   onToggleFilters: () => void
   onResetFilters: () => void
 }
-const TripListHeader: React.FC<TripListHeaderProps> = ({
+const CourseListHeader: React.FC<CourseListHeaderProps> = ({
   searchTerm,
   onSearchChange,
   showFilters,
@@ -285,7 +296,7 @@ const TripListHeader: React.FC<TripListHeaderProps> = ({
         <FiSearch className="absolute inset-y-0 left-3 h-5 w-5 text-gray-400 pointer-events-none" />
         <input
           type="text"
-          placeholder="Search trips..."
+          placeholder="Search courses..."
           value={searchTerm}
           onChange={onSearchChange}
           className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -294,14 +305,14 @@ const TripListHeader: React.FC<TripListHeaderProps> = ({
       <div className="flex gap-3">
         <button
           onClick={onToggleFilters}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg"
+          className="flex items-center gap-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors"
         >
           <FiFilter /> Filters{" "}
           {showFilters ? <FiChevronUp /> : <FiChevronDown />}
         </button>
         <button
           onClick={onResetFilters}
-          className="px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-lg"
+          className="px-4 py-2 bg-gray-50 hover:bg-gray-100 text-gray-700 rounded-lg transition-colors"
         >
           Reset
         </button>
@@ -310,80 +321,71 @@ const TripListHeader: React.FC<TripListHeaderProps> = ({
   </div>
 )
 
-// --- FilterPanel ---
-interface FilterPanelProps {
+// --- CourseFilterPanel ---
+interface CourseFilterPanelProps {
   isOpen: boolean
-  filters: FiltersState
-  onFilterChange: (name: keyof FiltersState, value: string) => void
-  activityTypes: string[]
+  filters: CourseFiltersState
+  onFilterChange: (name: keyof CourseFiltersState, value: string) => void
+  courseDurations: string[]
   onResetFilters: () => void
 }
-const FilterPanel: React.FC<FilterPanelProps> = ({
+const CourseFilterPanel: React.FC<CourseFilterPanelProps> = ({
   isOpen,
   filters,
   onFilterChange,
-  activityTypes,
+  courseDurations,
   onResetFilters,
 }) => {
   if (!isOpen) return null
   return (
     <div className="p-4 border-b border-gray-200">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4 bg-blue-50 rounded-lg">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4 bg-blue-50 rounded-lg">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Activity
-          </label>
-          <select
-            value={filters.activityType}
-            onChange={(e) => onFilterChange("activityType", e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2"
-          >
-            <option value="">All Types</option>
-            {activityTypes.map((type) => (
-              <option key={type} value={type}>
-                {type}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Price
+            Price Range
           </label>
           <div className="flex gap-2">
             <input
               type="number"
-              placeholder="Min"
+              placeholder="Min Price"
               value={filters.minPrice}
               onChange={(e) => onFilterChange("minPrice", e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2"
             />
             <input
               type="number"
-              placeholder="Max"
+              placeholder="Max Price"
               value={filters.maxPrice}
               onChange={(e) => onFilterChange("maxPrice", e.target.value)}
               className="w-full border border-gray-300 rounded-lg px-3 py-2"
             />
           </div>
         </div>
+
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Date
+            Duration
           </label>
-          <input
-            type="date"
-            value={filters.date}
-            onChange={(e) => onFilterChange("date", e.target.value)}
+          <select
+            value={filters.duration}
+            onChange={(e) => onFilterChange("duration", e.target.value)}
             className="w-full border border-gray-300 rounded-lg px-3 py-2"
-          />
+          >
+            <option value="">All Durations</option>
+            {courseDurations.map((duration) => (
+              <option key={duration} value={duration}>
+                {duration}
+              </option>
+            ))}
+          </select>
         </div>
+
         <div className="flex items-end">
           <button
             onClick={onResetFilters}
-            className="w-full py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+            className="w-full py-2 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
           >
-            Clear
+            Clear Filters
           </button>
         </div>
       </div>
@@ -391,14 +393,15 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
   )
 }
 
-// --- Other sub-components remain the same but could also be typed with interfaces... ---
-const TripListSummary: React.FC<{
+// --- CourseListSummary ---
+interface CourseListSummaryProps {
   startIndex: number
   endIndex: number
   totalItems: number
   itemsPerPage: number
   onItemsPerPageChange: (e: React.ChangeEvent<HTMLSelectElement>) => void
-}> = ({
+}
+const CourseListSummary: React.FC<CourseListSummaryProps> = ({
   startIndex,
   endIndex,
   totalItems,
@@ -409,10 +412,10 @@ const TripListSummary: React.FC<{
     <div className="text-gray-700 mb-2 sm:mb-0">
       Showing <span className="font-medium">{startIndex + 1}</span> to{" "}
       <span className="font-medium">{endIndex}</span> of{" "}
-      <span className="font-medium">{totalItems}</span> trips
+      <span className="font-medium">{totalItems}</span> courses
     </div>
     <div className="flex items-center gap-2">
-      <span className="text-gray-700">Items per page:</span>
+      <span className="text-gray-700">Courses per page:</span>
       <select
         value={itemsPerPage}
         onChange={onItemsPerPageChange}
@@ -427,50 +430,57 @@ const TripListSummary: React.FC<{
   </div>
 )
 
-const TripTable: React.FC<{
-  trips: Trip[]
-  onSort: (key: keyof Trip) => void
-  sortConfig: SortConfig | null
+// --- CourseTable ---
+interface CourseTableProps {
+  courses: Course[]
+  onSort: (key: keyof Course) => void
+  sortConfig: CourseSortConfig | null
   onDelete: (id: number) => void
   isDeleting: boolean
   deletingId: number | null
-}> = ({ trips, onSort, sortConfig, onDelete, isDeleting, deletingId }) => (
+}
+const CourseTable: React.FC<CourseTableProps> = ({
+  courses,
+  onSort,
+  sortConfig,
+  onDelete,
+  isDeleting,
+  deletingId,
+}) => (
   <div className="hidden md:block overflow-x-auto">
     <table className="min-w-full divide-y divide-gray-200">
       <thead className="bg-gray-50">
         <tr>
-          {["title", "destination", "activityType", "date", "price"].map(
-            (key) => (
-              <th
-                key={key}
-                scope="col"
-                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                onClick={() => onSort(key as keyof Trip)}
-              >
-                <div className="flex items-center gap-1">
-                  {key.replace("Type", "")}
-                  {sortConfig?.key === key &&
-                    (sortConfig.direction === "ascending" ? (
-                      <FiChevronUp />
-                    ) : (
-                      <FiChevronDown />
-                    ))}
-                </div>
-              </th>
-            )
-          )}
+          {["title", "price", "duration", "createdAt"].map((key) => (
+            <th
+              key={key}
+              scope="col"
+              className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
+              onClick={() => onSort(key as keyof Course)}
+            >
+              <div className="flex items-center gap-1">
+                {key === "createdAt" ? "Created" : key}
+                {sortConfig?.key === key &&
+                  (sortConfig.direction === "ascending" ? (
+                    <FiChevronUp />
+                  ) : (
+                    <FiChevronDown />
+                  ))}
+              </div>
+            </th>
+          ))}
           <th scope="col" className="relative px-6 py-3">
             <span className="sr-only">Actions</span>
           </th>
         </tr>
       </thead>
       <tbody className="bg-white divide-y divide-gray-200">
-        {trips.map((trip) => (
-          <TripTableRow
-            key={trip.id}
-            trip={trip}
+        {courses.map((course) => (
+          <CourseTableRow
+            key={course.id}
+            course={course}
             onDelete={onDelete}
-            isDeleting={isDeleting && deletingId === trip.id}
+            isDeleting={isDeleting && deletingId === course.id}
           />
         ))}
       </tbody>
@@ -478,154 +488,176 @@ const TripTable: React.FC<{
   </div>
 )
 
-const TripTableRow: React.FC<{
-  trip: Trip
+// --- CourseTableRow ---
+interface CourseTableRowProps {
+  course: Course
   onDelete: (id: number) => void
   isDeleting: boolean
-}> = ({ trip, onDelete, isDeleting }) => (
+}
+const CourseTableRow: React.FC<CourseTableRowProps> = ({
+  course,
+  onDelete,
+  isDeleting,
+}) => (
   <tr className="hover:bg-gray-50">
     <td className="px-6 py-4 whitespace-nowrap">
       <div className="flex items-center">
-        <img
-          className="h-16 w-16 rounded-lg object-cover border flex-shrink-0"
-          src={trip.imageUrl}
-          alt={trip.title}
-        />
+        {course.imageUrl ? (
+          <img
+            className="h-16 w-16 rounded-lg object-cover border flex-shrink-0"
+            src={course.imageUrl}
+            alt={course.title}
+          />
+        ) : (
+          <div className="bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16" />
+        )}
         <div className="ml-4">
-          <div className="text-sm font-medium text-gray-900">{trip.title}</div>
+          <div className="text-sm font-medium text-gray-900">
+            {course.title}
+          </div>
           <div className="text-sm text-gray-500 max-w-xs truncate">
-            {trip.description}
+            {course.description}
           </div>
         </div>
       </div>
     </td>
     <td className="px-6 py-4 whitespace-nowrap">
-      <div className="flex items-center text-sm">
-        <FiMapPin className="mr-1.5 h-4 w-4 text-blue-500" />
-        {trip.destination}
-      </div>
-    </td>
-    <td className="px-6 py-4 whitespace-nowrap">
-      <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-        {trip.activityType}
-      </span>
-    </td>
-    <td className="px-6 py-4 whitespace-nowrap">
-      <div className="flex items-center text-sm">
-        <FiCalendar className="mr-1.5 h-4 w-4 text-green-500" />
-        {new Date(trip.date).toLocaleDateString()}
-      </div>
-    </td>
-    <td className="px-6 py-4 whitespace-nowrap">
       <div className="flex items-center text-sm font-medium">
-        <FiDollarSign className="mr-1.5 h-4 w-4 text-yellow-500" />${trip.price}
-        <span className="ml-2 text-xs text-gray-500 flex items-center">
-          <FiClock className="mr-1" />
-          {trip.duration}
-        </span>
+        <FiDollarSign className="mr-1.5 h-4 w-4 text-yellow-500" />$
+        {course.price}
       </div>
+    </td>
+    <td className="px-6 py-4 whitespace-nowrap">
+      <div className="flex items-center text-sm">
+        <FiClock className="mr-1.5 h-4 w-4 text-green-500" />
+        {course.duration}
+      </div>
+    </td>
+    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+      {new Date(course.createdAt).toLocaleDateString()}
     </td>
     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
       <Link
-        to={paths.dashboard.trip.edit(trip.id.toString())}
+        to={paths.shared.course.edit(course.id.toString())}
         className="text-blue-600 hover:text-blue-900 mr-4 cursor-pointer"
       >
-        Edit
+        <FiEdit className="inline mr-1" /> Edit
       </Link>
       <button
-        onClick={() => onDelete(trip.id)}
+        onClick={() => onDelete(course.id)}
         disabled={isDeleting}
         className="text-red-600 hover:text-red-900 disabled:text-gray-400 cursor-pointer"
       >
+        <FiTrash2 className="inline mr-1" />
         {isDeleting ? "Deleting..." : "Delete"}
       </button>
     </td>
   </tr>
 )
 
-const TripCardList: React.FC<{
-  trips: Trip[]
+// --- CourseCardList ---
+interface CourseCardListProps {
+  courses: Course[]
   onDelete: (id: number) => void
   isDeleting: boolean
   deletingId: number | null
-}> = ({ trips, onDelete, isDeleting, deletingId }) => (
+}
+const CourseCardList: React.FC<CourseCardListProps> = ({
+  courses,
+  onDelete,
+  isDeleting,
+  deletingId,
+}) => (
   <div className="md:hidden grid grid-cols-1 gap-4 p-4">
-    {trips.map((trip) => (
-      <TripCard
-        key={trip.id}
-        trip={trip}
+    {courses.map((course) => (
+      <CourseCard
+        key={course.id}
+        course={course}
         onDelete={onDelete}
-        isDeleting={isDeleting && deletingId === trip.id}
+        isDeleting={isDeleting && deletingId === course.id}
       />
     ))}
   </div>
 )
 
-const TripCard: React.FC<{
-  trip: Trip
+// --- CourseCard ---
+interface CourseCardProps {
+  course: Course
   onDelete: (id: number) => void
   isDeleting: boolean
-}> = ({ trip, onDelete, isDeleting }) => (
+}
+const CourseCard: React.FC<CourseCardProps> = ({
+  course,
+  onDelete,
+  isDeleting,
+}) => (
   <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
     <div className="p-4">
       <div className="flex items-start">
-        <img
-          className="h-16 w-16 rounded-lg object-cover border"
-          src={trip.imageUrl}
-          alt={trip.title}
-        />
+        {course.imageUrl ? (
+          <img
+            className="h-16 w-16 rounded-lg object-cover border"
+            src={course.imageUrl}
+            alt={course.title}
+          />
+        ) : (
+          <div className="bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16" />
+        )}
         <div className="ml-4 flex-1">
           <div className="flex justify-between">
-            <h3 className="text-sm font-medium text-gray-900">{trip.title}</h3>
+            <h3 className="text-sm font-medium text-gray-900">
+              {course.title}
+            </h3>
             <div className="flex gap-2">
-              <button className="text-blue-600 hover:text-blue-800 text-sm">
-                Edit
-              </button>
+              <Link
+                to={paths.shared.course.edit(course.id.toString())}
+                className="text-blue-600 hover:text-blue-800 text-sm"
+              >
+                <FiEdit />
+              </Link>
               <button
-                onClick={() => onDelete(trip.id)}
+                onClick={() => onDelete(course.id)}
                 disabled={isDeleting}
                 className="text-red-600 hover:text-red-800 text-sm disabled:text-gray-400 cursor-pointer"
               >
-                {isDeleting ? "..." : "Delete"}
+                {isDeleting ? "..." : <FiTrash2 />}
               </button>
             </div>
           </div>
           <p className="mt-1 text-xs text-gray-500 line-clamp-2">
-            {trip.description}
+            {course.description}
           </p>
         </div>
       </div>
       <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-gray-600">
         <div className="flex items-center">
-          <FiMapPin className="mr-1.5 h-3 w-3 text-blue-500" />
-          <span>{trip.destination}</span>
-        </div>
-        <div className="flex items-center">
-          <span className="px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
-            {trip.activityType}
-          </span>
-        </div>
-        <div className="flex items-center">
-          <FiCalendar className="mr-1.5 h-3 w-3 text-green-500" />
-          <span>{new Date(trip.date).toLocaleDateString()}</span>
-        </div>
-        <div className="flex items-center">
           <FiDollarSign className="mr-1.5 h-3 w-3 text-yellow-500" />
-          <span>${trip.price}</span>
-          <span className="mx-1">•</span>
-          <FiClock className="mr-1 h-3 w-3" />
-          <span>{trip.duration}</span>
+          <span>${course.price}</span>
+        </div>
+        <div className="flex items-center">
+          <FiClock className="mr-1.5 h-3 w-3 text-green-500" />
+          <span>{course.duration}</span>
+        </div>
+        <div className="flex items-center">
+          <FiCalendar className="mr-1.5 h-3 w-3 text-blue-500" />
+          <span>{new Date(course.createdAt).toLocaleDateString()}</span>
         </div>
       </div>
     </div>
   </div>
 )
 
-const PaginationControls: React.FC<{
+// --- CoursePaginationControls ---
+interface CoursePaginationControlsProps {
   currentPage: number
   totalPages: number
   onPageChange: (page: number) => void
-}> = ({ currentPage, totalPages, onPageChange }) => {
+}
+const CoursePaginationControls: React.FC<CoursePaginationControlsProps> = ({
+  currentPage,
+  totalPages,
+  onPageChange,
+}) => {
   if (totalPages <= 1) return null
   const pageNumbers = useMemo(() => {
     if (totalPages <= 5)
@@ -694,12 +726,16 @@ const PaginationControls: React.FC<{
   )
 }
 
-const DeleteConfirmationModal: React.FC<{
+// --- CourseDeleteConfirmationModal ---
+interface CourseDeleteConfirmationModalProps {
   isOpen: boolean
   onClose: () => void
   onConfirm: () => void
   isDeleting: boolean
-}> = ({ isOpen, onClose, onConfirm, isDeleting }) => {
+}
+const CourseDeleteConfirmationModal: React.FC<
+  CourseDeleteConfirmationModalProps
+> = ({ isOpen, onClose, onConfirm, isDeleting }) => {
   if (!isOpen) return null
   return (
     <div
@@ -722,11 +758,12 @@ const DeleteConfirmationModal: React.FC<{
                     className="text-lg font-semibold leading-6 text-gray-900"
                     id="modal-title"
                   >
-                    Delete Trip
+                    Confirm Delete
                   </h3>
                   <div className="mt-2">
                     <p className="text-sm text-gray-500">
-                      Are you sure? This action cannot be undone.
+                      Are you sure you want to delete this course? This action
+                      cannot be undone.
                     </p>
                   </div>
                 </div>
@@ -737,7 +774,7 @@ const DeleteConfirmationModal: React.FC<{
                 type="button"
                 onClick={onConfirm}
                 disabled={isDeleting}
-                className="inline-flex cursor-pointer w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto disabled:opacity-50"
+                className="inline-flex cursor-pointer w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto disabled:opacity-50 transition-colors"
               >
                 {isDeleting ? "Deleting..." : "Delete"}
               </button>
@@ -745,7 +782,7 @@ const DeleteConfirmationModal: React.FC<{
                 type="button"
                 onClick={onClose}
                 disabled={isDeleting}
-                className="mt-3 inline-flex cursor-pointer w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto disabled:opacity-50"
+                className="mt-3 inline-flex cursor-pointer w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto disabled:opacity-50 transition-colors"
               >
                 Cancel
               </button>

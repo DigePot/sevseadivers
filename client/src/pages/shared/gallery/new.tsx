@@ -1,10 +1,10 @@
 import { Helmet } from "react-helmet-async"
 
 import { CONFIG } from "../../../global-config"
-import { CourseNewCreateForm } from "../../../sections/dashboard/course/course-new-create-form"
+import { GalleryCreateView } from "../../../sections/shared/gallery/view"
 
 const metadata = {
-  title: `Create a new Course | Dashboard - ${CONFIG.appName}`,
+  title: `Create a new Gallery | Dashboard - ${CONFIG.appName}`,
 }
 
 export default function Page() {
@@ -14,7 +14,7 @@ export default function Page() {
         <title> {metadata.title}</title>
       </Helmet>
 
-      <CourseNewCreateForm />
+      <GalleryCreateView />
     </>
   )
 }

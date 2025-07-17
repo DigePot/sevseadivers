@@ -31,33 +31,33 @@ export const paths = {
       list: `${ROOTS.DASHBOARD}/staff/list`,
       edit: (id: string) => `${ROOTS.DASHBOARD}/staff/${id}/edit`,
     },
-    trip: {
-      root: `${ROOTS.DASHBOARD}/trip`,
-      new: `${ROOTS.DASHBOARD}/trip/new`,
-      list: `${ROOTS.DASHBOARD}/trip/list`,
-      edit: (id: string) => `${ROOTS.DASHBOARD}/trip/${id}/edit`,
-    },
-    course: {
-      root: `${ROOTS.DASHBOARD}/course`,
-      new: `${ROOTS.DASHBOARD}/course/new`,
-      list: `${ROOTS.DASHBOARD}/course/list`,
-      edit: (id: string) => `${ROOTS.DASHBOARD}/course/${id}/edit`,
-    },
-    gallery: {
-      root: `${ROOTS.DASHBOARD}/gallery`,
-      new: `${ROOTS.DASHBOARD}/gallery/new`,
-      list: `${ROOTS.DASHBOARD}/gallery/list`,
-      edit: (id: string) => `${ROOTS.DASHBOARD}/gallery/${id}/edit`,
-    },
-    booking: `${ROOTS.DASHBOARD}/booking`,
   },
   // STAFF
   staff: {
-    root: `${ROOTS.STAFF}/booking`,
+    root: `${ROOTS.STAFF}`,
   },
   // SHARED
   shared: {
     root: `/profile`,
+    booking: `/booking`,
+    gallery: {
+      root: `/gallery`,
+      new: `/gallery/new`,
+      list: `/gallery/list`,
+      edit: (id: string) => `/gallery/${id}/edit`,
+    },
+    trip: {
+      root: `/trip`,
+      new: `/trip/new`,
+      list: `/trip/list`,
+      edit: (id: string) => `/trip/${id}/edit`,
+    },
+    course: {
+      root: `/course`,
+      new: `/course/new`,
+      list: `/course/list`,
+      edit: (id: string) => `/course/${id}/edit`,
+    },
   },
   // MAIN
   main: {

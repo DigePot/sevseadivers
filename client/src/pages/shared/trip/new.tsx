@@ -1,7 +1,7 @@
 import { Helmet } from "react-helmet-async"
 
 import { CONFIG } from "../../../global-config"
-import { TripCreateView } from "../../../sections/dashboard/trip/view"
+import { TripCreateView } from "../../../sections/shared/trip/view"
 
 const metadata = { title: `Create a new Trip | Dashboard - ${CONFIG.appName}` }
 
