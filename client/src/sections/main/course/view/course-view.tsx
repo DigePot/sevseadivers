@@ -1,140 +1,63 @@
-import { motion } from "framer-motion";
-import {
-  FaBookOpen,
-  FaCogs,
-} from "react-icons/fa";
+import { useState } from "react";
+import { CourseCard } from "../components/course-card";
+import { useCourses } from "../../../main/course/hook/use-course";
+import { CoursesHeader } from "../components/course-header";
+import { CourseFilter } from "../components/course-filter";
 
-const divingCourses = [
-  {
-    title: "Discover Scuba Diving",
-    price: "$80",
-  },
-  {
-    title: "Open Water Diver Course",
-    price: "$350",
-  },
-  {
-    title: "Advanced Open Water Course",
-    price: "$400",
-  },
-  {
-    title: "Rescue Diver Course",
-    price: "$450",
-  },
-  {
-    title: "Divemaster Program",
-    price: "$950",
-  },
-];
+export const CourseView = () => {
+  const { courses, loading, error } = useCourses();
+    console.log("Fetched courses:", courses);
 
-const equipmentServices = [
-  {
-    title: "Full Scuba Gear Rental",
-    price: "$40/day",
-  },
-  {
-    title: "Snorkeling Gear Rental",
-    price: "$25/day",
-  },
-  {
-    title: "Underwater Camera Rental",
-    price: "$30/day",
-  },
-  {
-    title: "Equipment Servicing & Tank Refills",
-    price: "$20+",
-  },
-];
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
+  const [search, setSearch] = useState<string>("");
 
-const listVariants = {
-  hidden: { opacity: 0, x: -20 },
-  visible: (i: number) => ({
-    opacity: 1,
-    x: 0,
-    transition: { delay: i * 0.1 },
-  }),
+  // Define your static categories
+  const categories = ["All", "Diving", "Snorkeling", "Swimming"];
+
+  // Filtering logic
+  const filteredCourses = courses.filter((course) => {
+    const categoryMatch =
+      selectedCategory === "All" ||
+      course.category?.toLowerCase() === selectedCategory.toLowerCase();
+
+    const searchMatch =
+      course.title.toLowerCase().includes(search.toLowerCase()) ||
+      (course.description?.toLowerCase().includes(search.toLowerCase()));
+
+    return categoryMatch && searchMatch;
+  });
+
+  return (
+    <div className="px-4 sm:px-6 lg:px-8 py-12">
+      <CoursesHeader />
+
+      <CourseFilter
+        selectedCategory={selectedCategory}
+        setSelectedCategory={setSelectedCategory}
+        search={search}
+        setSearch={setSearch}
+        categories={categories}
+      />
+
+      {/* Loading & Error */}
+      {loading && <p className="text-center">Loading courses...</p>}
+      {error && <p className="text-center text-red-500">{error}</p>}
+
+      {/* Filtered Course Grid */}
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        {filteredCourses.length > 0 ? (
+          filteredCourses.map((course) => (
+            <CourseCard key={course.id} course={course} />
+
+          ))
+        ) : (
+          <p className="col-span-full text-center text-gray-500">
+            No courses found in this category.
+          </p>
+        )}
+      </div>
+    </div>
+  );
 };
 
-export function CourseView() {
-  return (
-    <section className="min-h-screen bg-gradient-to-b from-blue-50 to-blue-100 px-6 sm:px-16 py-20">
-      <div className="max-w-5xl mx-auto text-center mb-16">
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="text-4xl sm:text-5xl font-bold text-blue-900 drop-shadow-md"
-        >
-          🎓 Diving Courses
-        </motion.h1>
-        <p className="mt-4 text-lg text-blue-700">
-          Learn to dive safely and confidently with internationally recognized certifications.
-        </p>
-      </div>
-
-      <div className="max-w-4xl mx-auto grid gap-12">
-        {/* Diving Certifications */}
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          className="bg-white rounded-3xl shadow-xl p-8 border-l-8 border-blue-500"
-        >
-          <div className="flex items-center gap-4 mb-6">
-            <FaBookOpen className="text-blue-600 text-3xl" />
-            <h2 className="text-2xl font-semibold text-blue-800">
-              Diving Certifications
-            </h2>
-          </div>
-          <ul className="space-y-4">
-            {divingCourses.map((course, i) => (
-              <motion.li
-                key={i}
-                custom={i}
-                variants={listVariants}
-                initial="hidden"
-                animate="visible"
-                className="flex items-center justify-between text-blue-800 text-lg border-b border-blue-100 pb-2"
-              >
-                <span>{course.title}</span>
-                <span className="font-bold text-blue-700 bg-blue-100 px-3 py-1 rounded-full text-sm">
-                  {course.price}
-                </span>
-              </motion.li>
-            ))}
-          </ul>
-        </motion.div>
-
-        {/* Equipment Rental & Servicing */}
-        <motion.div
-          initial="hidden"
-          animate="visible"
-          className="bg-white rounded-3xl shadow-xl p-8 border-l-8 border-cyan-500"
-        >
-          <div className="flex items-center gap-4 mb-6">
-            <FaCogs className="text-cyan-600 text-3xl" />
-            <h2 className="text-2xl font-semibold text-cyan-800">
-              Equipment Rental & Servicing
-            </h2>
-          </div>
-          <ul className="space-y-4">
-            {equipmentServices.map((service, i) => (
-              <motion.li
-                key={i}
-                custom={i}
-                variants={listVariants}
-                initial="hidden"
-                animate="visible"
-                className="flex items-center justify-between text-cyan-800 text-lg border-b border-cyan-100 pb-2"
-              >
-                <span>{service.title}</span>
-                <span className="font-bold text-cyan-700 bg-cyan-100 px-3 py-1 rounded-full text-sm">
-                  {service.price}
-                </span>
-              </motion.li>
-            ))}
-          </ul>
-        </motion.div>
-      </div>
-    </section>
-  );
-}
+export default CourseView;

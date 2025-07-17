@@ -28,9 +28,25 @@ const defineCourse = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
+    category: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: '', 
+    },
+    level: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: '', 
+    },
+    instructorName: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: '', 
+    },
   }, {
     timestamps: true,
   });
+
   return Course;
 };
 

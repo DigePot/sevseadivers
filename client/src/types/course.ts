@@ -7,4 +7,7 @@ export interface Course {
   duration: string
   createdAt: string
   updatedAt: string
+  category: string
+  level: string
+  instructorName: string
 }
