@@ -4,15 +4,15 @@ import AppError from "../utils/appErorr.js"
 
 export const createCourse = tryCatch(async (req, res, next) => {
   const baseUrl = `${req.protocol}://${req.get("host")}`
-  const { title, description, price, duration } = req.body
+  const { title, description, price, duration, category, level, instructorName } = req.body
   let imageUrl = req.body.imageUrl
 
   if (req.file) {
     imageUrl = `/upload/${req.file.filename}`
   }
-  if (!title || !description || !price || !duration) {
+  if (!title || !description || !price || !duration || !category || !level || !instructorName) {
     return next(
-      new AppError("Title, description, price, and duration are required", 400)
+      new AppError("Title, description, price, duration, category, level, and instructor name are required", 400)
     )
   }
   const course = await Course.create({
@@ -22,6 +22,9 @@ export const createCourse = tryCatch(async (req, res, next) => {
     imageUrl: req.file ? `${baseUrl}/upload/${req.file.filename}` : undefined, // Full image URL
     price,
     duration,
+    category,
+    level,  
+    instructorName,
   })
   res.status(201).json(course)
 })
@@ -41,7 +44,7 @@ export const updateCourse = tryCatch(async (req, res, next) => {
   const baseUrl = `${req.protocol}://${req.get("host")}`
   const course = await Course.findByPk(req.params.id)
   if (!course) return next(new AppError("Course not found", 404))
-  const { title, description, imageUrl, price, duration } = req.body
+  const { title, description, imageUrl, price, duration, category, level, instructorName } = req.body
   await course.update({
     title,
     description,
@@ -49,6 +52,9 @@ export const updateCourse = tryCatch(async (req, res, next) => {
     imageUrl: req.file ? `${baseUrl}/upload/${req.file.filename}` : undefined, // Full image URL
     price,
     duration,
+    category,
+    level,
+    instructorName,
   })
   res.json(course)
 })

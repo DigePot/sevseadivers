@@ -14,6 +14,9 @@ export const CourseSchema = zod.object({
   description: zod.string().min(1, { message: "Description is required!" }),
   price: zod.number().min(0, { message: "Price must be positive" }).optional(),
   duration: zod.string().optional(),
+  category: zod.string().optional(),
+  level: zod.string().optional(),
+  instructorName: zod.string().optional(),
 })
 
 export type CourseSchemaType = zod.infer<typeof CourseSchema>
@@ -48,6 +51,9 @@ export function CourseEditForm({ currentCourse }: Props) {
       description: "",
       price: undefined,
       duration: undefined,
+      category: "",
+      level: "Beginner",
+      instructorName: "",
     },
   })
 
@@ -59,6 +65,10 @@ export function CourseEditForm({ currentCourse }: Props) {
         description: currentCourse.description,
         price: currentCourse.price,
         duration: currentCourse.duration,
+        category: currentCourse.category || "",
+        level: currentCourse.level || "",
+        instructorName: currentCourse.instructorName || "",
+
       })
 
       // Set image preview from current course
@@ -140,7 +150,11 @@ export function CourseEditForm({ currentCourse }: Props) {
       }
       if (data.duration !== undefined) {
         formData.append("duration", data.duration || "")
+      
       }
+      formData.append("category", data.category || "")
+      formData.append("level", data.level || "")
+      formData.append("instructorName", data.instructorName || "")
 
       // Only append new image if selected
       if (selectedFile) {
@@ -364,6 +378,89 @@ export function CourseEditForm({ currentCourse }: Props) {
             <p className="text-red-500 text-sm">{errors.description.message}</p>
           )}
         </div>
+
+        {/* Category */}
+        <div className="space-y-2">
+  <label
+    htmlFor="category"
+    className="block text-sm font-medium text-gray-700"
+  >
+    Category *
+  </label>
+  <select
+    id="category"
+    {...register("category", { required: "Category is required" })}
+    className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:outline-none ${
+      errors.category
+        ? "border-red-300 focus:ring-red-200"
+        : "border-gray-300 focus:border-blue-500 focus:ring-blue-200"
+    }`}
+  >
+    <option value="">Select a category</option>
+    <option value="Diving">Diving</option>
+    <option value="Snorkeling">Snorkeling</option>
+    <option value="Swimming">Swimming</option>
+  </select>
+  {errors.category && (
+    <p className="text-red-500 text-sm">{errors.category.message}</p>
+  )}
+</div>
+
+  
+
+<div className="space-y-2">
+  <label
+    htmlFor="level"
+    className="block text-sm font-medium text-gray-700"
+  >
+    Level *
+  </label>
+  <select
+    id="level"
+    {...register("level", { required: "Level is required" })}
+    className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:outline-none ${
+      errors.level
+        ? "border-red-300 focus:ring-red-200"
+        : "border-gray-300 focus:border-blue-500 focus:ring-blue-200"
+    }`}
+  >
+    <option value="">Select level</option>
+    <option value="Beginner">Beginner</option>
+    <option value="Intermediate">Intermediate</option>
+    <option value="Advanced">Advanced</option>
+  </select>
+  {errors.level && (
+    <p className="text-red-500 text-sm">{errors.level.message}</p>
+  )}
+</div>
+
+
+{/* Instructor Name */}
+<div className="space-y-2">
+  <label
+    htmlFor="instructorName"
+    className="block text-sm font-medium text-gray-700"
+  >
+    Instructor Name *
+  </label>
+  <input
+    id="instructorName"
+    type="text"
+    {...register("instructorName", {
+      required: "Instructor name is required",
+    })}
+    className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:outline-none ${
+      errors.instructorName
+        ? "border-red-300 focus:ring-red-200"
+        : "border-gray-300 focus:border-blue-500 focus:ring-blue-200"
+    }`}
+    placeholder="Instructor full name"
+  />
+  {errors.instructorName && (
+    <p className="text-red-500 text-sm">{errors.instructorName.message}</p>
+  )}
+</div>
+
 
         {/* Submit Button */}
         <div className="pt-4 flex justify-between">
