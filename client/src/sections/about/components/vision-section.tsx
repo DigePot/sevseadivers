@@ -45,9 +45,9 @@ export default function VisionSection() {
           whileInView={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.3 }}
         >
-          To be a global leader in ocean conservation and diving education —
-          empowering a new wave of ocean advocates, explorers, and educators
-          who protect and celebrate marine ecosystems worldwide.
+          To become the leading diving and underwater training company in 
+East Africa, known for excellence in marine adventure, safety, and 
+sustainability. .
         </motion.p>
       </motion.div>
     </section>

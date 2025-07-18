@@ -45,7 +45,10 @@ export default function MissionSection() {
           whileInView={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.3 }}
         >
-          We are committed to redefining the way the world explores the ocean — inspiring a new generation through transformative underwater experiences, sustainable diving, and unforgettable journeys beneath the surface.
+          To promote marine exploration and education through safe  
+diving and swimming programs, while advocating for   
+environmental conservation and supporting Somalia's emerging 
+blue tourism industry.
         </motion.p>
       </motion.div>
     </section>

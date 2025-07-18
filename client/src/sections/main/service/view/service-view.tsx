@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FaSwimmer,
@@ -12,194 +12,195 @@ const services = [
   {
     title: "Scuba Diving",
     icon: FaSwimmer,
-    desc: "Explore the mesmerizing reefs and marine life with our certified dive professionals.",
-    details: ["Fun Dives", "Night Dives", "Deep Water", "Private Dives"],
-    longDesc:
-      "Join us for unforgettable scuba diving adventures exploring vibrant coral reefs and abundant marine life. Certified dive professionals will guide you through safe and exciting underwater experiences, suitable for all levels.",
+    desc: "Explore the beautiful reefs and marine life with our professional diving team.",
+    details: [
+      "Fun Dives (Daily Trips)",
+      "Night Dives",
+      "Deep Dives",
+      "Private Diving Experience",
+    ],
   },
   {
     title: "Snorkeling",
     icon: FaWater,
-    desc: "Discover coral gardens and marine life with our snorkeling guides.",
-    details: ["Group Tours", "Private Snorkel", "Family Packages"],
-    longDesc:
-      "Our snorkeling tours offer a relaxing way to experience the underwater beauty without needing special training. Swim alongside colorful fish and explore coral gardens under the guidance of experienced snorkeling guides.",
+    desc: "Enjoy guided snorkeling trips to discover colorful coral gardens and tropical fish.",
+    details: [
+      "Group Snorkeling Tours",
+      "Private Snorkeling",
+      "Family Snorkeling Packages",
+    ],
   },
   {
     title: "Marine Conservation",
     icon: FaLeaf,
-    desc: "Join our mission to protect marine ecosystems in Somalia.",
-    details: ["Coral Restoration", "Beach Cleanups", "Citizen Science"],
-    longDesc:
-      "Contribute to preserving Somalia’s precious marine ecosystems by participating in coral restoration projects, beach cleanups, and citizen science programs. Help protect the ocean for future generations.",
+    desc: "Join our ocean protection and clean-up programs.",
+    details: [
+      "Volunteer activities",
+      "Educational sessions",
+      "Eco-focused efforts",
+      "Community engagement",
+    ],
   },
   {
-    title: "Dive Courses",
+    title: "Diving Courses",
     icon: FaBookOpen,
-    desc: "Get certified with our range of beginner to advanced PADI courses.",
-    details: ["Open Water", "Advanced Diver", "Rescue Diver", "Divemaster"],
-    longDesc:
-      "Get professionally certified through PADI with our comprehensive dive courses designed for all levels. From beginner Open Water to Divemaster, our instructors provide hands-on training and support.",
+    desc: "Get certified with our professional training.",
+    details: [
+      "Beginner to pro",
+      "International license",
+      "Skilled instructors",
+      "Flexible schedules",
+    ],
   },
   {
-    title: "Youth Training",
+    title: "Beach & Boat Trips",
     icon: FaUmbrellaBeach,
-    desc: "Fun, safe, and educational programs designed for young adventurers.",
-    details: ["Junior Open Water", "Ocean Discovery", "School Camps"],
-    longDesc:
-      "Our youth training programs are tailored for young adventurers to safely learn about the ocean, diving basics, and marine conservation through fun and educational activities.",
+    desc: "Relax on the beach or enjoy boat excursions.",
+    details: [
+      "Day trips",
+      "Private boats",
+      "Food & music",
+      "Scenic views",
+    ],
   },
 ];
 
 const cardVariants = {
-  hidden: (i: number) => ({
-    opacity: 0,
-    y: 50,
-    scale: 0.8,
-    transition: { delay: i * 0.15, ease: "easeOut" },
-  }),
-  visible: {
+  hidden: { opacity: 0, y: 40, scale: 0.95 },
+  visible: (i: number) => ({
     opacity: 1,
     y: 0,
     scale: 1,
-    transition: { duration: 0.6, ease: "easeOut" },
-  },
+    transition: { delay: i * 0.1, duration: 0.6, ease: "easeOut" },
+  }),
   hover: {
-    scale: 1.05,
-    boxShadow:
-      "0 15px 25px rgba(59, 130, 246, 0.4), 0 0 12px rgba(59, 130, 246, 0.6)",
-    transition: { duration: 0.3, ease: "easeOut" },
+    scale: 1.04,
+    boxShadow: "0 8px 30px rgba(14,165,233,0.15)",
+    transition: { duration: 0.3 },
   },
-  tap: { scale: 0.95 },
-};
-
-const modalVariants = {
-  hidden: { opacity: 0, scale: 0.75 },
-  visible: { opacity: 1, scale: 1, transition: { duration: 0.4, ease: "easeOut" } },
-  exit: { opacity: 0, scale: 0.75, transition: { duration: 0.3 } },
 };
 
 export function ServiceView() {
-  const [selectedService, setSelectedService] = useState<string | null>(null);
-  const modalRef = useRef<HTMLDivElement>(null);
+  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+  const toggleExpand = (index: number) =>
+    setExpandedIndex(expandedIndex === index ? null : index);
 
   return (
-    <section className="min-h-screen bg-gradient-to-b from-white to-sky-100 py-16 px-6 sm:px-16">
-      <motion.div
-        initial={{ opacity: 0, y: 60 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1 }}
-        className="max-w-6xl mx-auto text-center mb-16"
+    <section className="max-w-7xl mx-auto px-6 py-20 bg-gradient-to-br from-cyan-50 to-blue-100 dark:from-gray-900 dark:to-gray-800 rounded-3xl select-none transition-colors">
+      <motion.h2
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 0.7, ease: "easeOut" }}
+        className="text-5xl font-extrabold text-center text-blue-900 dark:text-white mb-10 tracking-wide drop-shadow-lg font-sans"
       >
-        <h1 className="text-5xl font-extrabold text-blue-900 mb-4 drop-shadow-lg">
-          Our Services
-        </h1>
-        <p className="text-lg md:text-xl text-blue-700 max-w-3xl mx-auto">
-          Discover amazing ocean adventures and programs offered by{" "}
-          <span className="font-semibold text-blue-900">SEVSEA DIVERS</span>.
-        </p>
-      </motion.div>
+        Our <span className="text-cyan-500">Services</span>
+      </motion.h2>
 
-      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12">
-        {services.map(({ title, icon: Icon, desc, details }, i) => (
-          <motion.div
-            key={title}
-            custom={i}
-            variants={cardVariants}
-            initial="hidden"
-            animate="visible"
-            whileHover="hover"
-            whileTap="tap"
-            onClick={() => setSelectedService(title)}
-            className="bg-white rounded-3xl p-8 cursor-pointer shadow-lg text-blue-900 flex flex-col justify-between min-h-[380px] relative border-4 border-blue-400 hover:border-blue-600 transition"
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                setSelectedService(title);
-              }
-            }}
-            aria-label={`View more about ${title}`} // fixed template literal syntax here
-          >
-            <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-28 h-28 rounded-full bg-blue-400/30 backdrop-blur-md flex items-center justify-center text-white drop-shadow-lg">
-              <Icon className="text-7xl" aria-hidden="true" />
-            </div>
+      <p className="max-w-3xl mx-auto text-center text-lg text-blue-800 dark:text-gray-300 mb-16 font-medium font-sans leading-relaxed">
+        Welcome to{" "}
+        <span className="font-bold text-cyan-600 dark:text-cyan-400">SEVSEA DIVERS</span>,
+        your gateway to the underwater world of Somalia. We offer top-tier diving and marine adventures to create memories that last forever.
+      </p>
 
-            <div className="mt-20">
-              <h2 className="text-3xl font-extrabold drop-shadow-md">{title}</h2>
-              <p className="mt-3 text-blue-700 leading-relaxed">{desc}</p>
-            </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
+        {services.map((service, index) => {
+          const Icon = service.icon;
+          const isOpen = expandedIndex === index;
 
-            <ul className="mt-8 space-y-1 list-disc list-inside font-medium text-blue-800">
-              {details.map((d, i) => (
-                <li key={i}>{d}</li>
-              ))}
-            </ul>
-
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setSelectedService(title);
+          return (
+            <motion.article
+              key={index}
+              className="relative bg-white dark:bg-white/5 bg-opacity-80 backdrop-blur-md rounded-3xl p-6 cursor-pointer border border-transparent shadow-md hover:shadow-[0_8px_30px_rgba(14,165,233,0.15)] hover:border-cyan-400 transition-all duration-300"
+              tabIndex={0}
+              role="button"
+              aria-expanded={isOpen}
+              aria-controls={`service-details-${index}`}
+              onClick={() => toggleExpand(index)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  toggleExpand(index);
+                }
               }}
-              aria-label={`Learn more about ${title}`} // fixed template literal syntax here
-              className="mt-10 bg-gradient-to-r from-blue-500 to-blue-700 text-white rounded-full py-3 font-semibold tracking-wide shadow-lg hover:from-blue-600 hover:to-blue-800 transition"
+              variants={cardVariants}
+              initial="hidden"
+              animate="visible"
+              custom={index}
+              whileHover="hover"
+              whileTap={{ scale: 0.98 }}
             >
-              Learn More
-            </button>
-          </motion.div>
-        ))}
-      </div>
+              {/* Icon */}
+              <motion.div
+                className="flex justify-center mb-6"
+                animate={{ y: [0, -10, 0] }}
+                transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+              >
+                <div className="bg-gradient-to-br from-cyan-500 to-blue-600 dark:from-cyan-400 dark:to-blue-500 rounded-full p-5 shadow-md text-white text-5xl">
+                  <Icon />
+                </div>
+              </motion.div>
 
-      <AnimatePresence>
-        {selectedService && (
-          <motion.div
-            key="modal"
-            variantvis={modalVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            className="fixed inset-0 bg-blue-900/90 backdrop-blur-md flex items-center justify-center z-50 p-6"
-            onClick={() => setSelectedService(null)}
-            aria-modal="true"
-            role="dialog"
-          >
-            <motion.div
-              className="bg-white rounded-3xl shadow-2xl max-w-3xl w-full p-10 relative"
-              onClick={(e) => e.stopPropagation()}
-              ref={modalRef}
-              tabIndex={-1}
-            >
-              <h2 className="text-4xl font-extrabold text-blue-900 mb-6 drop-shadow-md">
-                {services.find((s) => s.title === selectedService)?.title}
-              </h2>
-              <p className="text-gray-700 text-lg leading-relaxed mb-8 whitespace-pre-line">
-                {services.find((s) => s.title === selectedService)?.longDesc}
+              {/* Title */}
+              <motion.h3
+                className="text-xl font-semibold text-center mb-3 text-blue-900 dark:text-white tracking-wide"
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+              >
+                {service.title}
+              </motion.h3>
+
+              {/* Description */}
+              <p className="text-center text-blue-800 dark:text-gray-300 text-sm mb-5 px-1">
+                {service.desc}
               </p>
-              <ul className="mb-8 list-disc list-inside text-gray-800 space-y-1 font-medium">
-                {services
-                  .find((s) => s.title === selectedService)
-                  ?.details.map((d, i) => (
-                    <li key={i}>{d}</li>
-                  ))}
-              </ul>
-              <button
-                onClick={() => setSelectedService(null)}
-                className="absolute top-6 right-6 text-blue-600 hover:text-blue-900 text-5xl font-bold transition focus:outline-none focus:ring-2 focus:ring-blue-600 rounded"
-                aria-label="Close modal"
-              >
-                &times;
-              </button>
-              <button
-                onClick={() => setSelectedService(null)}
-                className="mt-4 w-full bg-blue-900 text-white rounded-3xl py-4 font-semibold tracking-wide hover:bg-blue-800 transition focus:outline-none focus:ring-2 focus:ring-blue-900"
-              >
-                Close
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+
+              {/* Learn More Button */}
+              <div className="flex justify-center">
+                <motion.button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    toggleExpand(index);
+                  }}
+                  aria-expanded={isOpen}
+                  aria-controls={`service-details-${index}`}
+                  className="px-6 py-2 bg-cyan-500 hover:bg-cyan-600 text-white font-semibold rounded-full shadow-md focus:outline-none focus:ring-4 focus:ring-cyan-300"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  {isOpen ? "Show Less" : "Learn More"}
+                </motion.button>
+              </div>
+
+              {/* Details Accordion */}
+              <AnimatePresence initial={false}>
+                {isOpen && (
+                  <motion.div
+                    key="content"
+                    id={`service-details-${index}`}
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.5, ease: "easeInOut" }}
+                    className="text-sm text-blue-900 dark:text-gray-200 px-5 mt-4 border-t border-cyan-300 pt-4"
+                  >
+                    <ul className="list-disc list-inside space-y-1 font-medium">
+                      {service.details.map((detail, i) => (
+                        <li
+                          key={i}
+                          className="hover:text-cyan-600 dark:hover:text-cyan-400 transition-all duration-300"
+                        >
+                          {detail}
+                        </li>
+                      ))}
+                    </ul>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.article>
+          );
+        })}
+      </div>
     </section>
   );
 }
