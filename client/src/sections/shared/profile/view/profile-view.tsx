@@ -4,33 +4,26 @@ import { useUser } from "../../../auth/hooks"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { z as zod } from "zod"
-import { extractErrorMessage } from "../../../../utils/extract-error-message"
+import { motion } from "framer-motion"
 import type { FetchBaseQueryError } from "@reduxjs/toolkit/query"
 import type { SerializedError } from "@reduxjs/toolkit"
+import { extractErrorMessage } from "../../../../utils/extract-error-message"
 
 const profileSchema = zod.object({
-  fullName: zod
-    .string()
-    .min(2, { message: "Full name must be at least 2 characters." }),
-  email: zod.string().email({ message: "Invalid email address." }),
-  phoneNumber: zod
-    .string()
-    .min(7, { message: "Phone number must be at least 7 characters." })
-    .optional()
-    .or(zod.literal("")), // Allow empty string
-  address: zod.string().optional().or(zod.literal("")), // Allow empty string
-  dateOfBirth: zod.string().optional().or(zod.literal("")), // Allow empty string
+  fullName: zod.string().min(2, { message: "Name too short" }),
+  email: zod.string().email({ message: "Invalid email" }),
+  phoneNumber: zod.string().min(7).optional().or(zod.literal("")),
+  address: zod.string().optional().or(zod.literal("")),
+  dateOfBirth: zod.string().optional().or(zod.literal("")),
 })
 
 export type ProfileFormType = zod.infer<typeof profileSchema>
 
-export const ProfileView: React.FC = () => {
+export const ProfileView = () => {
   const id = localStorage.getItem("id") ?? ""
   const { user } = useUser(id)
-  const [updateMyProfile, { isLoading, error, isSuccess }] =
-    useUpdateMyProfileMutation()
-  const [originalProfile, setOriginalProfile] =
-    useState<ProfileFormType | null>(null)
+  const [updateMyProfile, { isLoading, error, isSuccess }] = useUpdateMyProfileMutation()
+  const [originalProfile, setOriginalProfile] = useState<ProfileFormType | null>(null)
 
   const {
     register,
@@ -39,210 +32,126 @@ export const ProfileView: React.FC = () => {
     reset,
   } = useForm<ProfileFormType>({
     resolver: zodResolver(profileSchema),
-    defaultValues: {
-      fullName: "",
-      email: "",
-      phoneNumber: "",
-      address: "",
-      dateOfBirth: "",
-    },
   })
 
   useEffect(() => {
     if (user) {
       const { fullName, email, phoneNumber, address, dateOfBirth } = user
-
-      // Format dateOfBirth to 'YYYY-MM-DD' for the input field
-      const formattedDateOfBirth = dateOfBirth
-        ? new Date(dateOfBirth).toISOString().split("T")[0]
-        : ""
-
-      const initialData: ProfileFormType = {
+      const formattedDOB = dateOfBirth ? new Date(dateOfBirth).toISOString().split("T")[0] : ""
+      const data: ProfileFormType = {
         fullName: fullName || "",
         email: email || "",
         phoneNumber: phoneNumber || "",
         address: address || "",
-        dateOfBirth: formattedDateOfBirth, // Use the formatted date
+        dateOfBirth: formattedDOB,
       }
-      reset(initialData)
-      setOriginalProfile(initialData)
+      reset(data)
+      setOriginalProfile(data)
     }
   }, [user, reset])
 
   const onSubmit = async (data: ProfileFormType) => {
     if (user?.id) {
       try {
-        console.log("Data being sent to backend:", data)
         await updateMyProfile({ id: parseInt(user.id), body: data }).unwrap()
-
-        // On success, update the original profile state to match the new data
-        const formattedDateOfBirth = data.dateOfBirth
+        const formattedDOB = data.dateOfBirth
           ? new Date(data.dateOfBirth).toISOString().split("T")[0]
           : ""
-        const newProfileData = { ...data, dateOfBirth: formattedDateOfBirth }
-        setOriginalProfile(newProfileData)
+        setOriginalProfile({ ...data, dateOfBirth: formattedDOB })
       } catch (err) {
-        console.error("Error updating profile:", err)
+        console.error(err)
       }
     }
   }
 
-  // Helper function to render the error message safely
-  const renderErrorMessage = (
-    error: FetchBaseQueryError | SerializedError | undefined
-  ) => {
+  const renderError = (error: FetchBaseQueryError | SerializedError | undefined) => {
     if (!error) return null
-
-    // This is a type guard to check if the error is a FetchBaseQueryError
     if ("data" in error) {
       const errorData = error.data as { error?: string }
-      console.log("eeeeeee", errorData)
-      if (errorData.error) {
-        return extractErrorMessage(errorData.error)
-      }
+      return errorData.error || "Unknown error"
     }
-
-    // Fallback for SerializedError or other unexpected error shapes
     return "An unexpected error occurred."
   }
 
   return (
-    <div className="">
-      <h2 className="text-xl font-semibold mb-4">Edit Profile</h2>
+    <div className="min-h-screen bg-gradient-to-br from-sky-200 via-blue-100 to-white dark:from-slate-800 dark:to-slate-900 transition-all">
+      {/* Wave Header */}
+      <div className="relative h-48 bg-cyan-600 dark:bg-cyan-800 rounded-b-[60px] shadow-lg overflow-hidden">
+        <svg className="absolute bottom-0 left-0 w-full" viewBox="0 0 1440 320">
+          <path
+            fill="#ffffff"
+            fillOpacity="1"
+            d="M0,192L60,186.7C120,181,240,171,360,154.7C480,139,600,117,720,117.3C840,117,960,139,1080,144C1200,149,1320,139,1380,133.3L1440,128L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z"
+          ></path>
+        </svg>
+      </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        {/* Full Name Input */}
-        <div>
-          <label
-            htmlFor="fullName"
-            className="block text-gray-700 text-sm font-bold mb-2"
-          >
-            Full Name
-          </label>
-          <input
-            type="text"
-            id="fullName"
-            {...register("fullName")}
-            className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
-              errors.fullName ? "border-red-500" : ""
-            }`}
-          />
-          {errors.fullName && (
-            <p className="text-red-500 text-xs italic">
-              {errors.fullName.message}
-            </p>
-          )}
-        </div>
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="-mt-32 mx-auto max-w-4xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-md rounded-3xl p-10 shadow-xl border border-white/30 dark:border-slate-700"
+      >
+        <h2 className="text-3xl font-extrabold text-center text-slate-800 dark:text-white mb-10">
+          Update Your Profile
+        </h2>
 
-        {/* Email Input */}
-        <div>
-          <label
-            htmlFor="email"
-            className="block text-gray-700 text-sm font-bold mb-2"
-          >
-            Email
-          </label>
-          <input
-            type="email"
-            id="email"
-            {...register("email")}
-            className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
-              errors.email ? "border-red-500" : ""
-            }`}
-          />
-          {errors.email && (
-            <p className="text-red-500 text-xs italic">
-              {errors.email.message}
-            </p>
-          )}
-        </div>
+        <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {[
+            ["Full Name", "fullName"],
+            ["Email", "email"],
+            ["Phone", "phoneNumber"],
+            ["Address", "address"],
+            ["Date of Birth", "dateOfBirth"],
+          ].map(([label, name]) => (
+            <div key={name}>
+              <label className="text-sm font-semibold text-slate-700 dark:text-gray-300">
+                {label}
+              </label>
+              <input
+                type={name === "dateOfBirth" ? "date" : "text"}
+                {...register(name as keyof ProfileFormType)}
+                className="w-full mt-2 px-4 py-2 rounded-xl bg-white/70 dark:bg-slate-800 border border-slate-300 dark:border-slate-600 shadow-inner focus:ring-2 focus:ring-cyan-500 text-slate-800 dark:text-white"
+              />
+              {errors[name as keyof typeof errors] && (
+                <p className="text-xs text-red-500 mt-1">
+                  {errors[name as keyof typeof errors]?.message}
+                </p>
+              )}
+            </div>
+          ))}
+        </form>
 
-        {/* Phone Number Input */}
-        <div>
-          <label
-            htmlFor="phoneNumber"
-            className="block text-gray-700 text-sm font-bold mb-2"
-          >
-            Phone Number
-          </label>
-          <input
-            type="text"
-            id="phoneNumber"
-            {...register("phoneNumber")}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          />
-          {errors.phoneNumber && (
-            <p className="text-red-500 text-xs italic">
-              {errors.phoneNumber.message}
-            </p>
-          )}
-        </div>
-
-        {/* Address Input */}
-        <div>
-          <label
-            htmlFor="address"
-            className="block text-gray-700 text-sm font-bold mb-2"
-          >
-            Address
-          </label>
-          <input
-            type="text"
-            id="address"
-            {...register("address")}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          />
-          {errors.address && (
-            <p className="text-red-500 text-xs italic">
-              {errors.address.message}
-            </p>
-          )}
-        </div>
-
-        {/* Date of Birth Input */}
-        <div>
-          <label
-            htmlFor="dateOfBirth"
-            className="block text-gray-700 text-sm font-bold mb-2"
-          >
-            Date of Birth
-          </label>
-          <input
-            type="date"
-            id="dateOfBirth"
-            {...register("dateOfBirth")}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          />
-          {errors.dateOfBirth && (
-            <p className="text-red-500 text-xs italic">
-              {errors.dateOfBirth.message}
-            </p>
-          )}
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex justify-end space-x-2">
+        <div className="mt-10 flex justify-center">
           <button
             type="submit"
             disabled={isLoading}
-            className={`bg-cyan-600 hover:bg-cyan-600/90 cursor-pointer text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline ${
-              isLoading ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            onClick={handleSubmit(onSubmit)}
+            className="bg-cyan-600 hover:bg-cyan-700 text-white font-bold px-8 py-3 rounded-full shadow-lg hover:shadow-xl transition duration-300 disabled:opacity-50"
           >
-            {isLoading ? "Saving..." : "Save changes"}
+            {isLoading ? "Saving..." : "Save Changes"}
           </button>
         </div>
 
-        {/* Success and Error Messages */}
         {isSuccess && (
-          <div className="mt-4 text-green-500">
-            Profile updated successfully!
-          </div>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-green-600 text-center mt-6"
+          >
+            ✅ Profile updated successfully!
+          </motion.p>
         )}
         {error && (
-          <div className="mt-4 text-red-500">{renderErrorMessage(error)}</div>
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-red-500 text-center mt-6"
+          >
+            {renderError(error)}
+          </motion.p>
         )}
-      </form>
+      </motion.div>
     </div>
   )
 }
