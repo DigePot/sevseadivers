@@ -1,10 +1,10 @@
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { motion, AnimatePresence } from "framer-motion";
-import { Link } from "react-router-dom";
-import axios from "axios";
-import { z as zod } from "zod";
+import React, { useState } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { motion, AnimatePresence } from "framer-motion"
+import { Link } from "react-router-dom"
+import axios from "axios"
+import { z as zod } from "zod"
 import {
   FaUserCircle,
   FaUser,
@@ -12,23 +12,33 @@ import {
   FaPhone,
   FaLock,
   FaCheckCircle,
-} from "react-icons/fa";
+} from "react-icons/fa"
+import { useRouter, useSearchParams } from "../../../routes/hooks"
+import type { AppDispatch } from "../../../store"
+import { useDispatch } from "react-redux"
+import { setCredentials } from "../../../store/auth/auth-slice"
+import { API } from "../../../store/api"
+import { extractErrorMessage } from "../../../utils/extract-error-message"
 
 export const SignUpSchema = zod
   .object({
     fullName: zod.string().min(1, "Full Name is required!"),
     username: zod.string().min(1, "User Name is required!"),
-    email: zod.string().min(1, "Email is required!").email("Invalid email address!"),
+    email: zod
+      .string()
+      .min(1, "Email is required!")
+      .email("Invalid email address!"),
     phoneNumber: zod.string().min(1, "Phone Number is required!"),
+    role: zod.string().min(1, "Role Name is required!"),
     password: zod.string().min(6, "Password must be at least 6 characters!"),
     confirmPassword: zod.string().min(6, "Confirm Password is required!"),
   })
   .refine((data) => data.password === data.confirmPassword, {
     path: ["confirmPassword"],
     message: "Passwords do not match",
-  });
+  })
 
-export type SignUpSchemaType = zod.infer<typeof SignUpSchema>;
+export type SignUpSchemaType = zod.infer<typeof SignUpSchema>
 
 const iconMap: Record<string, React.ReactNode> = {
   fullName: <FaUserCircle className="text-cyan-500" />,
@@ -37,11 +47,16 @@ const iconMap: Record<string, React.ReactNode> = {
   phoneNumber: <FaPhone className="text-cyan-500" />,
   password: <FaLock className="text-cyan-500" />,
   confirmPassword: <FaCheckCircle className="text-cyan-500" />,
-};
+}
 
 export const SignUpForm: React.FC = () => {
-  const [globalError, setGlobalError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [globalError, setGlobalError] = useState("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const returnTo = searchParams.get("returnTo")
+  const dispatch: AppDispatch = useDispatch()
 
   const {
     register,
@@ -49,20 +64,53 @@ export const SignUpForm: React.FC = () => {
     formState: { errors },
   } = useForm<SignUpSchemaType>({
     resolver: zodResolver(SignUpSchema),
-  });
+    defaultValues: {
+      username: "",
+      fullName: "",
+      email: "",
+      phoneNumber: "",
+      password: "",
+      confirmPassword: "",
+      role: "client",
+    },
+  })
+
+  // Redirect user based on role or returnTo param
+  const handleRoleBasedRedirect = (role: string) => {
+    if (returnTo) return returnTo
+    switch (role.toLocaleLowerCase()) {
+      case "admin":
+        return "/dashboard"
+      case "staff":
+        return "/staff-dashboard"
+      default:
+        return "/"
+    }
+  }
 
   const onSubmit = async (data: SignUpSchemaType) => {
-    setGlobalError("");
-    setIsSubmitting(true);
+    setGlobalError("")
+    setIsSubmitting(true)
     try {
-      await axios.post("/api/users/register", data);
-      alert("Registration successful! Please check your email.");
-    } catch (err: any) {
-      setGlobalError(err.response?.data?.message || "Something went wrong");
+      const res = await axios.post(`${API}/users/register`, data)
+
+      const { token } = res.data
+      const { role, email, id } = res.data.user
+      dispatch(setCredentials({ token, role, email, id }))
+
+      router.push(handleRoleBasedRedirect(role))
+      router.refresh()
+    } catch (error: any) {
+      if (error.response) {
+        const errorMessage = extractErrorMessage(error.response.data)
+        setGlobalError(errorMessage)
+      } else {
+        setGlobalError("An unknown error occurred")
+      }
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   const fields: (keyof SignUpSchemaType)[] = [
     "fullName",
@@ -71,11 +119,11 @@ export const SignUpForm: React.FC = () => {
     "phoneNumber",
     "password",
     "confirmPassword",
-  ];
+  ]
 
   return (
     <motion.form
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={handleSubmit(onSubmit)} // Ensure handleSubmit is wrapping onSubmit
       className="max-w-lg mx-auto bg-gradient-to-br from-cyan-100 to-blue-200 p-10 rounded-xl shadow-xl"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -104,22 +152,22 @@ export const SignUpForm: React.FC = () => {
       {fields.map((name) => {
         const label = name
           .replace(/([A-Z])/g, " $1")
-          .replace(/^./, (str) => str.toUpperCase());
+          .replace(/^./, (str) => str.toUpperCase())
 
         const type = name.toLowerCase().includes("password")
           ? "password"
           : name.toLowerCase() === "email"
           ? "email"
-          : "text";
+          : "text"
 
         const autoComplete =
           name === "email"
             ? "email"
             : name === "password" || name === "confirmPassword"
             ? "new-password"
-            : "off";
+            : "off"
 
-        const hasError = Boolean(errors[name]);
+        const hasError = Boolean(errors[name])
 
         return (
           <motion.div
@@ -166,11 +214,11 @@ export const SignUpForm: React.FC = () => {
               </motion.p>
             )}
           </motion.div>
-        );
+        )
       })}
 
       <button
-        type="submit"
+        type="submit" // Make sure this button is type="submit"
         disabled={isSubmitting}
         className="w-full mt-6 py-3 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold shadow-lg hover:from-cyan-600 hover:to-blue-700 focus:outline-none focus:ring-4 focus:ring-cyan-400 focus:ring-opacity-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
       >
@@ -179,10 +227,13 @@ export const SignUpForm: React.FC = () => {
 
       <p className="mt-6 text-center text-gray-600">
         Already have an account?{" "}
-        <Link to="/auth/sign-in" className="text-cyan-700 hover:underline font-semibold">
+        <Link
+          to="/auth/sign-in"
+          className="text-cyan-700 hover:underline font-semibold"
+        >
           Sign In
         </Link>
       </p>
     </motion.form>
-  );
-};
+  )
+}
