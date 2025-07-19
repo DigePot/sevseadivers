@@ -1,5 +1,5 @@
 import { DataTypes } from 'sequelize';
-import defineUser from './User.js';      // Don't import the instance directly, define with sequelize
+import defineUser from './User.js';     
 import defineCourse from './Course.js';
 
 const defineEnrollment = (sequelize) => {

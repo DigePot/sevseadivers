@@ -13,10 +13,13 @@ const ContactPage = lazy(() => import("../../pages/main/contact-us"))
 const TripsPage = lazy(() => import("../../pages/main/trips"))
 const CoursePage = lazy(() => import("../../pages/main/courses/index"))
 const CourseDetailsPage = lazy(() => import("../../pages/main/courses/components/course-details"))
-const CourseEnroll = lazy(() => import("../../pages/main/courses/components/enroll"))
+
+
 
 const ServicePage = lazy(() => import("../../pages/main/service/index"))
 const GalleryPage = lazy(() => import("../../pages/main/gallery/index"))
+const CourseCheckoutPage = lazy(() => import("../../pages/main/courses/components/course-checkout"))  
+const CourseEnrolledPage = lazy(() => import("../../pages/main/courses/components/course-checkout"))  
 
 
 // ------------------------------------------------------------------------
@@ -43,9 +46,13 @@ export const mainRoutes: RouteObject[] = [
           { path: "services", element: <ServicePage /> },
           { path: "gallery", element: <GalleryPage /> },
           { path: "courses/:id", element: <CourseDetailsPage /> },
-          { path: "courses/:id/enroll", element: <CourseEnroll /> },
+          { path: "courses/:id/checkout", element: <CourseCheckoutPage /> },
+          { path: "enrollments/", element: <CourseCheckoutPage /> },
+
+
         ],
       },
     ],
   },
 ]
+

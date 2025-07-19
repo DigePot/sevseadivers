@@ -4,7 +4,7 @@ import type { RootState } from "../../../store"
 // ----------------------------------------------------------------------
 
 export function useAuth() {
-  const { token, email, role, loading } = useSelector(
+  const { token, email, role, loading, id } = useSelector(
     (state: RootState) => state.auth
   )
 
@@ -13,6 +13,8 @@ export function useAuth() {
     token,
     email,
     role,
+    userId: id,
     loading,
+    
   }
 }

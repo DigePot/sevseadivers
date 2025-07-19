@@ -28,21 +28,28 @@ const defineCourse = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    category: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      defaultValue: '', 
-    },
-    level: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      defaultValue: '', 
-    },
-    instructorName: {
-      type: DataTypes.STRING,
-      allowNull: false,
-      defaultValue: '', 
-    },
+ category: {
+  type: DataTypes.STRING,
+  allowNull: false,
+  validate: {
+    notEmpty: { msg: 'Category cannot be empty' },
+  },
+},
+level: {
+  type: DataTypes.STRING,
+  allowNull: false,
+  validate: {
+    notEmpty: { msg: 'Level cannot be empty' },
+  },
+},
+instructorName: {
+  type: DataTypes.STRING,
+  allowNull: false,
+  validate: {
+    notEmpty: { msg: 'Instructor name cannot be empty' },
+  },
+},
+
   }, {
     timestamps: true,
   });

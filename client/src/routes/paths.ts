@@ -69,4 +69,11 @@ export const paths = {
     gallery: `/gallery`,
     contact: `/contact-us`,
   },
+  // Payment
+  payment: {
+    root: "/success",
+    courses: `/cancel`,
+   
+  },
+
 }

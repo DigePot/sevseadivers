@@ -10,4 +10,6 @@ export interface Course {
   category: string
   level: string
   instructorName: string
+  courseId: string
 }
+

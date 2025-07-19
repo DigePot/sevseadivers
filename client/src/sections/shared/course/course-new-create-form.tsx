@@ -13,6 +13,9 @@ export const NewCourseSchema = zod.object({
   description: zod.string().min(1, { message: "Description is required!" }),
   price: zod.number().min(0, { message: "Price must be positive" }).optional(),
   duration: zod.string().optional(),
+  category: zod.string().min(1, { message: "Category is required!" }),
+  level: zod.string().min(1, { message: "Level is required!" }),
+  instructorName: zod.string().min(1, { message: "Instructor name is required!" }),
 })
 
 export type NewCourseSchemaType = zod.infer<typeof NewCourseSchema>
@@ -33,6 +36,9 @@ export function CourseNewCreateForm() {
     description: "",
     price: undefined,
     duration: undefined,
+    category: "",
+    level: "",
+    instructorName: "",
   }
 
   const {
@@ -102,47 +108,39 @@ export function CourseNewCreateForm() {
     }
   }
 
-  const onSubmit = handleSubmit(async (data) => {
-    if (!selectedFile) {
-      setError("root", { message: "Please select an image" })
-      return
-    }
+ const onSubmit = handleSubmit(async (data) => {
+  if (!selectedFile) {
+    setError("root", { message: "Please select an image" })
+    return
+  }
 
-    try {
-      setIsSubmitting(true)
+  try {
+    setIsSubmitting(true)
 
-      // Create FormData object
-      const formData = new FormData()
+    const formData = new FormData()
+    formData.append("title", data.title)
+    formData.append("description", data.description)
+    formData.append("price", data.price?.toString() || "0") 
+    formData.append("duration", data.duration || "N/A")
+    formData.append("category", data.category)
+    formData.append("level", data.level) 
+    formData.append("instructorName", data.instructorName)
+    formData.append("media", selectedFile)
 
-      // Append other form data
-      formData.append("title", data.title)
-      formData.append("description", data.description)
-      if (data.price !== undefined) {
-        formData.append("price", data.price.toString())
-      }
-      if (data.duration !== undefined) {
-        formData.append("duration", data.duration)
-      }
+    await createCourse(formData).unwrap()
 
-      // Append the image file
-      formData.append("media", selectedFile)
-
-      // Send the form data to the backend API to create the course
-      await createCourse(formData).unwrap()
-
-      // Reset form and UI state after successful submission
-      reset()
-      handleRemoveImage()
-      router.push(paths.shared.course.list)
-    } catch (error: any) {
-      console.error("Error creating course:", error)
-      setError("root", {
-        message: error.data?.message || "Failed to create course",
-      })
-    } finally {
-      setIsSubmitting(false)
-    }
-  })
+    reset()
+    handleRemoveImage()
+    router.push(paths.shared.course.list)
+  } catch (error: any) {
+    console.error("Error creating course:", error)
+    setError("root", {
+      message: error.data?.message || "Failed to create course",
+    })
+  } finally {
+    setIsSubmitting(false)
+  }
+})
 
   return (
     <div className="">
@@ -290,6 +288,38 @@ export function CourseNewCreateForm() {
               <p className="text-red-500 text-sm">{errors.price.message}</p>
             )}
           </div>
+          {/* Category */}<div className="space-y-2">
+  <label htmlFor="category" className="block text-sm font-medium text-gray-700">
+    Category
+  </label>
+  <select
+    id="category"
+    {...register("category")}
+    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+  >
+    <option value="General">General</option>
+    <option value="Diving">Diving</option>
+    <option value="Snorkeling">Snorkeling</option>
+    <option value="Swimming">Swimming</option>
+  </select>
+ </div>
+ 
+{/* Level */}
+<div className="space-y-2">
+  <label htmlFor="level" className="block text-sm font-medium text-gray-700">
+    Level
+  </label>
+  <select
+    id="level"
+    {...register("level")}
+    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+  >
+    <option value="Beginner">Beginner</option>
+    <option value="Intermediate">Intermediate</option>
+    <option value="Advanced">Advanced</option>
+  </select>
+</div>
+
 
           {/* Duration */}
           <div className="space-y-2">
@@ -315,6 +345,20 @@ export function CourseNewCreateForm() {
             )}
           </div>
         </div>
+        {/* Instructor Name */}
+        <div className="space-y-2 md:col-span-2">
+  <label htmlFor="instructorName" className="block text-sm font-medium text-gray-700">
+    Instructor Name
+  </label>
+  <input
+    id="instructorName"
+    type="text"
+    {...register("instructorName")}
+    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+    placeholder="Instructor full name"
+  />
+</div>
+
 
         {/* Description */}
         <div className="space-y-2">

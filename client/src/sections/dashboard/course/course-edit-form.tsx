@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useRef, useState, useEffect } from "react" // Added useEffect
+import { useRef, useState, useEffect } from "react" 
 import { useForm } from "react-hook-form"
 import { z as zod } from "zod"
 import { useRouter } from "../../../routes/hooks"
@@ -14,9 +14,9 @@ export const CourseSchema = zod.object({
   description: zod.string().min(1, { message: "Description is required!" }),
   price: zod.number().min(0, { message: "Price must be positive" }).optional(),
   duration: zod.string().optional(),
-  category: zod.string().optional(),
-  level: zod.string().optional(),
-  instructorName: zod.string().optional(),
+  category: zod.string().min(1, { message: "Category is required!" }),
+  level: zod.string().min(1, { message: "Level is required!" }),
+  instructorName: zod.string().min(1, { message: "Instructor name is required!" }),
 })
 
 export type CourseSchemaType = zod.infer<typeof CourseSchema>
@@ -163,7 +163,7 @@ export function CourseEditForm({ currentCourse }: Props) {
 
       if (currentCourse?.id) {
         await updateCourse({ id: currentCourse.id, formData }).unwrap()
-        router.push(paths.dashboard.course.list)
+        router.push(paths.shared.course.list)
       }
     } catch (error: any) {
       console.error("Error updating course:", error)
@@ -466,7 +466,7 @@ export function CourseEditForm({ currentCourse }: Props) {
         <div className="pt-4 flex justify-between">
           <button
             type="button"
-            onClick={() => router.push(paths.dashboard.course.list)}
+            onClick={() => router.push(paths.shared.course.list)}
             className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-lg shadow-sm transition-colors"
           >
             Cancel

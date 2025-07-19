@@ -131,7 +131,7 @@ export function CourseNewCreateForm() {
 
     reset()
     handleRemoveImage()
-    router.push(paths.dashboard.course.list)
+    router.push(paths.shared.course.list)
   } catch (error: any) {
     console.error("Error creating course:", error)
     setError("root", {
