@@ -1,5 +1,5 @@
 import { zodResolver } from "@hookform/resolvers/zod"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 import { useForm } from "react-hook-form"
 import { z as zod } from "zod"
 import { useRouter } from "../../../routes/hooks"
@@ -21,6 +21,7 @@ export const StaffSchema = zod.object({
     .min(6, { message: "Phone number must be at least 6 digits!" }),
   address: zod.string().optional(),
   dateOfBirth: zod.string().optional(),
+  bio: zod.string().optional(),
 })
 
 export type StaffSchemaType = zod.infer<typeof StaffSchema>
@@ -35,6 +36,8 @@ export function StaffEditForm({ currentStaff }: Props) {
   const router = useRouter()
   const [updateStaff] = useUpdateStaffMutation()
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [preview, setPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Initialize form with current staff values
   const {
@@ -53,6 +56,7 @@ export function StaffEditForm({ currentStaff }: Props) {
       phoneNumber: currentStaff?.phoneNumber || "",
       address: currentStaff?.address || "",
       dateOfBirth: currentStaff?.dateOfBirth?.split("T")[0] || "",
+      bio: currentStaff?.bio || "",
     },
   })
 
@@ -60,51 +64,57 @@ export function StaffEditForm({ currentStaff }: Props) {
   useEffect(() => {
     if (currentStaff) {
       reset({
-        username: currentStaff.username,
-        email: currentStaff.email,
-        fullName: currentStaff.fullName,
-        phoneNumber: currentStaff.phoneNumber,
+        username: currentStaff.username || "",
+        email: currentStaff.email || "",
+        fullName: currentStaff.fullName || "",
+        phoneNumber: currentStaff.phoneNumber || "",
         address: currentStaff.address || "",
         dateOfBirth: currentStaff.dateOfBirth?.split("T")[0] || "",
-      })
+        bio: currentStaff.bio || "",
+      });
     }
-  }, [currentStaff, reset])
+  }, [currentStaff, reset]);
 
   const onSubmit = handleSubmit(async (data) => {
-    if (!currentStaff?.id) return
-
+    if (!currentStaff?.id) return;
     try {
-      setIsSubmitting(true)
-
-      // Prepare the update data
-      const updateData = {
-        ...data,
-        // Only include changed fields
-        ...(data.address === currentStaff.address
-          ? {}
-          : { address: data.address }),
-        ...(data.dateOfBirth === currentStaff.dateOfBirth?.split("T")[0]
-          ? {}
-          : { dateOfBirth: data.dateOfBirth }),
+      setIsSubmitting(true);
+      const formData = new FormData();
+      formData.append("username", data.username);
+      formData.append("email", data.email);
+      formData.append("fullName", data.fullName);
+      formData.append("phoneNumber", data.phoneNumber);
+      if (data.address) formData.append("address", data.address);
+      if (data.dateOfBirth) formData.append("dateOfBirth", data.dateOfBirth);
+      if (data.bio) formData.append("bio", data.bio);
+      if (fileInputRef.current?.files?.[0]) {
+        formData.append("profilePicture", fileInputRef.current.files[0]);
       }
-
-      // Send update request
-      await updateStaff({
-        id: currentStaff.id,
-        body: updateData,
-      }).unwrap()
-
-      // Redirect to staff list after successful update
-      router.push(paths.dashboard.staff.list)
+      // Use 'body' instead of 'data' if your updateStaff expects it
+      await updateStaff({ id: currentStaff.id, body: formData }).unwrap();
+      router.push(paths.dashboard.staff.list);
     } catch (error: any) {
-      const errorMessage = extractErrorMessage(error.data)
+      const errorMessage = extractErrorMessage(error.data);
       setError("root", {
         message: errorMessage || "Failed to update staff member",
-      })
+      });
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  })
+  });
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setPreview(null);
+    }
+  };
 
   if (!currentStaff) {
     return (
@@ -120,7 +130,7 @@ export function StaffEditForm({ currentStaff }: Props) {
         Edit Staff Member: {currentStaff.fullName}
       </h1>
 
-      <form onSubmit={onSubmit} className="space-y-6">
+      <form onSubmit={onSubmit} className="space-y-6" encType="multipart/form-data">
         {/* Grid Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Full Name */}
@@ -147,13 +157,13 @@ export function StaffEditForm({ currentStaff }: Props) {
             )}
           </div>
 
-          {/* Username */}
+          {/* Job Title */}
           <div className="space-y-2">
             <label
               htmlFor="username"
               className="block text-sm font-medium text-gray-700"
             >
-              Username *
+              Job Title *
             </label>
             <input
               id="username"
@@ -164,7 +174,7 @@ export function StaffEditForm({ currentStaff }: Props) {
                   ? "border-red-300 focus:ring-red-200"
                   : "border-gray-300 focus:border-blue-500 focus:ring-blue-200"
               }`}
-              placeholder="Enter username"
+              placeholder="Enter job title"
             />
             {errors.username && (
               <p className="text-red-500 text-sm">{errors.username.message}</p>
@@ -268,6 +278,52 @@ export function StaffEditForm({ currentStaff }: Props) {
               <p className="text-red-500 text-sm">{errors.address.message}</p>
             )}
           </div>
+
+          {/* Bio */}
+          <div className="space-y-2">
+            <label
+              htmlFor="bio"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Bio
+            </label>
+            <textarea
+              id="bio"
+              {...register("bio")}
+              className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:outline-none ${
+                errors.bio
+                  ? "border-red-300 focus:ring-red-200"
+                  : "border-gray-300 focus:border-blue-500 focus:ring-blue-200"
+              }`}
+              placeholder="Short bio about the staff member"
+              rows={3}
+            />
+            {errors.bio && (
+              <p className="text-red-500 text-sm">{errors.bio.message}</p>
+            )}
+          </div>
+
+          {/* Profile Picture */}
+          <div className="space-y-2">
+            <label htmlFor="profilePicture" className="block text-sm font-medium text-gray-700">
+              Profile Picture <span className="text-xs text-gray-400">(JPG, PNG, max 2MB)</span>
+            </label>
+            {/* Show preview if new image selected, else show current */}
+            {preview ? (
+              <img src={preview} alt="Preview" className="w-24 h-24 object-cover rounded-full border mb-2" />
+            ) : currentStaff?.profilePicture ? (
+              <img src={currentStaff.profilePicture} alt="Current profile" className="w-24 h-24 object-cover rounded-full border mb-2" />
+            ) : null}
+            <input
+              id="profilePicture"
+              type="file"
+              accept="image/*"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            />
+            <span className="text-xs text-gray-400">Recommended: Square image, max 2MB.</span>
+          </div>
         </div>
 
         {/* Submit Button */}
@@ -307,22 +363,8 @@ export function StaffEditForm({ currentStaff }: Props) {
               {isSubmitting ? "Updating..." : "Update Staff"}
             </div>
           </button>
-
-          <button
-            type="button"
-            onClick={() => router.push(paths.dashboard.staff.list)}
-            className="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-lg shadow-sm transition-colors"
-          >
-            Cancel
-          </button>
         </div>
       </form>
-
-      {errors.root && (
-        <div className="mt-6 p-4 bg-red-50 text-red-700 rounded-lg">
-          {errors.root.message}
-        </div>
-      )}
     </div>
   )
 }

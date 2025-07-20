@@ -330,8 +330,12 @@ export const getStaffById = tryCatch(async (req, res, next) => {
 
 // Create new staff member
 export const createStaff = tryCatch(async (req, res, next) => {
-  const { username, password, email, fullName, phoneNumber, role } = req.body
+  const { username, password, email, fullName, phoneNumber, role, bio } = req.body
+ let profilePicture = req.body.profilePicture; 
 
+if (req.file) {
+  profilePicture = `/upload/${req.file.filename}`; // set to uploaded file path
+}
   if (!username || !password || !email || !fullName || !role) {
     return next(
       new AppError(
@@ -363,6 +367,8 @@ export const createStaff = tryCatch(async (req, res, next) => {
     fullName,
     phoneNumber,
     role,
+    bio,
+    profilePicture,
   })
 
   // Return user without password
@@ -374,7 +380,7 @@ export const createStaff = tryCatch(async (req, res, next) => {
 // Update staff member
 export const updateStaff = tryCatch(async (req, res, next) => {
   const { id } = req.params
-  const { username, email, fullName, phoneNumber, role } = req.body
+  const { username, email, fullName, phoneNumber, role, bio, profilePicture } = req.body
 
   const staff = await User.findOne({
     where: { id, role: { [Op.in]: ["admin", "staff"] } },
@@ -411,6 +417,8 @@ export const updateStaff = tryCatch(async (req, res, next) => {
     fullName: fullName || staff.fullName,
     phoneNumber: phoneNumber || staff.phoneNumber,
     role: role || staff.role,
+    bio: bio || staff.bio,
+    profilePicture: profilePicture || staff.profilePicture,
   })
 
   const { password: _, ...staffWithoutPassword } = staff.toJSON()

@@ -41,6 +41,10 @@ const defineUser = (sequelize) => {
     profilePicture: {
       type: DataTypes.STRING,
     },
+    bio:{
+    type: DataTypes.STRING,
+
+    },
     address: {
       type: DataTypes.JSONB,
     },

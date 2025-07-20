@@ -6,6 +6,7 @@ export interface Staff {
   fullName: string
   phoneNumber: string
   profilePicture: string
+  bio:string
   address: string
   dateOfBirth: string
   createdAt: string

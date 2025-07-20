@@ -6,6 +6,7 @@ import { useRouter } from "../../../routes/hooks"
 import { paths } from "../../../routes/paths"
 import { useCreateStaffMutation } from "../../../store/admin"
 import { extractErrorMessage } from "../../../utils/extract-error-message"
+import { useRef } from "react";
 
 // ----------------------------------------------------------------------
 
@@ -24,7 +25,8 @@ export const NewStaffSchema = zod.object({
   // role: zod.string().min(1, { message: "Role is required!" }),
   address: zod.string().optional(),
   dateOfBirth: zod.string().optional(),
-})
+  bio: zod.string().optional(),
+});
 
 export type NewStaffSchemaType = zod.infer<typeof NewStaffSchema>
 
@@ -45,6 +47,7 @@ export function StaffNewCreateForm() {
     // role: "staff",
     address: "",
     dateOfBirth: "",
+    bio: "",
   }
 
   const {
@@ -58,25 +61,28 @@ export function StaffNewCreateForm() {
     defaultValues,
   })
 
+  const [preview, setPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const onSubmit = handleSubmit(async (data) => {
     try {
       setIsSubmitting(true)
-
-      // Prepare the staff data
-      const staffData = {
-        username: data.username,
-        password: data.password,
-        email: data.email,
-        fullName: data.fullName,
-        phoneNumber: data.phoneNumber,
-        // role: data.role,
-        role: "staff",
-        ...(data.address && { address: data.address }),
-        ...(data.dateOfBirth && { dateOfBirth: data.dateOfBirth }),
+      const formData = new FormData();
+      formData.append("username", data.username);
+      formData.append("password", data.password);
+      formData.append("email", data.email);
+      formData.append("fullName", data.fullName);
+      formData.append("phoneNumber", data.phoneNumber);
+      formData.append("role", "staff");
+      if (data.address) formData.append("address", data.address);
+      if (data.dateOfBirth) formData.append("dateOfBirth", data.dateOfBirth);
+      if (data.bio) formData.append("bio", data.bio);
+      if (fileInputRef.current?.files?.[0]) {
+        formData.append("profilePicture", fileInputRef.current.files[0]);
       }
 
       // Send the JSON data to the backend API to create the staff
-      await createStaff(staffData).unwrap()
+      await createStaff(formData).unwrap()
 
       // Reset form after successful submission
       reset()
@@ -92,13 +98,26 @@ export function StaffNewCreateForm() {
     }
   })
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setPreview(null);
+    }
+  };
+
   return (
     <div className="">
       <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6">
         Create New Staff Member
       </h1>
 
-      <form onSubmit={onSubmit} className="space-y-6">
+      <form onSubmit={onSubmit} className="space-y-6" encType="multipart/form-data">
         {/* Grid Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Full Name */}
@@ -125,13 +144,13 @@ export function StaffNewCreateForm() {
             )}
           </div>
 
-          {/* Username */}
+          {/* Job Title */}
           <div className="space-y-2">
             <label
               htmlFor="username"
               className="block text-sm font-medium text-gray-700"
             >
-              Username *
+              Job Title *
             </label>
             <input
               id="username"
@@ -142,7 +161,7 @@ export function StaffNewCreateForm() {
                   ? "border-red-300 focus:ring-red-200"
                   : "border-gray-300 focus:border-blue-500 focus:ring-blue-200"
               }`}
-              placeholder="Enter username"
+              placeholder="Enter job title"
             />
             {errors.username && (
               <p className="text-red-500 text-sm">{errors.username.message}</p>
@@ -270,6 +289,53 @@ export function StaffNewCreateForm() {
             {errors.password && (
               <p className="text-red-500 text-sm">{errors.password.message}</p>
             )}
+          </div>
+
+          {/* Bio */}
+          <div className="space-y-2">
+            <label
+              htmlFor="bio"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Bio
+            </label>
+            <textarea
+              id="bio"
+              {...register("bio")}
+              className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:outline-none ${
+                errors.bio
+                  ? "border-red-300 focus:ring-red-200"
+                  : "border-gray-300 focus:border-blue-500 focus:ring-blue-200"
+              }`}
+              placeholder="Short bio about the staff member"
+              rows={3}
+            />
+            {errors.bio && (
+              <p className="text-red-500 text-sm">{errors.bio.message}</p>
+            )}
+          </div>
+
+          {/* Profile Picture */}
+          <div className="space-y-2">
+            <label htmlFor="profilePicture" className="block text-sm font-medium text-gray-700">
+              Profile Picture <span className="text-xs text-gray-400">(JPG, PNG, max 2MB)</span>
+            </label>
+            {preview && (
+              <img
+                src={preview}
+                alt="Preview"
+                className="w-24 h-24 object-cover rounded-full border mb-2"
+              />
+            )}
+            <input
+              id="profilePicture"
+              type="file"
+              accept="image/*"
+              ref={fileInputRef}
+              onChange={handleFileChange}
+              className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+            />
+            <span className="text-xs text-gray-400">Recommended: Square image, max 2MB.</span>
           </div>
         </div>
 
