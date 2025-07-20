@@ -474,14 +474,14 @@ const StaffTableRow: React.FC<{
   <tr className="hover:bg-gray-50">
     <td className="px-6 py-4 whitespace-nowrap">
       <div className="flex items-center">
-        <img
-          className="h-10 w-10 rounded-full object-cover"
-          src={
-            staff.profilePicture ||
-            "https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909_960_720.png"
-          }
-          alt={staff.fullName}
-        />
+       <img
+        className="h-10 w-10 rounded-full object-cover border"
+        src={
+          staff.profilePicture ||
+          "https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909_960_720.png"
+        }
+        alt={""}
+      />
         <div className="ml-4">
           <div className="text-sm font-medium text-gray-900">
             {staff.fullName}

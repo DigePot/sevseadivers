@@ -11,6 +11,8 @@ import adminRoutes from "./routes/adminRoutes.js"
 import galleryRoutes from "./routes/GalleryRoutes.js"
 import enrollmentRoutes from "./routes/enrollmentRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
+import staffRoutes from "./routes/staffRoutes.js";
+
 
   
 import path from "path"
@@ -40,6 +42,8 @@ app.use("/api/admin", adminRoutes)
 app.use("/api/gallery", galleryRoutes)
 app.use("/api/enrollments", enrollmentRoutes)
 app.use("/api/payments", paymentRoutes);
+app.use("/api/staff", staffRoutes);
+
 app.get("/", (req, res) => {
   res.send("✅ Server is running and connected to Sequelize")
 })

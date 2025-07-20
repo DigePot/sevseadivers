@@ -15,6 +15,7 @@ import {
 } from "../controllers/AdminDashboardController.js"
 import authenticateToken from "../middleware/auth.js"
 import isAdmin from "../middleware/isAdmin.js"
+import upload from "../middleware/upload.js"
 
 const router = express.Router()
 
@@ -36,10 +37,10 @@ router.get("/staff", authenticateToken, isAdmin, getAllStaff)
 router.get("/staff/:id", authenticateToken, isAdmin, getStaffById)
 
 // Create new staff member (admin only)
-router.post("/staff", authenticateToken, isAdmin, createStaff)
+router.post("/staff", upload.single('profilePicture'), authenticateToken, isAdmin, createStaff)
 
 // Update staff member (admin only)
-router.put("/staff/:id", authenticateToken, isAdmin, updateStaff)
+router.put("/staff/:id", upload.single('profilePicture'),  authenticateToken, isAdmin, updateStaff)
 
 // Delete staff member (admin only)
 router.delete("/staff/:id", authenticateToken, isAdmin, deleteStaff)
