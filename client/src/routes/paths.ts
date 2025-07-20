@@ -68,12 +68,12 @@ export const paths = {
     services: `/services`,
     gallery: `/gallery`,
     contact: `/contact-us`,
+    forgotPassword: `/forgot-password`,
+    resetPassword: `/reset-password`,
   },
   // Payment
   payment: {
     root: "/success",
     courses: `/cancel`,
-   
   },
-
 }
