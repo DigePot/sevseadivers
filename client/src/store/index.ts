@@ -7,6 +7,8 @@ import { galleryApi } from "./gallery"
 import { bookingApi } from "./booking"
 import authReducer from "./auth/auth-slice"
 import { paymentApi } from "./payment";
+import { enrollmentApi } from "./enrollment";
+
 
 export const store = configureStore({
   reducer: {
@@ -18,6 +20,7 @@ export const store = configureStore({
     [galleryApi.reducerPath]: galleryApi.reducer,
     [bookingApi.reducerPath]: bookingApi.reducer,
     [paymentApi.reducerPath]: paymentApi.reducer,
+    [enrollmentApi.reducerPath]: enrollmentApi.reducer,
   },
   devTools: false,
   middleware: (getDefaultMiddleware) =>
@@ -28,7 +31,8 @@ export const store = configureStore({
       courseApi.middleware,
       galleryApi.middleware,
       bookingApi.middleware,
-      paymentApi.middleware
+      paymentApi.middleware,
+     enrollmentApi.middleware
     ),
 })
 

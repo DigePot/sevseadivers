@@ -1,21 +1,19 @@
 import React, { useEffect, useState } from "react"
-import { useParams } from "react-router-dom"
-import { useGetCourseQuery } from "../../../../store/course"
+import { useParams } from "react-router-dom";
 import { useCreatePaymentIntentMutation } from "../../../../store/payment"
 import { loadStripe } from "@stripe/stripe-js"
 import { Elements } from "@stripe/react-stripe-js"
-import StripePaymentForm from "../../../../payment/srtipre-payment-form"
+import StripePaymentForm from "../../../../payment/stripe-payment-form";
 import Spinner from "../../../../components/Spinner"
-import { useCourses } from "../../../../sections/main/course/hook/use-course"
-
+import { useCourses } from "../../../../sections/main/course/hook/use-course";
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY!)
 
 const EnrollPage: React.FC = () => {
-
-  const { data: course, isLoading, error } = useCourses
+  const { id } = useParams<{ id: string }>()
+  const { courses, loading, error } = useCourses();
   const [clientSecret, setClientSecret] = useState<string | null>(null)
-
+  const course = courses.find(c => c.id.toString() === id);
   const [createPaymentIntent, { isLoading: isCreating }] = useCreatePaymentIntentMutation()
 
   useEffect(() => {
@@ -36,7 +34,7 @@ const EnrollPage: React.FC = () => {
     fetchPaymentIntent()
   }, [course, createPaymentIntent])
 
-  if (isLoading || isCreating || !stripePromise) return <Spinner />
+  if (loading  || isCreating || !stripePromise) return <Spinner />
   if (error || !course) return <p className="text-red-600">Course not found</p>
 
   return (

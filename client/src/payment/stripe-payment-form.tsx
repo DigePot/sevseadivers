@@ -1,48 +1,46 @@
-// src/components/StripePaymentForm.tsx
 import React, { useEffect, useState } from "react";
-import { 
-  CardNumberElement, 
-  CardExpiryElement, 
+import {
+  CardNumberElement,
+  CardExpiryElement,
   CardCvcElement,
-  useStripe, 
-  useElements 
+  useStripe,
+  useElements
 } from "@stripe/react-stripe-js";
-
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useGetCourseQuery } from "../store/course";
 import usePayment from "./hook/use-payment";
 import { useCreateEnrollmentMutation } from "../store/enrollment";
-import { useAuth } from "../sections/auth/hooks/use-auth";
 
 
 
+interface StripePaymentFormProps {
+  courseId: string | number;
+}
 
-const StripePaymentForm: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+const StripePaymentForm: React.FC<StripePaymentFormProps> = ({ courseId }) => {
   const navigate = useNavigate();
-  const { data: course, isLoading: courseLoading } = useGetCourseQuery(id);
+  // Ensure courseId is a string for useGetCourseQuery
+  const courseIdStr = String(courseId);
+  const { data: course, isLoading: courseLoading } = useGetCourseQuery(courseIdStr);
   const stripe = useStripe();
   const elements = useElements();
   const [createEnrollment] = useCreateEnrollmentMutation();
-   const { userId } = useAuth();
+ 
+
   // payment hook
   const amount = course ? Number(course.price) : 0;
-  const { 
-    clientSecret, 
-    error: paymentIntentError, 
-    isLoading: paymentIntentLoading 
+  const {
+    clientSecret,
+    error: paymentIntentError,
+    isLoading: paymentIntentLoading
   } = usePayment(amount);
-  
+
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [success, setSuccess] = useState(false);
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
   const [country, setCountry] = useState("US");
   const [postalCode, setPostalCode] = useState("");
-  
-
-  
 
   // Handle payment intent errors
   useEffect(() => {
@@ -70,7 +68,7 @@ const StripePaymentForm: React.FC = () => {
     e.preventDefault();
     setError(null);
     setIsSubmitting(true);
-    
+
     if (!stripe || !elements || !clientSecret) {
       setError("Payment system is not ready. Please try again.");
       setIsSubmitting(false);
@@ -111,36 +109,57 @@ const StripePaymentForm: React.FC = () => {
         throw new Error(stripeError.message || "Payment failed");
       }
 
-     if (paymentIntent && paymentIntent.status === "succeeded") {
-       try {
-     await createEnrollment({
-         userId: userId!,
-         courseId: course?.id,
-         paymentMethod: "stripe",
-         amount: course?.price,
-         currency: "USD"
-    }).unwrap();
+      if (paymentIntent && paymentIntent.status === "succeeded") {
+        try {
+          // Only try to create enrollment if course is defined
+          if (course) {
+            const result = await createEnrollment({
+              courseId: course.id,
+              paymentMethod: "stripe",
+              amount: course.price,
+              currency: "USD"
+            });
 
-    setSuccess(true);
-  } catch (err: any) {
-    // Enhanced error logging
-    console.error('Enrollment error:', {
-      status: err.status,
-      data: err.data,
-      originalStatus: err.originalStatus
-    });
-    
-    setError(
-      err.data?.error?.message || 
-      "Enrollment failed. Please contact support with your payment ID: " + 
-      paymentIntent.id
-    );
-  }
- }
+            // Check if we got a successful response
+            if ('data' in result) {
+              navigate("/enrollments/success", {
+                state: {
+                  courseTitle: course.title,
+                  amount: course.price,
+                  paymentId: paymentIntent.id
+                }
+              });
+            } else if ('error' in result) {
+              // Handle RTK Query error
+              const error = result.error as any;
+              let errorMsg = "Enrollment failed";
+
+              if (error?.data) {
+                // Handle HTML errors
+                if (typeof error.data === 'string' && error.data.includes('<!DOCTYPE html>')) {
+                  const match = error.data.match(/<pre>(.*?)<\/pre>/s);
+                  errorMsg = match ? match[1] : "Server error";
+                }
+                // Handle structured errors
+                else if (error.data.error) {
+                  errorMsg = error.data.error;
+                } else if (error.data.message) {
+                  errorMsg = error.data.message;
+                }
+              } else if (error?.message) {
+                errorMsg = error.message;
+              }
+
+              setError(errorMsg);
+            }
+          }
+        } catch (err: any) {
+          setError("Failed to complete enrollment. Please contact support.");
+        }
+      }
     } catch (err: any) {
-      // Convert error to readable string
       let errorMessage = "Payment failed";
-      
+
       if (err.message) {
         errorMessage = err.message;
       } else if (err.response?.data?.message) {
@@ -150,12 +169,13 @@ const StripePaymentForm: React.FC = () => {
       } else if (typeof err === 'string') {
         errorMessage = err;
       }
-      
+
       setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
   };
+
   // Combine loading states
   const isLoading = courseLoading || paymentIntentLoading;
 
@@ -169,7 +189,7 @@ const StripePaymentForm: React.FC = () => {
       </div>
     );
   }
-  
+
   if (!course) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-cyan-50 to-blue-100 flex items-center justify-center p-4">
@@ -193,30 +213,6 @@ const StripePaymentForm: React.FC = () => {
       </div>
     );
   }
-  
-  if (success) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-cyan-50 to-blue-100 flex items-center justify-center p-4">
-        <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-lg text-center">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-            </svg>
-          </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-4">Payment Successful!</h2>
-          <p className="mb-6 text-gray-600">
-            You are now enrolled in <span className="font-semibold">{course.title}</span>.
-          </p>
-          <button
-            className="bg-cyan-600 hover:bg-cyan-700 text-white px-6 py-3 rounded-lg font-medium transition"
-            onClick={() => navigate("/mycourses")}
-          >
-            Go to My Courses
-          </button>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 to-blue-100 py-12 px-4 sm:px-6">
@@ -225,13 +221,11 @@ const StripePaymentForm: React.FC = () => {
           <h1 className="text-3xl font-bold text-cyan-800 mb-2">Secure Payment</h1>
           <p className="text-cyan-600">Complete your purchase for {course.title}</p>
         </div>
-        
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           <div className="p-6 bg-gradient-to-r from-cyan-500 to-blue-500 text-white">
             <h2 className="text-xl font-bold">Course Summary</h2>
             <p className="opacity-90">{course.title}</p>
           </div>
-          
           <div className="p-6 border-b border-gray-200">
             <div className="flex justify-between items-center">
               <div>
@@ -241,7 +235,6 @@ const StripePaymentForm: React.FC = () => {
               <div className="text-2xl font-bold text-cyan-700">{course.price} $</div>
             </div>
           </div>
-          
           <form onSubmit={handleSubmit} className="p-6">
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
@@ -254,12 +247,12 @@ const StripePaymentForm: React.FC = () => {
                 required
               />
             </div>
-            
+
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">Card Information</label>
               <div className="bg-gray-50 rounded-lg border border-gray-300 px-4 py-3 mb-3">
-                <CardNumberElement 
-                  options={stripeElementOptions} 
+                <CardNumberElement
+                  options={stripeElementOptions}
                   className="w-full"
                 />
               </div>
@@ -271,9 +264,9 @@ const StripePaymentForm: React.FC = () => {
                   <CardCvcElement options={stripeElementOptions} />
                 </div>
               </div>
-        
+
             </div>
-            
+
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">Name on card</label>
               <input
@@ -285,7 +278,7 @@ const StripePaymentForm: React.FC = () => {
                 required
               />
             </div>
-            
+
             <div className="grid grid-cols-2 gap-4 mb-8">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Country or region</label>
@@ -316,13 +309,13 @@ const StripePaymentForm: React.FC = () => {
                 />
               </div>
             </div>
-            
+
             {error && (
               <div className="mb-6 text-red-500 text-sm p-3 bg-red-50 rounded-lg border border-red-100">
                 {error}
               </div>
             )}
-            
+
             <button
               type="submit"
               disabled={isSubmitting || !stripe || !clientSecret}
@@ -344,7 +337,7 @@ const StripePaymentForm: React.FC = () => {
                 `Pay ${course.price} $`
               )}
             </button>
-            
+
             <div className="flex items-center justify-center mt-6">
               <div className="flex items-center">
                 <div className="mr-2 text-gray-400 text-sm">Secured by</div>
@@ -359,7 +352,7 @@ const StripePaymentForm: React.FC = () => {
             </div>
           </form>
         </div>
-        
+
         <div className="mt-8 text-center text-cyan-700 text-sm">
           <p>All transactions are encrypted and securely processed</p>
           <p className="mt-1">© {new Date().getFullYear()} Learning Platform. All rights reserved.</p>

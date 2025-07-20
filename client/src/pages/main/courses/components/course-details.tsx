@@ -104,9 +104,7 @@ export default function CourseDetails() {
                   )}
                 </div>
                 <button
-                  onClick={() => navigate(`/courses/${id}/checkout`, {
-                    state: { courseId: id, price: course.price },
-                  })}
+                  onClick={() => navigate(`/courses/${id}/checkout`)}
                   className="bg-cyan-600 hover:bg-cyan-700 text-white px-8 py-3 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all duration-300 flex items-center justify-center"
                 >
                   Enroll Now

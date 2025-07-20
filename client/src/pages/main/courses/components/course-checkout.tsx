@@ -2,7 +2,7 @@ import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import { useParams } from "react-router-dom";
 import { useCourses } from "../../../../sections/main/course/hook/use-course";
-import StripePaymentForm from "../../../../payment/srtipre-payment-form";
+import StripePaymentForm from "../../../../payment/stripe-payment-form";
 import Spinner from "../../../../components/Spinner"; 
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY!);
@@ -33,7 +33,7 @@ const CheckoutPage = () => {
     <div className="min-h-screen p-4">
       <h1 className="text-2xl font-semibold text-center mb-6">Checkout</h1>
       <Elements stripe={stripePromise}>
-        <StripePaymentForm courseId={course.id} amount={course.price} />
+        <StripePaymentForm courseId={course.id} />
       </Elements>
     </div>
   );

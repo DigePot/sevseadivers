@@ -11,10 +11,10 @@ import authenticateToken from "../middleware/auth.js";
 
 const router = express.Router();
 
-router.use(authenticateToken);
 
-router.post("/", createEnrollment);
-router.get("/", getUserEnrollments); // or getAllEnrollments if admin
+
+router.post("/add", authenticateToken, createEnrollment);
+router.get("/my", authenticateToken, getUserEnrollments);
 router.get("/:id", getEnrollmentById);
 router.delete("/:id", deleteEnrollment);
 

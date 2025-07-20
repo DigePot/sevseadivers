@@ -2,56 +2,83 @@ import { Enrollment, Course, User } from '../models/index.js';
 import tryCatch from '../utils/tryCatch.js';
 import AppError from '../utils/appErorr.js';
 
-// Create an enrollment
+// ✅ Create an enrollment
 export const createEnrollment = tryCatch(async (req, res, next) => {
-  const { userId, courseId, paymentMethod } = req.body;
+  // Get userId from the authenticated user (JWT)
+  const userId = req.user.id;
+  const { courseId, paymentMethod, amount, currency } = req.body;
+
   if (!userId || !courseId) {
     return next(new AppError('userId and courseId are required', 400));
   }
+
   const course = await Course.findByPk(courseId);
-  if (!course) return next(new AppError('Course not found', 404));
-  // Optionally check if already enrolled
-  const exists = await Enrollment.findOne({ where: { userId, courseId } });
-  if (exists) return next(new AppError('Already enrolled in this course', 400));
-  const enrollment = await Enrollment.create({ userId, courseId, paymentMethod, status: 'paid' });
-  res.status(201).json(enrollment);
+  if (!course) {
+    return next(new AppError('Course not found', 404));
+  }
+
+  const existingEnrollment = await Enrollment.findOne({ where: { userId, courseId } });
+  if (existingEnrollment) {
+    return next(new AppError('Already enrolled in this course', 400));
+  }
+
+  const enrollment = await Enrollment.create({
+    userId,
+    courseId,
+    paymentMethod,
+    amount,
+    currency,
+    status: 'paid',
+  });
+
+  res.status(201).json({ success: true, data: enrollment });
 });
 
-// Get all enrollments (admin/staff)
+// ✅ Get all enrollments (admin)
 export const getAllEnrollments = tryCatch(async (req, res, next) => {
   const enrollments = await Enrollment.findAll({
     include: [User, Course],
     order: [['createdAt', 'DESC']],
   });
-  res.json(enrollments);
+
+  res.json({ success: true, data: enrollments });
 });
 
-// Get all enrollments for a user
+// ✅ Get enrollments for a specific user
 export const getUserEnrollments = tryCatch(async (req, res, next) => {
-  const { userId } = req.params;
+  const userId = req.user.id; 
   const enrollments = await Enrollment.findAll({
     where: { userId },
     include: [Course],
     order: [['createdAt', 'DESC']],
   });
-  res.json(enrollments);
+  res.json({ success: true, data: enrollments });
 });
 
-// Get enrollment by ID
+// ✅ Get single enrollment by ID
 export const getEnrollmentById = tryCatch(async (req, res, next) => {
   const { id } = req.params;
+
   const enrollment = await Enrollment.findByPk(id, {
     include: [Course, User],
   });
-  if (!enrollment) return next(new AppError('Enrollment not found', 404));
-  res.json(enrollment);
+
+  if (!enrollment) {
+    return next(new AppError('Enrollment not found', 404));
+  }
+
+  res.json({ success: true, data: enrollment });
 });
 
-// Delete an enrollment
+// ✅ Delete enrollment
 export const deleteEnrollment = tryCatch(async (req, res, next) => {
   const { id } = req.params;
+
   const enrollment = await Enrollment.findByPk(id);
-  if (!enrollment) return next(new AppError('Enrollment not found', 404));
+  if (!enrollment) {
+    return next(new AppError('Enrollment not found', 404));
+  }
+
   await enrollment.destroy();
-  res.json({ message: 'Enrollment deleted' });
+  res.json({ success: true, message: 'Enrollment deleted' });
 });

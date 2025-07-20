@@ -1,4 +1,5 @@
-// src/types/enrollment.ts
+import type { Course } from "./course";
+
 export interface Enrollment {
   id: number;
   userId: number;
@@ -8,6 +9,7 @@ export interface Enrollment {
   paymentMethod: string;
   amount: number;
   currency: string;
+  Course?: Course; 
 }
 
 export interface CreateEnrollmentRequest {
