@@ -22,8 +22,10 @@ export type ProfileFormType = zod.infer<typeof profileSchema>
 export const ProfileView = () => {
   const id = localStorage.getItem("id") ?? ""
   const { user } = useUser(id)
-  const [updateMyProfile, { isLoading, error, isSuccess }] = useUpdateMyProfileMutation()
-  const [originalProfile, setOriginalProfile] = useState<ProfileFormType | null>(null)
+  const [updateMyProfile, { isLoading, error, isSuccess }] =
+    useUpdateMyProfileMutation()
+  const [originalProfile, setOriginalProfile] =
+    useState<ProfileFormType | null>(null)
 
   const {
     register,
@@ -37,7 +39,9 @@ export const ProfileView = () => {
   useEffect(() => {
     if (user) {
       const { fullName, email, phoneNumber, address, dateOfBirth } = user
-      const formattedDOB = dateOfBirth ? new Date(dateOfBirth).toISOString().split("T")[0] : ""
+      const formattedDOB = dateOfBirth
+        ? new Date(dateOfBirth).toISOString().split("T")[0]
+        : ""
       const data: ProfileFormType = {
         fullName: fullName || "",
         email: email || "",
@@ -64,7 +68,9 @@ export const ProfileView = () => {
     }
   }
 
-  const renderError = (error: FetchBaseQueryError | SerializedError | undefined) => {
+  const renderError = (
+    error: FetchBaseQueryError | SerializedError | undefined
+  ) => {
     if (!error) return null
     if ("data" in error) {
       const errorData = error.data as { error?: string }
@@ -96,7 +102,10 @@ export const ProfileView = () => {
           Update Your Profile
         </h2>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        >
           {[
             ["Full Name", "fullName"],
             ["Email", "email"],

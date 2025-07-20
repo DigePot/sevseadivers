@@ -12,18 +12,25 @@ const AboutPage = lazy(() => import("../../pages/main/about-us"))
 const ContactPage = lazy(() => import("../../pages/main/contact-us"))
 const TripsPage = lazy(() => import("../../pages/main/trips"))
 const CoursePage = lazy(() => import("../../pages/main/courses/index"))
-const CourseDetailsPage = lazy(() => import("../../pages/main/courses/components/course-details"))
-import MyCoursesPage from "../../pages/main/courses/enrolled/my-courses";
-
-
-
+const CourseDetailsPage = lazy(
+  () => import("../../pages/main/courses/components/course-details")
+)
+import MyCoursesPage from "../../pages/main/courses/enrolled/my-courses"
 
 const ServicePage = lazy(() => import("../../pages/main/service/index"))
 const GalleryPage = lazy(() => import("../../pages/main/gallery/index"))
-const CourseCheckoutPage = lazy(() => import("../../pages/main/courses/components/course-checkout"))  
-const CourseEnrolledPage = lazy(() => import("../../pages/main/courses/components/course-checkout"))  
-const EnrollmentSuccessPage = lazy(() => import("../../payment/payment-succes"))  
+const CourseCheckoutPage = lazy(
+  () => import("../../pages/main/courses/components/course-checkout")
+)
+const CourseEnrolledPage = lazy(
+  () => import("../../pages/main/courses/components/course-checkout")
+)
+const EnrollmentSuccessPage = lazy(() => import("../../payment/payment-succes"))
 
+const ForgotPasswordPage = lazy(
+  () => import("../../pages/main/forgot-password")
+)
+const ResetPasswordPage = lazy(() => import("../../pages/main/reset-password"))
 
 // ------------------------------------------------------------------------
 
@@ -53,13 +60,10 @@ export const mainRoutes: RouteObject[] = [
           { path: "enrollments", element: <CourseEnrolledPage /> },
           { path: "enrollments/success", element: <EnrollmentSuccessPage /> },
           { path: "mycourses", element: <MyCoursesPage /> },
-       
-           
-
-
+          { path: "forgot-password", element: <ForgotPasswordPage /> },
+          { path: "reset-password", element: <ResetPasswordPage /> },
         ],
       },
     ],
   },
 ]
-
