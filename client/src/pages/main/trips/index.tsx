@@ -64,8 +64,8 @@ export default function Page() {
       <Helmet>
         <title>{metadata.title}</title>
       </Helmet>
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: 32 }}>
-        <h1 style={{ fontSize: 36, fontWeight: 700, marginBottom: 32 }}>
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 md:px-8 py-8">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-cyan-700 mb-8 text-left">
           Explore Our Diving and Snorkeling Trips
         </h1>
         <TripFilters
@@ -79,11 +79,11 @@ export default function Page() {
           setDate={setDate}
         />
         {isLoading && <div>Loading trips...</div>}
-        {error && <div style={{ color: "red" }}>Failed to load trips.</div>}
+        {error && <div className="text-red-600">Failed to load trips.</div>}
         {!isLoading && !error && paginatedTrips.length === 0 && (
-          <div style={{ color: "#888", fontSize: 18 }}>No trips available.</div>
+          <div className="text-gray-500 text-lg">No trips available.</div>
         )}
-        <div style={{ display: "flex", flexDirection: "column", gap: 32 }}>
+        <div className="flex flex-col gap-8">
           {paginatedTrips.map((trip) => (
             <TripCard key={trip.id} trip={trip} />
           ))}

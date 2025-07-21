@@ -25,6 +25,14 @@ const defineBooking = (sequelize) => {
         allowNull: false,
         defaultValue: DataTypes.NOW,
       },
+      tripId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+          model: 'Trips',
+          key: 'id'
+        }
+      },
     },
     {
       timestamps: true,

@@ -56,6 +56,8 @@ const Enrollment = defineEnrollment(sequelize);
 // Associations...
 Booking.belongsTo(User, { foreignKey: 'userId' });
 Booking.belongsTo(Course, { foreignKey: 'courseId' });
+Booking.belongsTo(Trip, { foreignKey: 'tripId' });
+Trip.hasMany(Booking, { foreignKey: 'tripId' });
 User.hasMany(Booking, { foreignKey: 'userId' });
 Course.hasMany(Booking, { foreignKey: 'courseId' });
 

@@ -1,23 +1,29 @@
-import { Booking, Course, User } from "../models/index.js"
+import { Booking, Course, User, Trip } from "../models/index.js"
 import tryCatch from "../utils/tryCatch.js"
 import AppError from "../utils/appErorr.js"
 
 // Create a booking
 export const createBooking = tryCatch(async (req, res, next) => {
-  const { userId, courseId } = req.body
-  if (!userId || !courseId) {
-    return next(new AppError("userId and courseId are required", 400))
+  const { userId, courseId, tripId, amount, status, bookingDate } = req.body;
+  if (!userId || (!courseId && !tripId)) {
+    return next(new AppError("userId and courseId or tripId are required", 400));
   }
-  const course = await Course.findByPk(courseId)
-  if (!course) return next(new AppError("Course not found", 404))
-  const booking = await Booking.create({ userId, courseId })
-  res.status(201).json(booking)
-})
+  let booking;
+  if (courseId) {
+    const course = await Course.findByPk(courseId);
+    if (!course) return next(new AppError("Course not found", 404));
+    booking = await Booking.create({ userId, courseId, amount, status, bookingDate });
+  } else if (tripId) {
+    // You may want to check if the trip exists as well
+    booking = await Booking.create({ userId, tripId, amount, status, bookingDate });
+  }
+  res.status(201).json(booking);
+});
 
 // ✅ Get all bookings (admin/staff)
 export const getAllBookings = tryCatch(async (req, res, next) => {
   const bookings = await Booking.findAll({
-    include: [User, Course],
+    include: [User, Course, Trip],
     order: [["createdAt", "DESC"]],
   })
   res.json(bookings)
@@ -28,7 +34,7 @@ export const getAllBookingsForUser = tryCatch(async (req, res, next) => {
   const { userId } = req.params
   const bookings = await Booking.findAll({
     where: { userId },
-    include: [Course],
+    include: [Course, Trip],
     order: [["createdAt", "DESC"]],
   })
   res.json(bookings)
@@ -38,7 +44,7 @@ export const getAllBookingsForUser = tryCatch(async (req, res, next) => {
 export const getBookingById = tryCatch(async (req, res, next) => {
   const { id } = req.params
   const booking = await Booking.findByPk(id, {
-    include: [Course, User],
+    include: [Course, User, Trip],
   })
   if (!booking) return next(new AppError("Booking not found", 404))
   res.json(booking)

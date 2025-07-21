@@ -9,6 +9,7 @@ import authReducer from "./auth/auth-slice"
 import { paymentApi } from "./payment";
 import { enrollmentApi } from "./enrollment";
 import { staffApi } from "./staff"
+import bookingReducer from "./booking-slice";
 
 
 export const store = configureStore({
@@ -22,7 +23,8 @@ export const store = configureStore({
     [bookingApi.reducerPath]: bookingApi.reducer,
     [paymentApi.reducerPath]: paymentApi.reducer,
     [enrollmentApi.reducerPath]: enrollmentApi.reducer,
-    [ staffApi.reducerPath]:  staffApi.reducer,
+    [staffApi.reducerPath]: staffApi.reducer,
+    booking: bookingReducer,
   },
   devTools: false,
   middleware: (getDefaultMiddleware) =>

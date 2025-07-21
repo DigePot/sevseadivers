@@ -1,81 +1,44 @@
-import { Link } from "react-router"
+import { useDispatch } from "react-redux"
+import { setSelectedTrip } from "../../../../store/booking-slice"
+import { useNavigate } from "react-router-dom"
 import type { Trip } from "../../../../types/trip"
 
 interface TripCardProps {
   trip: Trip
 }
 
-const cardStyle: React.CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  background: "#fff",
-  borderRadius: 16,
-  boxShadow: "0 2px 8px #0001",
-  padding: 24,
-  gap: 32,
-  transition:
-    "box-shadow 0.3s cubic-bezier(.4,2,.6,1), transform 0.3s cubic-bezier(.4,2,.6,1)",
-  cursor: "pointer",
-}
-
 export default function TripCard({ trip }: TripCardProps) {
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+
+  const handleBookNow = () => {
+    dispatch(setSelectedTrip(trip))
+    navigate("/trips/booking-summary")
+  }
+
   return (
     <div
-      style={cardStyle}
-      onMouseEnter={(e) => {
-        ;(e.currentTarget as HTMLDivElement).style.boxShadow =
-          "0 8px 24px #06b6d422"
-        ;(e.currentTarget as HTMLDivElement).style.transform =
-          "translateY(-6px) scale(1.015)"
-      }}
-      onMouseLeave={(e) => {
-        ;(e.currentTarget as HTMLDivElement).style.boxShadow = "0 2px 8px #0001"
-        ;(e.currentTarget as HTMLDivElement).style.transform = "none"
-      }}
+      className="flex flex-col md:flex-row items-center bg-white rounded-2xl shadow-md p-4 md:p-6 gap-6 md:gap-10 hover:shadow-xl transition-shadow duration-300 cursor-pointer"
     >
-      <div style={{ flex: 1 }}>
-        <h2 style={{ fontSize: 22, fontWeight: 700, margin: 0 }}>
+      <div className="flex-1 w-full">
+        <h2 className="text-xl md:text-2xl font-bold text-cyan-700 mb-2">
           {trip.title}
         </h2>
-        <div style={{ color: "#444", margin: "12px 0 18px 0", fontSize: 16 }}>
+        <div className="text-gray-700 mb-4 text-base md:text-lg">
           {trip.description}
         </div>
-        <Link
-          to={`/trips/${trip.id}/book`}
-          style={{
-            background: "#06b6d4",
-            color: "#fff",
-            border: "none",
-            borderRadius: 8,
-            padding: "10px 24px",
-            fontWeight: 600,
-            fontSize: 16,
-            textDecoration: "none",
-            transition: "background 0.2s",
-            display: "inline-block",
-          }}
+        <button
+          onClick={handleBookNow}
+          className="bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg px-6 py-2 font-semibold text-base md:text-lg transition-colors shadow"
         >
           Book Now
-        </Link>
+        </button>
       </div>
       {trip.imageUrl && (
         <img
           src={trip.imageUrl}
           alt={trip.title}
-          style={{
-            width: 260,
-            height: 140,
-            objectFit: "cover",
-            borderRadius: 12,
-            transition: "transform 0.3s cubic-bezier(.4,2,.6,1)",
-          }}
-          onMouseEnter={(e) => {
-            ;(e.currentTarget as HTMLImageElement).style.transform =
-              "scale(1.04)"
-          }}
-          onMouseLeave={(e) => {
-            ;(e.currentTarget as HTMLImageElement).style.transform = "none"
-          }}
+          className="w-full md:w-64 h-40 md:h-36 object-cover rounded-xl border shadow-sm transition-transform duration-300 hover:scale-105"
         />
       )}
     </div>

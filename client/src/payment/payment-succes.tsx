@@ -2,7 +2,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 const PaymentSuccessPage = () => {
   const { state } = useLocation();
-  const navigate = useNavigate(); // ✅ useNavigate hook
+  const navigate = useNavigate(); 
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 to-blue-100 flex items-center justify-center p-4">
@@ -22,15 +22,15 @@ const PaymentSuccessPage = () => {
         <div className="flex flex-col gap-3">
           <button
             className="bg-cyan-600 hover:bg-cyan-700 text-white px-6 py-3 rounded-lg font-medium transition"
-            onClick={() => navigate("/mycourses")} // ✅ Correct
+            onClick={() => navigate("/mybooking")}
           >
-            Go to My Courses
+            Go to My Bookings
           </button>
           <button
             className="border border-cyan-600 text-cyan-700 px-6 py-3 rounded-lg font-medium transition hover:bg-cyan-50"
-            onClick={() => navigate("/courses")} // ✅ Correct
+            onClick={() => navigate("/trips")}
           >
-            Browse More Courses
+            Browse More Trips
           </button>
         </div>
         {state?.paymentId && (
