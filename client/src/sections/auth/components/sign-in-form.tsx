@@ -3,7 +3,7 @@ import axios from "axios"
 import React, { useState } from "react"
 import { useForm } from "react-hook-form"
 import { useDispatch } from "react-redux"
-import { Link } from "react-router-dom"
+import { Link } from "react-router"
 import { z as zod } from "zod"
 import { useRouter, useSearchParams } from "../../../routes/hooks"
 import type { AppDispatch } from "../../../store"
@@ -96,13 +96,14 @@ export const SignInForm: React.FC = () => {
       )}
 
       {/* Header */}
-      <h2 className="text-2xl font-bold text-center text-gray-900">
-        Sign In
-      </h2>
+      <h2 className="text-2xl font-bold text-center text-gray-900">Sign In</h2>
 
       {/* Email input */}
       <div>
-        <label htmlFor="email" className="block mb-1 font-semibold text-gray-700">
+        <label
+          htmlFor="email"
+          className="block mb-1 font-semibold text-gray-700"
+        >
           Email
         </label>
         <input
@@ -125,7 +126,10 @@ export const SignInForm: React.FC = () => {
 
       {/* Password input */}
       <div>
-        <label htmlFor="password" className="block mb-1 font-semibold text-gray-700">
+        <label
+          htmlFor="password"
+          className="block mb-1 font-semibold text-gray-700"
+        >
           Password
         </label>
         <input
@@ -168,7 +172,10 @@ export const SignInForm: React.FC = () => {
       {/* Sign Up link */}
       <p className="mt-4 text-center text-sm text-gray-700">
         Don’t have an account?{" "}
-        <Link to="/auth/sign-up" className="text-cyan-600 hover:underline font-semibold">
+        <Link
+          to="/auth/sign-up"
+          className="text-cyan-600 hover:underline font-semibold"
+        >
           Sign Up
         </Link>
       </p>

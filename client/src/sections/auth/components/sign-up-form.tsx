@@ -2,7 +2,7 @@ import React, { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { motion, AnimatePresence } from "framer-motion"
-import { Link } from "react-router-dom"
+import { Link } from "react-router"
 import axios from "axios"
 import { z as zod } from "zod"
 import {

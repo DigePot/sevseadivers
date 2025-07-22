@@ -17,7 +17,7 @@ import {
 import { useDeleteCourseMutation } from "../../../../store/course"
 import type { Course } from "../../../../types/course"
 import { useCourses } from "../hooks/use-courses"
-import { Link } from "react-router-dom"
+import { Link } from "react-router"
 import { paths } from "../../../../routes/paths"
 
 // ============================================================================

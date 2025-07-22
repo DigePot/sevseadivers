@@ -1,5 +1,5 @@
 import React, { useState, useEffect, type ReactNode, useCallback } from "react"
-import { Link, useLocation } from "react-router-dom"
+import { Link, useLocation } from "react-router"
 import { navData, type NavItem } from "../nav-config-dashboard"
 import clsx from "clsx"
 import {

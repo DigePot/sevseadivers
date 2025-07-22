@@ -1,35 +1,35 @@
-import { Link } from "react-router-dom";
-import heroImg from "../../../../assets/hero.jpg";
-import { useTrips } from "../../../trip/hooks/use-trips";
-import { motion } from "framer-motion";
+import { Link } from "react-router"
+import heroImg from "../../../../assets/hero.jpg"
+import { useTrips } from "../../../trip/hooks/use-trips"
+import { motion } from "framer-motion"
 
 export function HomeView() {
-  const { allTrips } = useTrips();
+  const { allTrips } = useTrips()
 
   if (!allTrips) {
     return (
       <div className="flex justify-center items-center h-screen bg-black text-white">
         Loading trips...
       </div>
-    );
+    )
   }
 
   const featuredDestinations = (() => {
-    const seen = new Set();
-    const arr = [];
+    const seen = new Set()
+    const arr = []
     for (const trip of allTrips) {
       if (!seen.has(trip.destination)) {
-        seen.add(trip.destination);
+        seen.add(trip.destination)
         arr.push({
           destination: trip.destination,
           imageUrl: trip.imageUrl,
           description: trip.description,
-        });
-        if (arr.length === 3) break;
+        })
+        if (arr.length === 3) break
       }
     }
-    return arr;
-  })();
+    return arr
+  })()
 
   return (
     <>
@@ -132,5 +132,5 @@ export function HomeView() {
         </div>
       </section>
     </>
-  );
+  )
 }

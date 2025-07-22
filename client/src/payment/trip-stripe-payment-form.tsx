@@ -1,89 +1,90 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react"
 import {
   CardNumberElement,
   CardExpiryElement,
   CardCvcElement,
   useStripe,
-  useElements
-} from "@stripe/react-stripe-js";
-import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
-import type { RootState } from "../store";
-import usePayment from "./hook/use-payment";
-import { useCreateBookingMutation } from "../store/booking";
+  useElements,
+} from "@stripe/react-stripe-js"
+import { useNavigate } from "react-router"
+import { useSelector } from "react-redux"
+import type { RootState } from "../store"
+import usePayment from "./hook/use-payment"
+import { useCreateBookingMutation } from "../store/booking"
 
 const TripStripePaymentForm: React.FC = () => {
-  const navigate = useNavigate();
-  const selectedTrip = useSelector((state: RootState) => state.booking.selectedTrip);
-  const stripe = useStripe();
-  const elements = useElements();
+  const navigate = useNavigate()
+  const selectedTrip = useSelector(
+    (state: RootState) => state.booking.selectedTrip
+  )
+  const stripe = useStripe()
+  const elements = useElements()
 
   // payment hook
-  const amount = selectedTrip ? Number(selectedTrip.price) : 0;
+  const amount = selectedTrip ? Number(selectedTrip.price) : 0
   const {
     clientSecret,
     error: paymentIntentError,
-    isLoading: paymentIntentLoading
-  } = usePayment(amount);
+    isLoading: paymentIntentLoading,
+  } = usePayment(amount)
 
-  const [createBooking] = useCreateBookingMutation();
+  const [createBooking] = useCreateBookingMutation()
 
-  const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [email, setEmail] = useState("");
-  const [name, setName] = useState("");
-  const [country, setCountry] = useState("US");
-  const [postalCode, setPostalCode] = useState("");
+  const [error, setError] = useState<string | null>(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [email, setEmail] = useState("")
+  const [name, setName] = useState("")
+  const [country, setCountry] = useState("US")
+  const [postalCode, setPostalCode] = useState("")
 
   useEffect(() => {
     if (paymentIntentError) {
-      setError(paymentIntentError);
+      setError(paymentIntentError)
     }
-  }, [paymentIntentError]);
+  }, [paymentIntentError])
 
-  const userId = useSelector((state: RootState) => state.auth.id);
+  const userId = useSelector((state: RootState) => state.auth.id)
 
   const stripeElementOptions = {
     style: {
       base: {
-        fontSize: '16px',
-        color: '#0e7490',
-        '::placeholder': {
-          color: '#a5b4fc',
+        fontSize: "16px",
+        color: "#0e7490",
+        "::placeholder": {
+          color: "#a5b4fc",
         },
       },
       invalid: {
-        color: '#f56565',
+        color: "#f56565",
       },
     },
-  };
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setIsSubmitting(true);
+    e.preventDefault()
+    setError(null)
+    setIsSubmitting(true)
 
     if (!stripe || !elements || !clientSecret) {
-      setError("Payment system is not ready. Please try again.");
-      setIsSubmitting(false);
-      return;
+      setError("Payment system is not ready. Please try again.")
+      setIsSubmitting(false)
+      return
     }
 
     if (!email || !name || !postalCode) {
-      setError("Please fill in all required fields.");
-      setIsSubmitting(false);
-      return;
+      setError("Please fill in all required fields.")
+      setIsSubmitting(false)
+      return
     }
 
     try {
-      const cardElement = elements.getElement(CardNumberElement);
+      const cardElement = elements.getElement(CardNumberElement)
       if (!cardElement) {
-        throw new Error("Card information is incomplete");
+        throw new Error("Card information is incomplete")
       }
 
-      const { error: stripeError, paymentIntent } = await stripe.confirmCardPayment(
-        clientSecret,
-        {
+      const { error: stripeError, paymentIntent } =
+        await stripe.confirmCardPayment(clientSecret, {
           payment_method: {
             card: cardElement,
             billing_details: {
@@ -91,66 +92,66 @@ const TripStripePaymentForm: React.FC = () => {
               email,
               address: {
                 country,
-                postal_code: postalCode
-              }
-            }
-          }
-        }
-      );
+                postal_code: postalCode,
+              },
+            },
+          },
+        })
 
       if (stripeError) {
-        throw new Error(stripeError.message || "Payment failed");
+        throw new Error(stripeError.message || "Payment failed")
       }
 
       if (paymentIntent && paymentIntent.status === "succeeded") {
-        const numericUserId = userId ? Number(userId) : undefined;
+        const numericUserId = userId ? Number(userId) : undefined
         const bookingPayload = {
           userId: numericUserId,
           tripId: Number(selectedTrip.id),
           amount: selectedTrip.price,
           status: "completed" as "completed",
           bookingDate: new Date().toISOString(),
-        };
-        console.log("Booking payload:", bookingPayload);
+        }
+        console.log("Booking payload:", bookingPayload)
         try {
-          const bookingResponse = await createBooking(bookingPayload).unwrap();
-          console.log("Booking created successfully:", bookingResponse);
+          const bookingResponse = await createBooking(bookingPayload).unwrap()
+          console.log("Booking created successfully:", bookingResponse)
           navigate("/trips/booking-success", {
             state: {
               tripTitle: selectedTrip.title,
               amount: selectedTrip.price,
-              paymentId: paymentIntent.id
-            }
-          });
+              paymentId: paymentIntent.id,
+            },
+          })
         } catch (err) {
-          console.error("Booking creation failed:", err);
-          let errorMsg = "Booking creation failed: Unknown error";
-          if (err && typeof err === 'object') {
-            if ('data' in err && (err as any).data?.message) {
-              errorMsg = "Booking creation failed: " + (err as any).data.message;
-            } else if ('message' in err && (err as any).message) {
-              errorMsg = "Booking creation failed: " + (err as any).message;
+          console.error("Booking creation failed:", err)
+          let errorMsg = "Booking creation failed: Unknown error"
+          if (err && typeof err === "object") {
+            if ("data" in err && (err as any).data?.message) {
+              errorMsg = "Booking creation failed: " + (err as any).data.message
+            } else if ("message" in err && (err as any).message) {
+              errorMsg = "Booking creation failed: " + (err as any).message
             }
           }
-          setError(errorMsg);
+          setError(errorMsg)
         }
       }
     } catch (err: any) {
-      let errorMessage = "Payment failed";
+      let errorMessage = "Payment failed"
       if (err.message) {
-        errorMessage = err.message;
+        errorMessage = err.message
       } else if (err.response?.data?.message) {
-        errorMessage = typeof err.response.data.message === 'string'
-          ? err.response.data.message
-          : JSON.stringify(err.response.data.message);
-      } else if (typeof err === 'string') {
-        errorMessage = err;
+        errorMessage =
+          typeof err.response.data.message === "string"
+            ? err.response.data.message
+            : JSON.stringify(err.response.data.message)
+      } else if (typeof err === "string") {
+        errorMessage = err
       }
-      setError(errorMessage);
+      setError(errorMessage)
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
   if (paymentIntentLoading) {
     return (
@@ -160,7 +161,7 @@ const TripStripePaymentForm: React.FC = () => {
           <p className="text-cyan-700 text-lg">Preparing payment...</p>
         </div>
       </div>
-    );
+    )
   }
 
   if (!selectedTrip) {
@@ -168,11 +169,24 @@ const TripStripePaymentForm: React.FC = () => {
       <div className="min-h-screen bg-gradient-to-br from-cyan-50 to-blue-100 flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white p-8 rounded-xl shadow-lg text-center">
           <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+            <svg
+              className="w-8 h-8 text-red-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M6 18L18 6M6 6l12 12"
+              ></path>
             </svg>
           </div>
-          <h2 className="text-xl font-bold text-gray-800 mb-4">Trip Not Found</h2>
+          <h2 className="text-xl font-bold text-gray-800 mb-4">
+            Trip Not Found
+          </h2>
           <p className="mb-6 text-gray-600">
             The trip you're trying to book could not be found.
           </p>
@@ -184,15 +198,19 @@ const TripStripePaymentForm: React.FC = () => {
           </button>
         </div>
       </div>
-    );
+    )
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-cyan-50 to-blue-100 py-12 px-4 sm:px-6">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold text-cyan-800 mb-2">Secure Payment</h1>
-          <p className="text-cyan-600">Complete your booking for {selectedTrip.title}</p>
+          <h1 className="text-3xl font-bold text-cyan-800 mb-2">
+            Secure Payment
+          </h1>
+          <p className="text-cyan-600">
+            Complete your booking for {selectedTrip.title}
+          </p>
         </div>
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           <div className="p-6 bg-gradient-to-r from-cyan-500 to-blue-500 text-white">
@@ -205,12 +223,16 @@ const TripStripePaymentForm: React.FC = () => {
                 <h3 className="font-semibold text-gray-800">Trip Fee</h3>
                 <p className="text-gray-500 text-sm">One-time payment</p>
               </div>
-              <div className="text-2xl font-bold text-cyan-700">{selectedTrip.price} $</div>
+              <div className="text-2xl font-bold text-cyan-700">
+                {selectedTrip.price} $
+              </div>
             </div>
           </div>
           <form onSubmit={handleSubmit} className="p-6">
             <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email
+              </label>
               <input
                 type="email"
                 value={email}
@@ -222,7 +244,9 @@ const TripStripePaymentForm: React.FC = () => {
             </div>
 
             <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Card Information</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Card Information
+              </label>
               <div className="bg-gray-50 rounded-lg border border-gray-300 px-4 py-3 mb-3">
                 <CardNumberElement
                   options={stripeElementOptions}
@@ -237,11 +261,12 @@ const TripStripePaymentForm: React.FC = () => {
                   <CardCvcElement options={stripeElementOptions} />
                 </div>
               </div>
-
             </div>
 
             <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Name on card</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Name on card
+              </label>
               <input
                 type="text"
                 value={name}
@@ -254,7 +279,9 @@ const TripStripePaymentForm: React.FC = () => {
 
             <div className="grid grid-cols-2 gap-4 mb-8">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Country or region</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Country or region
+                </label>
                 <select
                   value={country}
                   onChange={(e) => setCountry(e.target.value)}
@@ -271,7 +298,9 @@ const TripStripePaymentForm: React.FC = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">ZIP / Postal code</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  ZIP / Postal code
+                </label>
                 <input
                   type="text"
                   value={postalCode}
@@ -300,9 +329,25 @@ const TripStripePaymentForm: React.FC = () => {
             >
               {isSubmitting ? (
                 <div className="flex items-center justify-center">
-                  <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  <svg
+                    className="animate-spin -ml-1 mr-2 h-5 w-5 text-white"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    ></path>
                   </svg>
                   Processing Payment...
                 </div>
@@ -315,10 +360,21 @@ const TripStripePaymentForm: React.FC = () => {
               <div className="flex items-center">
                 <div className="mr-2 text-gray-400 text-sm">Secured by</div>
                 <div className="bg-gray-100 rounded px-2 py-1">
-                  <svg className="h-6 w-12" viewBox="0 0 28 20" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M22 0H6C2.686 0 0 2.686 0 6v8c0 3.314 2.686 6 6 6h16c3.314 0 6-2.686 6-6V6c0-3.314-2.686-6-6-6z" fill="#6772e5"/>
-                    <path d="M14 12a2 2 0 100-4 2 2 0 000 4z" fill="#fff"/>
-                    <path d="M22 5h-2a1 1 0 000 2h2a1 1 0 000-2z" fill="#fff" opacity=".8"/>
+                  <svg
+                    className="h-6 w-12"
+                    viewBox="0 0 28 20"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M22 0H6C2.686 0 0 2.686 0 6v8c0 3.314 2.686 6 6 6h16c3.314 0 6-2.686 6-6V6c0-3.314-2.686-6-6-6z"
+                      fill="#6772e5"
+                    />
+                    <path d="M14 12a2 2 0 100-4 2 2 0 000 4z" fill="#fff" />
+                    <path
+                      d="M22 5h-2a1 1 0 000 2h2a1 1 0 000-2z"
+                      fill="#fff"
+                      opacity=".8"
+                    />
                   </svg>
                 </div>
               </div>
@@ -328,11 +384,13 @@ const TripStripePaymentForm: React.FC = () => {
 
         <div className="mt-8 text-center text-cyan-700 text-sm">
           <p>All transactions are encrypted and securely processed</p>
-          <p className="mt-1">© {new Date().getFullYear()} Booking Platform. All rights reserved.</p>
+          <p className="mt-1">
+            © {new Date().getFullYear()} Booking Platform. All rights reserved.
+          </p>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default TripStripePaymentForm; 
+export default TripStripePaymentForm

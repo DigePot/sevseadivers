@@ -1,6 +1,6 @@
 import { useDispatch } from "react-redux"
 import { setSelectedTrip } from "../../../../store/booking-slice"
-import { useNavigate } from "react-router-dom"
+import { useNavigate } from "react-router"
 import type { Trip } from "../../../../types/trip"
 
 interface TripCardProps {
@@ -17,9 +17,7 @@ export default function TripCard({ trip }: TripCardProps) {
   }
 
   return (
-    <div
-      className="flex flex-col md:flex-row items-center bg-white rounded-2xl shadow-md p-4 md:p-6 gap-6 md:gap-10 hover:shadow-xl transition-shadow duration-300 cursor-pointer"
-    >
+    <div className="flex flex-col md:flex-row items-center bg-white rounded-2xl shadow-md p-4 md:p-6 gap-6 md:gap-10 hover:shadow-xl transition-shadow duration-300 cursor-pointer">
       <div className="flex-1 w-full">
         <h2 className="text-xl md:text-2xl font-bold text-cyan-700 mb-2">
           {trip.title}

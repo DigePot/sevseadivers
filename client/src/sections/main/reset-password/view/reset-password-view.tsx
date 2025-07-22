@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
-import { useLocation } from "react-router-dom"
+import { useLocation } from "react-router"
 import { z as zod } from "zod"
 import { useResetPasswordMutation } from "../../../../store/auth/auth"
 import { extractErrorMessage } from "../../../../utils/extract-error-message"

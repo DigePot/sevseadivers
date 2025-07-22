@@ -1,9 +1,9 @@
 // src/pages/PaymentCancelled.tsx
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React from "react"
+import { useNavigate } from "react-router"
 
 const PaymentCancelled: React.FC = () => {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   return (
     <div className="text-center mt-20">
@@ -16,7 +16,7 @@ const PaymentCancelled: React.FC = () => {
         Back to Courses
       </button>
     </div>
-  );
-};
+  )
+}
 
-export default PaymentCancelled;
+export default PaymentCancelled

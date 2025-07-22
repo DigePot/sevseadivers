@@ -1,19 +1,13 @@
-import { motion } from "framer-motion";
-import { Link, useNavigate } from "react-router-dom";
-import type { Course } from "../../../../types/course";
-import { cardVariants } from "./animations";
-
+import { motion } from "framer-motion"
+import { Link, useNavigate } from "react-router"
+import type { Course } from "../../../../types/course"
+import { cardVariants } from "./animations"
 
 interface CourseCardProps {
-  course: Course;
+  course: Course
 }
 
 export const CourseCard = ({ course }: CourseCardProps) => {
- 
- 
-
-  
-
   return (
     <motion.div
       variants={cardVariants}
@@ -33,9 +27,7 @@ export const CourseCard = ({ course }: CourseCardProps) => {
 
       <h3 className="text-xl font-bold text-cyan-700">{course.title}</h3>
 
-      <p className="text-sm text-gray-700 line-clamp-3">
-        {course.description}
-      </p>
+      <p className="text-sm text-gray-700 line-clamp-3">{course.description}</p>
 
       <div className="text-sm text-gray-800 divide-y divide-gray-200 rounded-md bg-gray-50 p-3 shadow-inner">
         <div className="flex justify-between py-1">
@@ -63,11 +55,10 @@ export const CourseCard = ({ course }: CourseCardProps) => {
       </div>
 
       <Link to={`/courses/${course.id}`} className="mt-3">
-  <button className="w-full bg-[#20C2F8] text-white font-semibold py-2 rounded-md hover:bg-cyan-800 transition">
-  View Course Detials
-  </button>
-</Link>
-
+        <button className="w-full bg-[#20C2F8] text-white font-semibold py-2 rounded-md hover:bg-cyan-800 transition">
+          View Course Detials
+        </button>
+      </Link>
     </motion.div>
-  );
-};
+  )
+}

@@ -1,7 +1,7 @@
-import React from "react";
-import { footerLinks } from "./footer.config";
-import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import React from "react"
+import { footerLinks } from "./footer.config"
+import { Link } from "react-router"
+import { motion } from "framer-motion"
 
 const FooterQuickLinks: React.FC = () => (
   <motion.nav
@@ -28,6 +28,6 @@ const FooterQuickLinks: React.FC = () => (
       ))}
     </ul>
   </motion.nav>
-);
+)
 
-export default FooterQuickLinks;
+export default FooterQuickLinks

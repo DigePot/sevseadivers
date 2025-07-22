@@ -1,9 +1,12 @@
-import React from "react";
-import { footerLinks } from "./footer.config";
-import { Link } from "react-router-dom";
+import React from "react"
+import { footerLinks } from "./footer.config"
+import { Link } from "react-router"
 
 const FooterLinks: React.FC = () => (
-  <nav className="flex flex-wrap justify-center gap-6 mb-6" aria-label="Footer navigation">
+  <nav
+    className="flex flex-wrap justify-center gap-6 mb-6"
+    aria-label="Footer navigation"
+  >
     {footerLinks.map(({ label, href }) => (
       <Link
         key={label}
@@ -17,6 +20,6 @@ const FooterLinks: React.FC = () => (
       </Link>
     ))}
   </nav>
-);
+)
 
-export default FooterLinks;
+export default FooterLinks

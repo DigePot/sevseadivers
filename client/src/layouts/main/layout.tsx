@@ -1,17 +1,16 @@
-import React, { useState, useEffect, useRef } from "react"
-import { Link, useNavigate } from "react-router-dom"
-import { motion, AnimatePresence } from "framer-motion"
+import React, { useEffect, useRef, useState } from "react"
+import { AnimatePresence, motion } from "framer-motion"
 import {
   FaBars,
-  FaTimes,
   FaMoon,
-  FaSun,
   FaSearch,
+  FaSun,
+  FaTimes,
   FaUserCircle,
 } from "react-icons/fa"
+import { Link, useNavigate } from "react-router"
 import { SignInButton } from "../../components/sign-in-button"
 import { SignOutButton } from "../../components/sign-out-button"
-import { CONFIG } from "../../global-config"
 import Footer from "../../layouts/footer/Footer"
 import { useAuth, useUser } from "../../sections/auth/hooks"
 import { navData as mainNavData } from "../nav-config-main"
