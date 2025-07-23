@@ -9,12 +9,10 @@ import serviceRouter from "./routes/serviceRoutes.js"
 import tripRouter from "./routes/tripRoutes.js"
 import adminRoutes from "./routes/adminRoutes.js"
 import galleryRoutes from "./routes/GalleryRoutes.js"
-import enrollmentRoutes from "./routes/enrollmentRoutes.js";
-import paymentRoutes from "./routes/paymentRoutes.js";
-import staffRoutes from "./routes/staffRoutes.js";
+import enrollmentRoutes from "./routes/enrollmentRoutes.js"
+import paymentRoutes from "./routes/paymentRoutes.js"
+import staffRoutes from "./routes/staffRoutes.js"
 
-
-  
 import path from "path"
 import { fileURLToPath } from "url"
 import { dirname } from "path"
@@ -22,7 +20,14 @@ import { dirname } from "path"
 dotenv.config({ path: "./config/.env" })
 
 const app = express()
-app.use(cors())
+// app.use(cors())
+app.use(
+  cors({
+    origin: "*", // allow all origins
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+  })
+)
 app.use(express.json())
 
 // Get the current directory name (equivalent to __dirname in CommonJS)
@@ -41,8 +46,8 @@ app.use("/api/trips", tripRouter)
 app.use("/api/admin", adminRoutes)
 app.use("/api/gallery", galleryRoutes)
 app.use("/api/enrollments", enrollmentRoutes)
-app.use("/api/payments", paymentRoutes);
-app.use("/api/staff", staffRoutes);
+app.use("/api/payments", paymentRoutes)
+app.use("/api/staff", staffRoutes)
 
 app.get("/", (req, res) => {
   res.send("✅ Server is running and connected to Sequelize")
