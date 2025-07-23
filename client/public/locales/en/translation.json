@@ -1,0 +1,15 @@
+{
+  "profileMenu": {
+    "profile": "Profile",
+    "signOut": "Sign out"
+  },
+  "nav": {
+    "home": "Home",
+    "courses": "Courses",
+    "trips": "Trips",
+    "contact": "Contact",
+    "service": "Service",
+    "gallery": "Gallery",
+    "about": "About"
+  }
+}

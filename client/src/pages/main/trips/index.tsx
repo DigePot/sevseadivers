@@ -5,6 +5,7 @@ import React, { useState, useMemo } from "react"
 import TripFilters from "./components/TripFilters"
 import TripCard from "./components/TripCard"
 import TripPagination from "./components/TripPagination"
+import Spinner from "../../../components/Spinner"
 
 const metadata = { title: `Trips | ${CONFIG.appName}` }
 
@@ -78,7 +79,7 @@ export default function Page() {
           date={date}
           setDate={setDate}
         />
-        {isLoading && <div>Loading trips...</div>}
+        {isLoading && <Spinner />}
         {error && <div className="text-red-600">Failed to load trips.</div>}
         {!isLoading && !error && paginatedTrips.length === 0 && (
           <div className="text-gray-500 text-lg">No trips available.</div>

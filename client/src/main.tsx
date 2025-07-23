@@ -5,6 +5,7 @@ import { Outlet, RouterProvider, createBrowserRouter } from "react-router"
 import App from "./App.tsx"
 import "./index.css"
 import { routesSection } from "./routes/sections"
+import "./i18n.ts"
 
 // ----------------------------------------------------------------------
 

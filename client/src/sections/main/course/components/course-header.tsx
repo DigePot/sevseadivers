@@ -1,9 +1,9 @@
-import { motion } from "framer-motion";
+import { motion } from "framer-motion"
 
 export const CoursesHeader = () => {
   return (
     <section
-      className="max-w-7xl mx-auto px-6 py-16 text-center relative bg-gradient-to-b from-cyan-50 via-white to-cyan-100"
+      className="mx-auto py-16 text-center relative bg-gradient-to-b from-cyan-50 via-white to-cyan-100"
       aria-label="Courses at Sevsea Divers"
     >
       {/* Heading */}
@@ -23,8 +23,10 @@ export const CoursesHeader = () => {
         transition={{ delay: 0.4, duration: 1 }}
         className="max-w-3xl mx-auto text-gray-700 text-lg md:text-xl leading-relaxed mb-8 px-4 md:px-0"
       >
-        Dive into a world of adventure! Our certified scuba and snorkeling courses are designed to help you explore the ocean with skill, confidence, and respect for the marine environment.
+        Dive into a world of adventure! Our certified scuba and snorkeling
+        courses are designed to help you explore the ocean with skill,
+        confidence, and respect for the marine environment.
       </motion.p>
     </section>
-  );
-};
+  )
+}

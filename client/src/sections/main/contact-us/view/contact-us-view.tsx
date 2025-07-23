@@ -1,42 +1,46 @@
-import { useState, useRef, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useState, useRef, useEffect } from "react"
+import { motion } from "framer-motion"
 
 export function ContactView() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
-  const [errors, setErrors] = useState<{ name?: string; email?: string; message?: string }>({});
-  const [submitted, setSubmitted] = useState(false);
-  const confirmationRef = useRef<HTMLDivElement>(null);
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+  const [message, setMessage] = useState("")
+  const [errors, setErrors] = useState<{
+    name?: string
+    email?: string
+    message?: string
+  }>({})
+  const [submitted, setSubmitted] = useState(false)
+  const confirmationRef = useRef<HTMLDivElement>(null)
 
   const validate = () => {
-    const newErrors: typeof errors = {};
-    if (!name.trim()) newErrors.name = "Please enter your name";
-    if (!email.trim()) newErrors.email = "Please enter your email";
-    else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = "Email is invalid";
-    if (!message.trim()) newErrors.message = "Please enter your message";
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+    const newErrors: typeof errors = {}
+    if (!name.trim()) newErrors.name = "Please enter your name"
+    if (!email.trim()) newErrors.email = "Please enter your email"
+    else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = "Email is invalid"
+    if (!message.trim()) newErrors.message = "Please enter your message"
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validate()) return;
-    setSubmitted(true);
+    e.preventDefault()
+    if (!validate()) return
+    setSubmitted(true)
     // Optionally clear form
-    setName("");
-    setEmail("");
-    setMessage("");
-  };
+    setName("")
+    setEmail("")
+    setMessage("")
+  }
 
   useEffect(() => {
     if (submitted && confirmationRef.current) {
-      confirmationRef.current.focus();
+      confirmationRef.current.focus()
     }
-  }, [submitted]);
+  }, [submitted])
 
   return (
-    <section className="max-w-5xl mx-auto mt-20 p-8 bg-white rounded-xl shadow-lg">
+    <section className=" mt-20 p-8 bg-white rounded-xl shadow-lg">
       <div className="flex flex-col md:flex-row gap-10">
         {/* Left: Form */}
         <div className="flex-1">
@@ -177,5 +181,5 @@ export function ContactView() {
         </div>
       </div>
     </section>
-  );
+  )
 }

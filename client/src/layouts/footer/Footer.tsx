@@ -1,5 +1,5 @@
-import React from "react";
-import { motion } from "framer-motion";
+import React from "react"
+import { motion } from "framer-motion"
 import {
   FaInstagram,
   FaFacebook,
@@ -7,13 +7,13 @@ import {
   FaEnvelope,
   FaPhone,
   FaMapMarkerAlt,
-} from "react-icons/fa";
+} from "react-icons/fa"
 
 const socialLinks = [
   { icon: FaFacebook, href: "https://facebook.com" },
   { icon: FaTwitter, href: "https://twitter.com" },
   { icon: FaInstagram, href: "https://instagram.com" },
-];
+]
 
 const linksGroup = [
   {
@@ -34,13 +34,13 @@ const linksGroup = [
       { label: "Help", href: "/help" },
     ],
   },
-];
+]
 
 const contactInfo = [
   { icon: FaMapMarkerAlt, text: "123 Ocean Drive, Beach City" },
   { icon: FaEnvelope, text: "info@sevsea.com" },
   { icon: FaPhone, text: "+1 (555) 123-4567" },
-];
+]
 
 const Footer: React.FC = () => {
   return (
@@ -90,8 +90,8 @@ const Footer: React.FC = () => {
             SEVSEA DIVERS
           </h3>
           <p className="text-gray-700 dark:text-gray-300 leading-relaxed font-light">
-            Passionate ocean explorers dedicated to sharing the wonders of diving
-            and ocean conservation.
+            Passionate ocean explorers dedicated to sharing the wonders of
+            diving and ocean conservation.
           </p>
         </motion.div>
 
@@ -103,7 +103,9 @@ const Footer: React.FC = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 + i * 0.1 }}
           >
-            <h4 className="text-xl font-semibold text-cyan-600 mb-5">{title}</h4>
+            <h4 className="text-xl font-semibold text-cyan-600 mb-5">
+              {title}
+            </h4>
             <ul className="space-y-4">
               {links.map(({ label, href }) => (
                 <li key={label}>
@@ -155,7 +157,7 @@ const Footer: React.FC = () => {
         &copy; {new Date().getFullYear()} Sevsea Divers. All rights reserved.
       </motion.div>
     </motion.footer>
-  );
-};
+  )
+}
 
-export default Footer;
+export default Footer

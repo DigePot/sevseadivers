@@ -73,10 +73,7 @@ export function HomeView() {
       </section>
 
       {/* Featured Destinations Section */}
-      <section
-        aria-label="Featured destinations"
-        className="max-w-7xl mx-auto px-6 py-20"
-      >
+      <section aria-label="Featured destinations" className="py-20">
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}

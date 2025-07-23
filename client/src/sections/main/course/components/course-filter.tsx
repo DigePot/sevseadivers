@@ -1,11 +1,11 @@
-import React from "react";
+import React from "react"
 
 interface CourseFilterProps {
-  selectedCategory: string;
-  setSelectedCategory: (value: string) => void;
-  search: string;
-  setSearch: (value: string) => void;
-  categories: string[];
+  selectedCategory: string
+  setSelectedCategory: (value: string) => void
+  search: string
+  setSearch: (value: string) => void
+  categories: string[]
 }
 
 export const CourseFilter: React.FC<CourseFilterProps> = ({
@@ -16,7 +16,7 @@ export const CourseFilter: React.FC<CourseFilterProps> = ({
   categories,
 }) => {
   return (
-    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
+    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 mt-10">
       {/* Category Buttons */}
       <div className="flex flex-wrap gap-3 overflow-x-auto">
         {categories.map((category) => (
@@ -46,9 +46,9 @@ export const CourseFilter: React.FC<CourseFilterProps> = ({
           placeholder="Search courses..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="px-4 py-2 rounded-md border border-cyan-600 w-full md:w-64"
+          className="px-4 py-2 rounded-md border text-white border-cyan-600 w-full md:w-64"
         />
       </div>
     </div>
-  );
-};
+  )
+}

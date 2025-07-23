@@ -38,7 +38,7 @@ export function GalleryView() {
   }
 
   return (
-    <div className="py-8 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-sky-200 via-gray-400 to-gray-700 dark:from-slate-800 dark:to-slate-900 transition-all">
+    <div className="py-8 px-4">
       <h1 className="text-3xl font-bold text-center text-white mb-8">
         Gallery
       </h1>
