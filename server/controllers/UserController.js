@@ -261,3 +261,7 @@ export const getProfile = async (req, res) => {
       .json({ message: "Error fetching profile", error: error.message })
   }
 }
+
+// export const contact = tryCatch(async (req, res, next) => {
+//   const { name, phoneNumber, email, subject, message } = req.body
+// })
