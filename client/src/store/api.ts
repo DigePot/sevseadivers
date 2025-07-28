@@ -1,2 +1,3 @@
 // export const API = "http://localhost:5000/api"
-export const API = "http://104.251.211.38:5000/api"
+// export const API = "http://104.251.211.38:5000/api"
+export const API = "https://104.251.211.38/api"
