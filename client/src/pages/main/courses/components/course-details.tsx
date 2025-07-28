@@ -9,7 +9,7 @@ import HighlightsSidebar from "../../../../sections/main/course/components/sideb
 export default function CourseDetails() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { data: course, isLoading } = useGetCourseQuery(id)
+  const { data: course, isLoading } = useGetCourseQuery(id as string)
   const [imgSrc, setImgSrc] = useState("")
 
   useEffect(() => {
@@ -91,7 +91,7 @@ export default function CourseDetails() {
                   </div>
                 </div>
 
-                <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+                <h1 className="text-3xl md:text-4xl font-bold text-cyan-700 mb-4">
                   {course.title}
                 </h1>
                 <p className="text-gray-600 text-lg">{course.description}</p>
@@ -113,35 +113,15 @@ export default function CourseDetails() {
                     </svg>
                     <span>{course.duration || "8 hours"}</span>
                   </div>
-                  <div className="flex items-center">
-                    <svg
-                      className="w-5 h-5 text-gray-500 mr-2"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                      ></path>
-                    </svg>
-                    <span>{course.students || "2,500 students"}</span>
-                  </div>
+                  
                 </div>
               </div>
 
               <div className="mt-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                   <span className="text-2xl font-bold text-gray-900">
-                    {course.price} €
+                    {course.price} $
                   </span>
-                  {course.originalPrice && (
-                    <span className="ml-2 text-gray-500 line-through">
-                      {course.originalPrice} €
-                    </span>
-                  )}
                 </div>
                 <button
                   onClick={() => navigate(`/courses/${id}/checkout`)}

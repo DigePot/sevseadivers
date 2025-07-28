@@ -40,4 +40,11 @@ export const endpoints = {
     signIn: "/api/auth/sign-in",
     signUp: "/api/auth/sign-up",
   },
+  course: {
+    create: "/api/courses/add",
+    getAll: "/api/courses/all",
+    getById: (id: string) => `/api/courses/${id}`,
+    update: (id: string) => `/api/courses/${id}`,
+    delete: (id: string) => `/api/courses/${id}`,
+  },
 }

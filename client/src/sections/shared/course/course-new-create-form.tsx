@@ -1,217 +1,213 @@
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useRef, useState } from "react"
-import { useForm } from "react-hook-form"
-import { z as zod } from "zod"
-import { useRouter } from "../../../routes/hooks"
-import { paths } from "../../../routes/paths"
-import { useCreateCourseMutation } from "../../../store/course"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useForm, useWatch } from "react-hook-form";
+import { useRef, useState, useEffect } from "react";
 
-// ----------------------------------------------------------------------
+// Zod Schema
+const NewCourseSchema = z.object({
+  title: z.string().min(1, { message: "Title is required!" }),
+  description: z.string().min(1, { message: "Description is required!" }),
+  price: z.number().min(0, { message: "Price must be positive" }).optional(),
+  duration: z.string().optional(),
+  category: z.string().min(1, { message: "Category is required!" }),
+  level: z.string().min(1, { message: "Level is required!" }),
+  imageUrl: z
+    .custom<File | null>((v) => v instanceof File || v === null)
+    .refine(
+      (file) => file !== null && file.size > 0,
+      "Image is required"
+    )
+    .refine(
+      (file) => file === null || file.size <= 10 * 1024 * 1024,
+      "Max size 10MB"
+    )
+    .refine(
+      (file) =>
+        file === null ||
+        ["image/jpeg", "image/png", "image/gif", "image/webp"].includes(file.type),
+      "Only JPEG, PNG, GIF, or WebP allowed"
+    ),
+});
 
-export const NewCourseSchema = zod.object({
-  title: zod.string().min(1, { message: "Title is required!" }),
-  description: zod.string().min(1, { message: "Description is required!" }),
-  price: zod.number().min(0, { message: "Price must be positive" }).optional(),
-  duration: zod.string().optional(),
-  category: zod.string().min(1, { message: "Category is required!" }),
-  level: zod.string().min(1, { message: "Level is required!" }),
-  instructorName: zod.string().min(1, { message: "Instructor name is required!" }),
-})
+export type NewCourseSchemaType = z.infer<typeof NewCourseSchema>;
 
-export type NewCourseSchemaType = zod.infer<typeof NewCourseSchema>
+type Props = {
+  initialData: NewCourseSchemaType;
+  onUpdate: (data: NewCourseSchemaType) => void;
+};
 
-// ----------------------------------------------------------------------
-
-export function CourseNewCreateForm() {
-  const router = useRouter()
-  const [createCourse] = useCreateCourseMutation()
-
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-
-  const defaultValues: NewCourseSchemaType = {
-    title: "",
-    description: "",
-    price: undefined,
-    duration: undefined,
-    category: "",
-    level: "",
-    instructorName: "",
-  }
-
+export function CourseNewCreateForm({ initialData, onUpdate }: Props) {
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [dragActive, setDragActive] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  
   const {
     register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-    setError,
+    setValue,
+    formState: { errors, isValid },
+    trigger,
+    control,
   } = useForm<NewCourseSchemaType>({
     resolver: zodResolver(NewCourseSchema),
-    defaultValues,
-  })
+    defaultValues: initialData,
+    mode: "onChange",
+  });
+
+  // Watch all form values using useWatch to avoid infinite loop
+  const formValues = useWatch({ control });
+  
+  // Update parent when form changes and form is valid
+  useEffect(() => {
+    if (isValid && onUpdate) {
+      onUpdate({
+        title: formValues.title ?? "",
+        description: formValues.description ?? "",
+        category: formValues.category ?? "",
+        level: formValues.level ?? "",
+        imageUrl: formValues.imageUrl ?? null,
+        price: formValues.price,
+        duration: formValues.duration,
+      });
+    }
+  }, [formValues, isValid]); // Removed onUpdate from dependencies since it's now memoized
+
+  // Set up image preview when form data changes
+  useEffect(() => {
+    if (formValues.imageUrl instanceof File) {
+      const url = URL.createObjectURL(formValues.imageUrl);
+      setImagePreview(url);
+      return () => URL.revokeObjectURL(url);
+    } else {
+      setImagePreview(null);
+    }
+  }, [formValues.imageUrl]);
+
+  // Initialize image preview if initialData has an image
+  useEffect(() => {
+    if (initialData.imageUrl instanceof File) {
+      const url = URL.createObjectURL(initialData.imageUrl);
+      setImagePreview(url);
+      return () => URL.revokeObjectURL(url);
+    }
+  }, [initialData.imageUrl]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0] || null;
     if (file) {
-      // Validate file type and size
-      const validTypes = ["image/jpeg", "image/png", "image/gif"]
-      const maxSize = 10 * 1024 * 1024 // 10MB
-
-      if (!validTypes.includes(file.type)) {
-        setError("root", {
-          message:
-            "Invalid file type. Please upload a JPEG, PNG, or GIF image.",
-        })
-        return
-      }
-
-      if (file.size > maxSize) {
-        setError("root", {
-          message: "File size too large. Maximum size is 10MB.",
-        })
-        return
-      }
-
-      setSelectedFile(file)
-      setImagePreview(URL.createObjectURL(file))
+      setValue("imageUrl", file);
+      trigger("imageUrl"); // Trigger validation
     }
-  }
+  };
 
   const handleRemoveImage = () => {
-    setSelectedFile(null)
-    setImagePreview(null)
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ""
+    setValue("imageUrl", null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    trigger("imageUrl"); // Trigger validation
+  };
+
+  // Drag and drop handlers
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
     }
-  }
+  };
 
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.currentTarget.classList.add("ring-2", "ring-blue-500")
-  }
-
-  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.currentTarget.classList.remove("ring-2", "ring-blue-500")
-  }
-
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault()
-    e.currentTarget.classList.remove("ring-2", "ring-blue-500")
-
-    const file = e.dataTransfer.files?.[0]
-    if (file) {
-      setSelectedFile(file)
-      setImagePreview(URL.createObjectURL(file))
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      const file = e.dataTransfer.files[0];
+      if (["image/jpeg", "image/png", "image/gif", "image/webp"].includes(file.type)) {
+        setValue("imageUrl", file);
+        trigger("imageUrl");
+      } else {
+        alert("Please upload a valid image file (JPEG, PNG, GIF, or WebP)");
+      }
     }
-  }
-
- const onSubmit = handleSubmit(async (data) => {
-  if (!selectedFile) {
-    setError("root", { message: "Please select an image" })
-    return
-  }
-
-  try {
-    setIsSubmitting(true)
-
-    const formData = new FormData()
-    formData.append("title", data.title)
-    formData.append("description", data.description)
-    formData.append("price", data.price?.toString() || "0") 
-    formData.append("duration", data.duration || "N/A")
-    formData.append("category", data.category)
-    formData.append("level", data.level) 
-    formData.append("instructorName", data.instructorName)
-    formData.append("media", selectedFile)
-
-    await createCourse(formData).unwrap()
-
-    reset()
-    handleRemoveImage()
-    router.push(paths.shared.course.list)
-  } catch (error: any) {
-    console.error("Error creating course:", error)
-    setError("root", {
-      message: error.data?.message || "Failed to create course",
-    })
-  } finally {
-    setIsSubmitting(false)
-  }
-})
+  };
 
   return (
-    <div className="">
-      <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-6">
-        Create New Course
-      </h1>
+    <div className="space-y-8">
+      <div className="border-b border-gray-200 pb-4">
+        <h2 className="text-2xl lg:text-3xl font-bold text-cyan-700">
+          Course Details
+        </h2>
+        <p className="text-gray-600 mt-2">
+          Provide the basic information about your course
+        </p>
+      </div>
 
-      <form onSubmit={onSubmit} className="space-y-6">
-        {/* Image Upload */}
+      <div className="space-y-8">
+        {/* Image Upload Section */}
         <div className="space-y-4">
-          <label className="block text-sm font-medium text-gray-700">
-            Course Image *
-          </label>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Course Image *
+            </label>
+            <p className="text-xs text-gray-500 mb-4">
+              Upload a high-quality image that represents your course (Max 10MB)
+            </p>
+          </div>
 
           <div
-            className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-all
-                  ${
-                    imagePreview
-                      ? "border-gray-300"
-                      : "border-blue-300 bg-blue-50 hover:bg-blue-100"
-                  }
-                  ${isSubmitting ? "opacity-70 pointer-events-none" : ""}`}
+            className={`relative border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all
+                  ${dragActive 
+                    ? "border-cyan-400 bg-cyan-50" 
+                    : imagePreview
+                    ? "border-gray-300 bg-gray-50"
+                    : errors.imageUrl
+                    ? "border-red-300 bg-red-50"
+                    : "border-gray-300 bg-gray-50 hover:border-cyan-400 hover:bg-cyan-50"
+                  }`}
             onClick={() => fileInputRef.current?.click()}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
+            onDragEnter={handleDrag}
+            onDragLeave={handleDrag}
+            onDragOver={handleDrag}
             onDrop={handleDrop}
           >
             <input
               type="file"
               ref={fileInputRef}
               onChange={handleFileChange}
-              accept="image/jpeg, image/png, image/gif"
+              accept="image/jpeg, image/png, image/gif, image/webp"
               className="hidden"
-              disabled={isSubmitting}
             />
 
             {imagePreview ? (
               <div className="relative">
                 <img
                   src={imagePreview}
-                  alt="Preview"
-                  className="mx-auto max-h-60 object-contain rounded-lg"
+                  alt="Course preview"
+                  className="mx-auto max-h-64 object-contain rounded-lg shadow-sm"
                 />
                 <button
                   type="button"
                   onClick={(e) => {
-                    e.stopPropagation()
-                    handleRemoveImage()
+                    e.stopPropagation();
+                    handleRemoveImage();
                   }}
-                  className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors"
+                  className="absolute -top-2 -right-2 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors shadow-lg"
+                  title="Remove image"
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                      clipRule="evenodd"
-                    />
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </button>
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-4">
                 <div className="mx-auto">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    className="h-12 w-12 mx-auto text-blue-500"
+                    className={`h-16 w-16 mx-auto transition-colors ${
+                      dragActive ? "text-cyan-500" : "text-gray-400"
+                    }`}
                     fill="none"
                     viewBox="0 0 24 24"
                     stroke="currentColor"
@@ -219,214 +215,241 @@ export function CourseNewCreateForm() {
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      strokeWidth={2}
+                      strokeWidth={1.5}
                       d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
                     />
                   </svg>
                 </div>
-                <p className="text-gray-600">
-                  <span className="text-blue-600 font-medium">
-                    Click to upload
-                  </span>{" "}
-                  or drag and drop
-                </p>
-                <p className="text-xs text-gray-500">
-                  JPEG, PNG, GIF (Max 10MB)
-                </p>
+                <div>
+                  <p className="text-gray-700 font-medium">
+                    <span className="text-cyan-600 font-semibold">
+                      Click to upload
+                    </span>{" "}
+                    or drag and drop
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    JPEG, PNG, GIF, WebP (Max 10MB)
+                  </p>
+                </div>
               </div>
             )}
           </div>
+          {errors.imageUrl && (
+            <p className="text-red-500 text-sm flex items-center gap-1">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              {errors.imageUrl.message}
+            </p>
+          )}
         </div>
 
-        {/* Grid Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Form Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Title */}
-          <div className="space-y-2">
-            <label
-              htmlFor="title"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Title *
+          <div className="lg:col-span-2 space-y-2">
+            <label htmlFor="title" className="block text-sm font-semibold text-gray-700">
+              Course Title *
             </label>
             <input
               id="title"
               type="text"
               {...register("title")}
-              className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:outline-none ${
+              className={`w-full px-4 py-3 rounded-lg border transition-all focus:ring-2 focus:outline-none ${
                 errors.title
-                  ? "border-red-300 focus:ring-red-200"
-                  : "border-gray-300 focus:border-blue-500 focus:ring-blue-200"
+                  ? "border-red-300 focus:ring-red-200 focus:border-red-500"
+                  : "border-gray-300 focus:border-cyan-500 focus:ring-cyan-200"
               }`}
-              placeholder="Course title"
+              placeholder="Enter an engaging course title..."
             />
             {errors.title && (
-              <p className="text-red-500 text-sm">{errors.title.message}</p>
+              <p className="text-red-500 text-sm flex items-center gap-1">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                {errors.title.message}
+              </p>
+            )}
+          </div>
+
+          {/* Category */}
+          <div className="space-y-2">
+            <label htmlFor="category" className="block text-sm font-semibold text-gray-700">
+              Category *
+            </label>
+            <select
+              id="category"
+              {...register("category")}
+              className={`w-full px-4 py-3 rounded-lg border transition-all focus:ring-2 focus:outline-none ${
+                errors.category
+                  ? "border-red-300 focus:ring-red-200 focus:border-red-500"
+                  : "border-gray-300 focus:border-cyan-500 focus:ring-cyan-200"
+              }`}
+            >
+              <option value="">Select a category</option>
+              <option value="General">General</option>
+              <option value="Diving">Diving</option>
+              <option value="Snorkeling">Snorkeling</option>
+              <option value="Swimming">Swimming</option>
+              <option value="Water Safety">Water Safety</option>
+              <option value="Marine Biology">Marine Biology</option>
+            </select>
+            {errors.category && (
+              <p className="text-red-500 text-sm flex items-center gap-1">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                {errors.category.message}
+              </p>
+            )}
+          </div>
+          
+          {/* Level */}
+          <div className="space-y-2">
+            <label htmlFor="level" className="block text-sm font-semibold text-gray-700">
+              Difficulty Level *
+            </label>
+            <select
+              id="level"
+              {...register("level")}
+              className={`w-full px-4 py-3 rounded-lg border transition-all focus:ring-2 focus:outline-none ${
+                errors.level
+                  ? "border-red-300 focus:ring-red-200 focus:border-red-500"
+                  : "border-gray-300 focus:border-cyan-500 focus:ring-cyan-200"
+              }`}
+            >
+              <option value="">Select difficulty level</option>
+              <option value="Beginner">Beginner</option>
+              <option value="Intermediate">Intermediate</option>
+              <option value="Advanced">Advanced</option>
+              <option value="Expert">Expert</option>
+            </select>
+            {errors.level && (
+              <p className="text-red-500 text-sm flex items-center gap-1">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                {errors.level.message}
+              </p>
             )}
           </div>
 
           {/* Price */}
           <div className="space-y-2">
-            <label
-              htmlFor="price"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Price ($)
+            <label htmlFor="price" className="block text-sm font-semibold text-gray-700">
+              Price (USD)
             </label>
-            <input
-              id="price"
-              type="number"
-              step="0.01"
-              {...register("price", { valueAsNumber: true })}
-              className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:outline-none ${
-                errors.price
-                  ? "border-red-300 focus:ring-red-200"
-                  : "border-gray-300 focus:border-blue-500 focus:ring-blue-200"
-              }`}
-              placeholder="Optional"
-            />
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+              <input
+                id="price"
+                type="number"
+                step="0.01"
+                min="0"
+                {...register("price", { valueAsNumber: true })}
+                className={`w-full pl-8 pr-4 py-3 rounded-lg border transition-all focus:ring-2 focus:outline-none ${
+                  errors.price
+                    ? "border-red-300 focus:ring-red-200 focus:border-red-500"
+                    : "border-gray-300 focus:border-cyan-500 focus:ring-cyan-200"
+                }`}
+                placeholder="0.00"
+              />
+            </div>
             {errors.price && (
-              <p className="text-red-500 text-sm">{errors.price.message}</p>
+              <p className="text-red-500 text-sm flex items-center gap-1">
+                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+                {errors.price.message}
+              </p>
             )}
+            <p className="text-xs text-gray-500">Leave empty for free course</p>
           </div>
-          {/* Category */}<div className="space-y-2">
-  <label htmlFor="category" className="block text-sm font-medium text-gray-700">
-    Category
-  </label>
-  <select
-    id="category"
-    {...register("category")}
-    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-200 focus:outline-none"
-  >
-    <option value="General">General</option>
-    <option value="Diving">Diving</option>
-    <option value="Snorkeling">Snorkeling</option>
-    <option value="Swimming">Swimming</option>
-  </select>
- </div>
- 
-{/* Level */}
-<div className="space-y-2">
-  <label htmlFor="level" className="block text-sm font-medium text-gray-700">
-    Level
-  </label>
-  <select
-    id="level"
-    {...register("level")}
-    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-200 focus:outline-none"
-  >
-    <option value="Beginner">Beginner</option>
-    <option value="Intermediate">Intermediate</option>
-    <option value="Advanced">Advanced</option>
-  </select>
-</div>
-
 
           {/* Duration */}
           <div className="space-y-2">
-            <label
-              htmlFor="duration"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label htmlFor="duration" className="block text-sm font-semibold text-gray-700">
               Duration
             </label>
             <input
               id="duration"
               type="text"
               {...register("duration")}
-              className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:outline-none ${
-                errors.duration
-                  ? "border-red-300 focus:ring-red-200"
-                  : "border-gray-300 focus:border-blue-500 focus:ring-blue-200"
-              }`}
-              placeholder="Optional e.g., 1 hour, 3 weeks"
+              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-cyan-500 focus:ring-cyan-200 focus:ring-2 focus:outline-none transition-all"
+              placeholder="e.g., 2 hours, 1 week, 6 sessions"
             />
-            {errors.duration && (
-              <p className="text-red-500 text-sm">{errors.duration.message}</p>
-            )}
+            <p className="text-xs text-gray-500">Estimated time to complete</p>
           </div>
         </div>
-        {/* Instructor Name */}
-        <div className="space-y-2 md:col-span-2">
-  <label htmlFor="instructorName" className="block text-sm font-medium text-gray-700">
-    Instructor Name
-  </label>
-  <input
-    id="instructorName"
-    type="text"
-    {...register("instructorName")}
-    className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-200 focus:outline-none"
-    placeholder="Instructor full name"
-  />
-</div>
-
 
         {/* Description */}
         <div className="space-y-2">
-          <label
-            htmlFor="description"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Description *
+          <label htmlFor="description" className="block text-sm font-semibold text-gray-700">
+            Course Description *
           </label>
           <textarea
             id="description"
-            rows={4}
+            rows={6}
             {...register("description")}
-            className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:outline-none ${
+            className={`w-full px-4 py-3 rounded-lg border transition-all focus:ring-2 focus:outline-none resize-none ${
               errors.description
-                ? "border-red-300 focus:ring-red-200"
-                : "border-gray-300 focus:border-blue-500 focus:ring-blue-200"
+                ? "border-red-300 focus:ring-red-200 focus:border-red-500"
+                : "border-gray-300 focus:border-cyan-500 focus:ring-cyan-200"
             }`}
-            placeholder="Describe the course content..."
+            placeholder="Provide a detailed description of what students will learn in this course. Include key topics, skills they'll gain, and what makes this course unique..."
           />
           {errors.description && (
-            <p className="text-red-500 text-sm">{errors.description.message}</p>
+            <p className="text-red-500 text-sm flex items-center gap-1">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              {errors.description.message}
+            </p>
           )}
+          <div className="flex justify-between text-xs text-gray-500">
+            <span>Write a compelling description that attracts students</span>
+            <span>{formValues.description?.length || 0} characters</span>
+          </div>
         </div>
 
-        {/* Submit Button */}
-        <div className="pt-4">
-          <button
-            type="submit"
-            disabled={isSubmitting}
-            className={`px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm transition-colors ${
-              isSubmitting ? "opacity-70 cursor-not-allowed" : ""
-            }`}
-          >
-            <div className="flex items-center justify-center">
-              {isSubmitting && (
-                <svg
-                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
-                  <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
+        {/* Form Status Indicator */}
+        <div className={`p-4 rounded-lg border-l-4 ${
+          isValid 
+            ? "bg-green-50 border-green-400" 
+            : "bg-yellow-50 border-yellow-400"
+        }`}>
+          <div className="flex items-center">
+            <div className={`flex-shrink-0 ${
+              isValid ? "text-green-400" : "text-yellow-400"
+            }`}>
+              {isValid ? (
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
                 </svg>
               )}
-              {isSubmitting ? "Creating Course..." : "Create Course"}
             </div>
-          </button>
+            <div className="ml-3">
+              <p className={`text-sm font-medium ${
+                isValid ? "text-green-800" : "text-yellow-800"
+              }`}>
+                {isValid 
+                  ? "All required fields completed!" 
+                  : "Please complete all required fields to proceed"
+                }
+              </p>
+              {!isValid && (
+                <p className="text-xs text-yellow-700 mt-1">
+                  Required: Course title, description, category, level, and image
+                </p>
+              )}
+            </div>
+          </div>
         </div>
-      </form>
-
-      {errors.root && (
-        <div className="mb-6 p-4 bg-red-50 text-red-700 rounded-lg">
-          {errors.root.message}
-        </div>
-      )}
+      </div>
     </div>
-  )
+  );
 }
