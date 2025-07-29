@@ -21,6 +21,7 @@ dotenv.config({ path: "./config/.env" })
 
 const app = express()
 // app.use(cors())
+// ✅ CORS should come **before everything else**
 app.use(
   cors({
     origin: "https://www.sevseadivers.com",
@@ -29,7 +30,9 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 )
-app.use(express.json())
+
+app.use(express.json({ limit: "4000mb" })) // also raise the limit to avoid next error
+app.use(express.urlencoded({ extended: true, limit: "50mb" })) // for form uploads
 
 // Get the current directory name (equivalent to __dirname in CommonJS)
 const __filename = fileURLToPath(import.meta.url)
