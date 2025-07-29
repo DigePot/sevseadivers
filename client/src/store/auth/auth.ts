@@ -53,6 +53,23 @@ export const authApi = createApi({
         body,
       }),
     }),
+
+    sendContactMessage: builder.mutation<
+      { success: boolean; message: string },
+      {
+        name: string
+        email: string
+        subject: string
+        message: string
+        phoneNumber?: string
+      }
+    >({
+      query: (body) => ({
+        url: "/users/contact",
+        method: "POST",
+        body,
+      }),
+    }),
   }),
 })
 
@@ -62,4 +79,5 @@ export const {
   useUpdateMyProfileMutation,
   useForgotPasswordMutation,
   useResetPasswordMutation,
+  useSendContactMessageMutation,
 } = authApi

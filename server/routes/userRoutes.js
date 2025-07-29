@@ -11,6 +11,7 @@ import {
   verifyOtp,
   forgotPassword,
   resetPassword,
+  contact,
 } from "../controllers/UserController.js"
 import authenticateToken from "../middleware/auth.js"
 
@@ -27,6 +28,6 @@ router.post("/send-otp", sendOtp)
 router.post("/verify-otp", verifyOtp)
 router.post("/forgot-password", forgotPassword)
 router.post("/reset-password", resetPassword)
-// router.post("/contact")
+router.post("/contact", contact)
 
 export default router

@@ -262,6 +262,31 @@ export const getProfile = async (req, res) => {
   }
 }
 
-// export const contact = tryCatch(async (req, res, next) => {
-//   const { name, phoneNumber, email, subject, message } = req.body
-// })
+export const contact = tryCatch(async (req, res, next) => {
+  const { name, phoneNumber, email, subject, message } = req.body
+  if (!name || !email || !subject || !message) {
+    // You can use a custom Error class or simply throw an error
+    const err = new Error(
+      "Please fill out all required fields: name, email, subject, and message."
+    )
+    err.statusCode = 400 // Bad Request
+    return next(err)
+  }
+
+  const adminEmail = process.env.EMAIL_USER // The email address that will receive the contact form submissions
+  const emailSubjectToAdmin = `New Contact Form Message: ${subject}`
+  const emailTextToAdmin = `You have received a new message from your website contact form.
+  From: ${name}
+  Email: ${email}
+  Phone Number: ${phoneNumber || "Not Provided"}
+  Message:
+  ${message}
+  `
+
+  await sendEmail(adminEmail, emailSubjectToAdmin, emailTextToAdmin)
+
+  res.status(200).json({
+    success: true,
+    message: "Thank you for your message. We will get back to you shortly!",
+  })
+})
