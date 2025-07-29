@@ -1,20 +1,3 @@
 {
-  "redirects": [
-    {
-      "source": "/(.*)",
-      "has": [
-        {
-          "type": "host",
-          "value": "sevseadivers.com"
-        },
-        {
-          "type": "protocol",
-          "value": "http"
-        }
-      ],
-      "destination": "https://www.sevseadivers.com/:1",
-      "permanent": true
-    }
-  ],
   "rewrites": [{ "source": "/(.*)", "destination": "/" }]
 }
