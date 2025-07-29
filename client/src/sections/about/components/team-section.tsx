@@ -1,11 +1,11 @@
-import { motion } from "framer-motion";
-import { FaUsers, FaUser } from "react-icons/fa";
-import { useStaff } from "../hook/use-staff";
+import { motion } from "framer-motion"
+import { FaUsers, FaUser } from "react-icons/fa"
+import { useStaff } from "../hook/use-staff"
 
-const API = "http://localhost:5000"; // Backend base URL
+const API = "https://api.sevseadivers.com" // Backend base URL
 
 export default function TeamSection() {
-  const { staff, isLoading, isError, error } = useStaff();
+  const { staff, isLoading, isError, error } = useStaff()
 
   return (
     <motion.section
@@ -19,19 +19,25 @@ export default function TeamSection() {
       <div className="flex justify-center mb-4">
         <FaUsers className="text-cyan-600 text-4xl" />
       </div>
-      <h2 className="text-4xl font-extrabold mb-12 text-gray-900">Meet Our Team</h2>
+      <h2 className="text-4xl font-extrabold mb-12 text-gray-900">
+        Meet Our Team
+      </h2>
 
       {/* Loading/Error States */}
-      {isLoading && <div className="text-cyan-600 text-lg">Loading team...</div>}
-      {isError && <div className="text-red-500 text-lg">Failed to load team.</div>}
+      {isLoading && (
+        <div className="text-cyan-600 text-lg">Loading team...</div>
+      )}
+      {isError && (
+        <div className="text-red-500 text-lg">Failed to load team.</div>
+      )}
 
       {/* Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-12 max-w-7xl mx-auto">
         {staff.map((member, index) => {
           // Prepend API URL if profilePicture is a relative path
-          let imageUrl = member.profilePicture;
+          let imageUrl = member.profilePicture
           if (imageUrl && imageUrl.startsWith("/upload")) {
-            imageUrl = API + imageUrl;
+            imageUrl = API + imageUrl
           }
           return (
             <motion.div
@@ -55,16 +61,22 @@ export default function TeamSection() {
                 )}
               </div>
               <div className="p-6">
-                <h3 className="text-2xl font-semibold text-gray-900">{member.fullName}</h3>
-                <p className="text-cyan-600 font-medium mt-1">{member.username}</p>
+                <h3 className="text-2xl font-semibold text-gray-900">
+                  {member.fullName}
+                </h3>
+                <p className="text-cyan-600 font-medium mt-1">
+                  {member.username}
+                </p>
                 {member.bio && (
-                  <p className="text-gray-600 text-sm mt-3 leading-relaxed">{member.bio}</p>
+                  <p className="text-gray-600 text-sm mt-3 leading-relaxed">
+                    {member.bio}
+                  </p>
                 )}
               </div>
             </motion.div>
-          );
+          )
         })}
       </div>
     </motion.section>
-  );
+  )
 }
