@@ -80,8 +80,9 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USERNAME }}
           key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
-          source: "client/dist/*"
+          source: "client/dist/**"
           target: "/var/www/sevseadivers-frontend"
+          strip_components: 3
 
       # ⬇️ BACKEND DEPLOY STEP
       - name: Deploy backend via SSH
