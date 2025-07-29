@@ -42,5 +42,5 @@ jobs:
             EMAIL_PASS=${{ secrets.EMAIL_PASS }}
             EOF
 
-            echo "🚀 Restarting backend..."
+            echo "🚀 Restarting backend.."
             pm2 reload sevseadivers-backend || pm2 start server.js --name sevseadivers-backend
