@@ -25,7 +25,7 @@ jobs:
 
             echo "🔄 Pulling latest code..."
             git reset --hard
-            git clean -fd -e uploads/  # Don't delete uploads/
+            git clean -fd -e upload/  # Don't delete upload/
             git pull origin main
 
             echo "📦 Installing dependencies..."
