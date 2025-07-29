@@ -3,31 +3,40 @@ import tryCatch from "../utils/tryCatch.js"
 import AppError from "../utils/appErorr.js"
 
 export const createCourse = tryCatch(async (req, res, next) => {
-  console.log('=== Course Creation Request ===');
-  console.log('Body:', req.body);
-  console.log('Files:', req.files);
-  
-  const baseUrl = `${req.protocol}://${req.get("host")}`
-  
+  console.log("=== Course Creation Request ===")
+  console.log("Body:", req.body)
+  console.log("Files:", req.files)
+
+  const baseUrl = `https://${req.get("host")}`
+
   // Extract data from request body
-  const { 
-    title, 
-    description, 
-    price, 
-    duration, 
-    category, 
-    level, 
+  const {
+    title,
+    description,
+    price,
+    duration,
+    category,
+    level,
     instructorName,
     instructorBio,
     instructorRating,
     learnPoints,
-    includes
+    includes,
   } = req.body
 
-  console.log('Extracted data:', {
-    title, description, price, duration, category, level, 
-    instructorName, instructorBio, instructorRating, learnPoints, includes
-  });
+  console.log("Extracted data:", {
+    title,
+    description,
+    price,
+    duration,
+    category,
+    level,
+    instructorName,
+    instructorBio,
+    instructorRating,
+    learnPoints,
+    includes,
+  })
 
   // Handle file uploads
   let imageUrl = null
@@ -36,32 +45,35 @@ export const createCourse = tryCatch(async (req, res, next) => {
 
   // Check for uploaded files
   if (req.files) {
-    console.log('Processing files:', Object.keys(req.files));
-    
+    console.log("Processing files:", Object.keys(req.files))
+
     // Handle course image
     if (req.files.courseImage) {
       imageUrl = `${baseUrl}/upload/${req.files.courseImage[0].filename}`
-      console.log('Course image URL:', imageUrl);
+      console.log("Course image URL:", imageUrl)
     }
-    
+
     // Handle instructor image
     if (req.files.instructorImage) {
       instructorImageUrl = `${baseUrl}/upload/${req.files.instructorImage[0].filename}`
-      console.log('Instructor image URL:', instructorImageUrl);
+      console.log("Instructor image URL:", instructorImageUrl)
     }
-    
+
     // Handle curriculum video
     if (req.files.curriculumVideo) {
       videoUrl = `${baseUrl}/upload/${req.files.curriculumVideo[0].filename}`
-      console.log('Curriculum video URL:', videoUrl);
+      console.log("Curriculum video URL:", videoUrl)
     }
   }
 
   // Validation
   if (!title || !description || !category || !level || !instructorName) {
-    console.log('Validation failed - missing required fields');
+    console.log("Validation failed - missing required fields")
     return next(
-      new AppError("Title, description, category, level, and instructor name are required", 400)
+      new AppError(
+        "Title, description, category, level, and instructor name are required",
+        400
+      )
     )
   }
 
@@ -77,14 +89,14 @@ export const createCourse = tryCatch(async (req, res, next) => {
         parsedLearnPoints = JSON.parse(learnPoints)
       }
     } catch (error) {
-      console.error('Error parsing learnPoints:', error)
+      console.error("Error parsing learnPoints:", error)
       parsedLearnPoints = []
     }
   } else {
     // Handle FormData array format (learnPoints[0], learnPoints[1], etc.)
     const learnPointsArray = []
     for (let key in req.body) {
-      if (key.startsWith('learnPoints[') && key.endsWith(']')) {
+      if (key.startsWith("learnPoints[") && key.endsWith("]")) {
         const value = req.body[key]
         if (value && value.trim()) {
           learnPointsArray.push(value.trim())
@@ -92,35 +104,31 @@ export const createCourse = tryCatch(async (req, res, next) => {
       }
     }
     parsedLearnPoints = learnPointsArray
-    console.log('Extracted learn points from FormData:', parsedLearnPoints);
+    console.log("Extracted learn points from FormData:", parsedLearnPoints)
   }
   // Handle includes// Parse includes if provided
-let parsedIncludes = []
-if (includes) {
-  try {
-    parsedIncludes = Array.isArray(includes)
-      ? includes
-      : JSON.parse(includes)
-  } catch (err) {
-    console.error('Error parsing includes:', err)
-    parsedIncludes = []
-  }
-} else {
-  const includesArray = []
-  for (let key in req.body) {
-    if (key.startsWith("includes[") && key.endsWith("][icon]")) {
-      const index = key.match(/includes\[(\d+)\]/)[1]
-      const icon = req.body[`includes[${index}][icon]`]
-      const text = req.body[`includes[${index}][text]`]
-      if (icon && text) {
-        includesArray.push({ icon, text })
+  let parsedIncludes = []
+  if (includes) {
+    try {
+      parsedIncludes = Array.isArray(includes) ? includes : JSON.parse(includes)
+    } catch (err) {
+      console.error("Error parsing includes:", err)
+      parsedIncludes = []
+    }
+  } else {
+    const includesArray = []
+    for (let key in req.body) {
+      if (key.startsWith("includes[") && key.endsWith("][icon]")) {
+        const index = key.match(/includes\[(\d+)\]/)[1]
+        const icon = req.body[`includes[${index}][icon]`]
+        const text = req.body[`includes[${index}][text]`]
+        if (icon && text) {
+          includesArray.push({ icon, text })
+        }
       }
     }
+    parsedIncludes = includesArray
   }
-  parsedIncludes = includesArray
-}
-
- 
 
   try {
     const course = await Course.create({
@@ -128,23 +136,23 @@ if (includes) {
       description,
       imageUrl,
       price: price ? parseFloat(price) : 0,
-      duration: duration || '',
+      duration: duration || "",
       category,
-      level,  
+      level,
       instructorName,
-      instructorBio: instructorBio || '',
+      instructorBio: instructorBio || "",
       instructorRating: instructorRating ? parseFloat(instructorRating) : 0,
       instructorImage: instructorImageUrl,
       videoUrl,
       whatYouWillLearn: parsedLearnPoints,
       includes: parsedIncludes,
     })
-    
-    console.log('Course created successfully:', course.id);
+
+    console.log("Course created successfully:", course.id)
     res.status(201).json(course)
   } catch (error) {
-    console.error('Database error creating course:', error);
-    return next(new AppError(`Failed to create course: ${error.message}`, 500));
+    console.error("Database error creating course:", error)
+    return next(new AppError(`Failed to create course: ${error.message}`, 500))
   }
 })
 
@@ -160,10 +168,19 @@ export const getCourseById = tryCatch(async (req, res, next) => {
 })
 
 export const updateCourse = tryCatch(async (req, res, next) => {
-  const baseUrl = `${req.protocol}://${req.get("host")}`
+  const baseUrl = `https://${req.get("host")}`
   const course = await Course.findByPk(req.params.id)
   if (!course) return next(new AppError("Course not found", 404))
-  const { title, description, imageUrl, price, duration, category, level, instructorName } = req.body
+  const {
+    title,
+    description,
+    imageUrl,
+    price,
+    duration,
+    category,
+    level,
+    instructorName,
+  } = req.body
   await course.update({
     title,
     description,

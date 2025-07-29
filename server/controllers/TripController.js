@@ -3,7 +3,7 @@ import tryCatch from "../utils/tryCatch.js"
 import AppError from "../utils/appErorr.js"
 
 export const createTrip = tryCatch(async (req, res, next) => {
-  const baseUrl = `${req.protocol}://${req.get("host")}`
+  const baseUrl = `https://${req.get("host")}`
   const {
     title,
     description,

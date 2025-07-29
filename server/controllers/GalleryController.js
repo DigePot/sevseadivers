@@ -3,7 +3,6 @@ import tryCatch from "../utils/tryCatch.js"
 import AppError from "../utils/appErorr.js"
 
 export const createGalleryItem = tryCatch(async (req, res, next) => {
-  // const baseUrl = `${req.protocol}://${req.get("host")}`
   const baseUrl = `https://${req.get("host")}`
   const { title, description, mediaType } = req.body
   let mediaUrl = req.body.mediaUrl
