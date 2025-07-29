@@ -72,8 +72,7 @@ jobs:
 
       - name: Build frontend
         working-directory: client
-        # run: npm run build
-        run: vite build
+        run: npm run build
 
       - name: Upload frontend to VPS
         uses: appleboy/scp-action@master
