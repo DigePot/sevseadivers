@@ -69,7 +69,7 @@ export function HomeView() {
           className="absolute top-0 left-0 w-full h-full object-cover z-0"
           style={{ y }} // Apply the transformed y value for parallax
         >
-          <source src={"/Hero.MP4"} type="video/mp4" />
+          <source src="/Hero.MP4" type="video/mp4" />
           Your browser does not support the video tag.
         </motion.video>
 
