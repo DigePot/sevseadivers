@@ -1,5 +1,5 @@
 import { motion } from "framer-motion"
-import { FaUsers, FaUser } from "react-icons/fa"
+import { FaUser, FaUsers } from "react-icons/fa"
 import { useStaff } from "../hook/use-staff"
 
 const API = "http://localhost:5000" // Backend base URL
