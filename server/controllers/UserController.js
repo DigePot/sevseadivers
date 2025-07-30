@@ -262,7 +262,6 @@ export const getProfile = async (req, res) => {
   }
 }
 
-<<<<<<< HEAD
 export const contact = tryCatch(async (req, res, next) => {
   const { name, phoneNumber, email, subject, message } = req.body
   if (!name || !email || !subject || !message) {
@@ -291,8 +290,3 @@ export const contact = tryCatch(async (req, res, next) => {
     message: "Thank you for your message. We will get back to you shortly!",
   })
 })
-=======
-// export const contact = tryCatch(async (req, res, next) => {
-//   const { name, phoneNumber, email, subject, message } = req.body
-// })
->>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
