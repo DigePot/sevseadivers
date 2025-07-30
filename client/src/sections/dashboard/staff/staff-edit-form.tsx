@@ -36,8 +36,8 @@ export function StaffEditForm({ currentStaff }: Props) {
   const router = useRouter()
   const [updateStaff] = useUpdateStaffMutation()
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [preview, setPreview] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [preview, setPreview] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Initialize form with current staff values
   const {
@@ -71,50 +71,50 @@ export function StaffEditForm({ currentStaff }: Props) {
         address: currentStaff.address || "",
         dateOfBirth: currentStaff.dateOfBirth?.split("T")[0] || "",
         bio: currentStaff.bio || "",
-      });
+      })
     }
-  }, [currentStaff, reset]);
+  }, [currentStaff, reset])
 
   const onSubmit = handleSubmit(async (data) => {
-    if (!currentStaff?.id) return;
+    if (!currentStaff?.id) return
     try {
-      setIsSubmitting(true);
-      const formData = new FormData();
-      formData.append("username", data.username);
-      formData.append("email", data.email);
-      formData.append("fullName", data.fullName);
-      formData.append("phoneNumber", data.phoneNumber);
-      if (data.address) formData.append("address", data.address);
-      if (data.dateOfBirth) formData.append("dateOfBirth", data.dateOfBirth);
-      if (data.bio) formData.append("bio", data.bio);
+      setIsSubmitting(true)
+      const formData = new FormData()
+      formData.append("username", data.username)
+      formData.append("email", data.email)
+      formData.append("fullName", data.fullName)
+      formData.append("phoneNumber", data.phoneNumber)
+      if (data.address) formData.append("address", data.address)
+      if (data.dateOfBirth) formData.append("dateOfBirth", data.dateOfBirth)
+      if (data.bio) formData.append("bio", data.bio)
       if (fileInputRef.current?.files?.[0]) {
-        formData.append("profilePicture", fileInputRef.current.files[0]);
+        formData.append("profilePicture", fileInputRef.current.files[0])
       }
       // Use 'body' instead of 'data' if your updateStaff expects it
-      await updateStaff({ id: currentStaff.id, body: formData }).unwrap();
-      router.push(paths.dashboard.staff.list);
+      await updateStaff({ id: currentStaff.id, body: formData }).unwrap()
+      router.push(paths.dashboard.staff.list)
     } catch (error: any) {
-      const errorMessage = extractErrorMessage(error.data);
+      const errorMessage = extractErrorMessage(error.data)
       setError("root", {
         message: errorMessage || "Failed to update staff member",
-      });
+      })
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  });
+  })
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const file = e.target.files?.[0]
     if (file) {
-      const reader = new FileReader();
+      const reader = new FileReader()
       reader.onloadend = () => {
-        setPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+        setPreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
     } else {
-      setPreview(null);
+      setPreview(null)
     }
-  };
+  }
 
   if (!currentStaff) {
     return (
@@ -130,7 +130,11 @@ export function StaffEditForm({ currentStaff }: Props) {
         Edit Staff Member: {currentStaff.fullName}
       </h1>
 
-      <form onSubmit={onSubmit} className="space-y-6" encType="multipart/form-data">
+      <form
+        onSubmit={onSubmit}
+        className="space-y-6"
+        encType="multipart/form-data"
+      >
         {/* Grid Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Full Name */}
@@ -305,14 +309,26 @@ export function StaffEditForm({ currentStaff }: Props) {
 
           {/* Profile Picture */}
           <div className="space-y-2">
-            <label htmlFor="profilePicture" className="block text-sm font-medium text-gray-700">
-              Profile Picture <span className="text-xs text-gray-400">(JPG, PNG, max 2MB)</span>
+            <label
+              htmlFor="profilePicture"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Profile Picture{" "}
+              <span className="text-xs text-gray-400">(JPG, PNG, max 2MB)</span>
             </label>
             {/* Show preview if new image selected, else show current */}
             {preview ? (
-              <img src={preview} alt="Preview" className="w-24 h-24 object-cover rounded-full border mb-2" />
+              <img
+                src={preview}
+                alt="Preview"
+                className="w-24 h-24 object-cover rounded-full border mb-2"
+              />
             ) : currentStaff?.profilePicture ? (
-              <img src={currentStaff.profilePicture} alt="Current profile" className="w-24 h-24 object-cover rounded-full border mb-2" />
+              <img
+                src={`http://api.sevseadivers.com${currentStaff.profilePicture}`}
+                alt="Current profile"
+                className="w-24 h-24 object-cover rounded-full border mb-2"
+              />
             ) : null}
             <input
               id="profilePicture"
@@ -322,7 +338,9 @@ export function StaffEditForm({ currentStaff }: Props) {
               onChange={handleFileChange}
               className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
             />
-            <span className="text-xs text-gray-400">Recommended: Square image, max 2MB.</span>
+            <span className="text-xs text-gray-400">
+              Recommended: Square image, max 2MB.
+            </span>
           </div>
         </div>
 

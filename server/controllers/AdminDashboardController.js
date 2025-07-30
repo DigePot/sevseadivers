@@ -330,12 +330,13 @@ export const getStaffById = tryCatch(async (req, res, next) => {
 
 // Create new staff member
 export const createStaff = tryCatch(async (req, res, next) => {
-  const { username, password, email, fullName, phoneNumber, role, bio } = req.body
- let profilePicture = req.body.profilePicture; 
+  const { username, password, email, fullName, phoneNumber, role, bio } =
+    req.body
+  let profilePicture = req.body.profilePicture
 
-if (req.file) {
-  profilePicture = `/upload/${req.file.filename}`; // set to uploaded file path
-}
+  if (req.file) {
+    profilePicture = `/upload/${req.file.filename}` // set to uploaded file path
+  }
   if (!username || !password || !email || !fullName || !role) {
     return next(
       new AppError(
@@ -380,7 +381,8 @@ if (req.file) {
 // Update staff member
 export const updateStaff = tryCatch(async (req, res, next) => {
   const { id } = req.params
-  const { username, email, fullName, phoneNumber, role, bio, profilePicture } = req.body
+  const { username, email, fullName, phoneNumber, role, bio, profilePicture } =
+    req.body
 
   const staff = await User.findOne({
     where: { id, role: { [Op.in]: ["admin", "staff"] } },

@@ -22,6 +22,7 @@ import { CONFIG } from "../../global-config"
 
 // --- Profile Menu ---
 const ProfileMenu = ({ user, onClose }: { user: any; onClose: () => void }) => {
+  console.log("user", user)
   const { t } = useTranslation()
   const navigate = useNavigate()
 
@@ -234,7 +235,7 @@ const Header = () => {
                       {user?.profilePicture ? (
                         <img
                           src={user.profilePicture}
-                          alt={t("profileMenu.altProfilePic")}
+                          alt="pic"
                           className="w-full h-full object-cover"
                         />
                       ) : (

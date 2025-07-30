@@ -6,7 +6,8 @@ import { useRouter } from "../../../routes/hooks"
 import { paths } from "../../../routes/paths"
 import { useCreateStaffMutation } from "../../../store/admin"
 import { extractErrorMessage } from "../../../utils/extract-error-message"
-import { useRef } from "react";
+import { useRef } from "react"
+import { useAllStaff } from "./hooks"
 
 // ----------------------------------------------------------------------
 
@@ -26,7 +27,7 @@ export const NewStaffSchema = zod.object({
   address: zod.string().optional(),
   dateOfBirth: zod.string().optional(),
   bio: zod.string().optional(),
-});
+})
 
 export type NewStaffSchemaType = zod.infer<typeof NewStaffSchema>
 
@@ -35,6 +36,7 @@ export type NewStaffSchemaType = zod.infer<typeof NewStaffSchema>
 export function StaffNewCreateForm() {
   const router = useRouter()
   const [createStaff] = useCreateStaffMutation()
+  const { refetch } = useAllStaff()
 
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -61,24 +63,24 @@ export function StaffNewCreateForm() {
     defaultValues,
   })
 
-  const [preview, setPreview] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [preview, setPreview] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const onSubmit = handleSubmit(async (data) => {
     try {
       setIsSubmitting(true)
-      const formData = new FormData();
-      formData.append("username", data.username);
-      formData.append("password", data.password);
-      formData.append("email", data.email);
-      formData.append("fullName", data.fullName);
-      formData.append("phoneNumber", data.phoneNumber);
-      formData.append("role", "staff");
-      if (data.address) formData.append("address", data.address);
-      if (data.dateOfBirth) formData.append("dateOfBirth", data.dateOfBirth);
-      if (data.bio) formData.append("bio", data.bio);
+      const formData = new FormData()
+      formData.append("username", data.username)
+      formData.append("password", data.password)
+      formData.append("email", data.email)
+      formData.append("fullName", data.fullName)
+      formData.append("phoneNumber", data.phoneNumber)
+      formData.append("role", "staff")
+      if (data.address) formData.append("address", data.address)
+      if (data.dateOfBirth) formData.append("dateOfBirth", data.dateOfBirth)
+      if (data.bio) formData.append("bio", data.bio)
       if (fileInputRef.current?.files?.[0]) {
-        formData.append("profilePicture", fileInputRef.current.files[0]);
+        formData.append("profilePicture", fileInputRef.current.files[0])
       }
 
       // Send the JSON data to the backend API to create the staff
@@ -87,6 +89,7 @@ export function StaffNewCreateForm() {
       // Reset form after successful submission
       reset()
       router.push(paths.dashboard.staff.list)
+      await refetch()
     } catch (error: any) {
       // console.log("Error creating staff:", error)
       const errorMessage = extractErrorMessage(error.data)
@@ -99,17 +102,17 @@ export function StaffNewCreateForm() {
   })
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const file = e.target.files?.[0]
     if (file) {
-      const reader = new FileReader();
+      const reader = new FileReader()
       reader.onloadend = () => {
-        setPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+        setPreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
     } else {
-      setPreview(null);
+      setPreview(null)
     }
-  };
+  }
 
   return (
     <div className="">
@@ -117,7 +120,11 @@ export function StaffNewCreateForm() {
         Create New Staff Member
       </h1>
 
-      <form onSubmit={onSubmit} className="space-y-6" encType="multipart/form-data">
+      <form
+        onSubmit={onSubmit}
+        className="space-y-6"
+        encType="multipart/form-data"
+      >
         {/* Grid Section */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Full Name */}
@@ -317,8 +324,12 @@ export function StaffNewCreateForm() {
 
           {/* Profile Picture */}
           <div className="space-y-2">
-            <label htmlFor="profilePicture" className="block text-sm font-medium text-gray-700">
-              Profile Picture <span className="text-xs text-gray-400">(JPG, PNG, max 2MB)</span>
+            <label
+              htmlFor="profilePicture"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Profile Picture{" "}
+              <span className="text-xs text-gray-400">(JPG, PNG, max 2MB)</span>
             </label>
             {preview && (
               <img
@@ -335,7 +346,9 @@ export function StaffNewCreateForm() {
               onChange={handleFileChange}
               className="block w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
             />
-            <span className="text-xs text-gray-400">Recommended: Square image, max 2MB.</span>
+            <span className="text-xs text-gray-400">
+              Recommended: Square image, max 2MB.
+            </span>
           </div>
         </div>
 
