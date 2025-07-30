@@ -6,18 +6,14 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
-<<<<<<< HEAD
 
     /* Bundler mode */
-=======
->>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
-<<<<<<< HEAD
 
     /* Linting */
     "strict": true,
@@ -26,13 +22,6 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
-=======
-    "strict": false,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "noFallthroughCasesInSwitch": false,
-    "noUncheckedSideEffectImports": false
->>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
   },
   "include": ["src"]
 }
