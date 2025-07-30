@@ -11,25 +11,5 @@
     "service": "Adeegyada",
     "gallery": "Sawirro",
     "about": "Nagu Saabsan"
-<<<<<<< HEAD
-=======
-  },
-  "home": {
-    "heroTitle": "Ka Bogo Qotada Badweynta la Jir SEVSEA DIVERS",
-    "heroSubtitle": "Kashif quruxda dunida hoosteeda biyaha leh dalxiisyo iyo dabaal-baaris la hagayo.",
-    "bookAdventure": "Dalbo Safarkaaga",
-    "aboutTitle": "Ku saabsan Sevsea Divers",
-    "aboutHeading": "Albaabkaaga u furma dunida hoosteeda biyaha",
-    "aboutDescription": "Sevsea Divers waxaan u heellanahay inaan kula wadaagno mucjisooyinka badda...",
-    "stepsTitle": "GAL DUNIDA BIIYOHA HOOSTEEDA 3 TALAABO OO SAHLAN!!!",
-    "learn": "BARO",
-    "learnDesc": "Baro sida loo quuso! Isdiiwaangeli koorsada!",
-    "dive": "QUUSO",
-    "diveDesc": "Ku quuso koorsooyin fudud oo loogu talagalay bilowga!",
-    "explore": "BAAR",
-    "exploreDesc": "Baro quusitaanka oo sahamin 71% kale ee dhulka!",
-    "featuredDestinationsTitle": "Meelo La Xushay",
-    "viewDetails": "Faahfaahin Dheeraad ah"
->>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
   }
 }
