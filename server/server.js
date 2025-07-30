@@ -20,30 +20,17 @@ import { dirname } from "path"
 dotenv.config({ path: "./config/.env" })
 
 const app = express()
-<<<<<<< HEAD
 app.use(
   cors({
     origin: ["https://www.sevseadivers.com", "http://localhost:5173"],
-=======
-// app.use(cors())
-// ✅ CORS should come **before everything else**
-app.use(
-  cors({
-    origin: "https://www.sevseadivers.com",
->>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 )
 
-<<<<<<< HEAD
 app.use(express.json({ limit: "4000mb" }))
 app.use(express.urlencoded({ extended: true, limit: "4000mb" }))
-=======
-app.use(express.json({ limit: "4000mb" })) // also raise the limit to avoid next error
-app.use(express.urlencoded({ extended: true, limit: "50mb" })) // for form uploads
->>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
 
 // Get the current directory name (equivalent to __dirname in CommonJS)
 const __filename = fileURLToPath(import.meta.url)

@@ -3,14 +3,11 @@ import React, { useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { FaBars, FaTimes, FaUserCircle } from "react-icons/fa"
 import { Link, useNavigate } from "react-router"
-<<<<<<< HEAD
-=======
 
 // --- Logo Import ---
 // Make sure the path and filename 'logo.png' are correct.
 import Logo from "../../assets/logo.png"
 
->>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
 import LanguageSwitcher from "../../components/LanguageSwitcher"
 import { SignInButton } from "../../components/sign-in-button"
 import { SignOutButton } from "../../components/sign-out-button"
@@ -43,13 +40,9 @@ const ProfileMenu = ({ user, onClose }: { user: any; onClose: () => void }) => {
     >
       <div className="p-2">
         <div className="px-3 py-2">
-<<<<<<< HEAD
           <p className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
             {user?.email || "User"}
           </p>
-=======
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">{user?.email || "User"}</p>
->>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
         </div>
         <div className="w-full h-px bg-gray-200 dark:bg-gray-700 my-1"></div>
         <button
@@ -177,10 +170,6 @@ const Header = () => {
   const { authenticated } = useAuth()
   const id = localStorage.getItem("id") ?? ""
   const { user } = useUser(id)
-<<<<<<< HEAD
-
-=======
->>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
   const [menuOpen, setMenuOpen] = useState(false)
   const [profileMenuOpen, setProfileMenuOpen] = useState(false)
   const profileMenuRef = useRef<HTMLDivElement>(null)
@@ -188,14 +177,10 @@ const Header = () => {
   // Close menus when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-<<<<<<< HEAD
       if (
         profileMenuRef.current &&
         !profileMenuRef.current.contains(e.target as Node)
       ) {
-=======
-      if (profileMenuRef.current && !profileMenuRef.current.contains(e.target as Node)) {
->>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
         setProfileMenuOpen(false)
       }
     }
@@ -217,26 +202,12 @@ const Header = () => {
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
             {/* Logo */}
-<<<<<<< HEAD
-            <Link
-              to="/"
-              className="flex items-center space-x-3 text-2xl font-extrabold text-cyan-600 font-sans select-none"
-            >
-              <motion.span
-                className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-cyan-100 dark:bg-cyan-800 text-3xl shadow-inner"
-                whileHover={{ rotate: 15, scale: 1.1 }}
-              >
-                🌊
-              </motion.span>
-              <span className="hidden sm:inline">{CONFIG.appName}</span>
-=======
             <Link to="/" className="flex-shrink-0 flex items-center">
               <img
                 src={Logo}
                 alt={`${CONFIG.appName} Logo`}
                 className="h-30 w-auto transition-transform duration-300 ease-in-out hover:scale-105"
               />
->>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
             </Link>
 
             {/* Desktop Navigation */}
@@ -271,16 +242,12 @@ const Header = () => {
                       )}
                     </motion.button>
                     <AnimatePresence>
-<<<<<<< HEAD
                       {profileMenuOpen && (
                         <ProfileMenu
                           user={user}
                           onClose={() => setProfileMenuOpen(false)}
                         />
                       )}
-=======
-                      {profileMenuOpen && <ProfileMenu user={user} onClose={() => setProfileMenuOpen(false)} />}
->>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
                     </AnimatePresence>
                   </>
                 ) : (
@@ -308,10 +275,6 @@ const Header = () => {
 // ==========================================================================
 // 2. Main Layout Component (The Top-Level Structure)
 // ==========================================================================
-<<<<<<< HEAD
-
-=======
->>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
 interface MainLayoutProps {
   children: React.ReactNode
 }
@@ -320,13 +283,9 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-500">
       <Header />
-<<<<<<< HEAD
       <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         {children}
       </main>
-=======
-      <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">{children}</main>
->>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
       <Footer />
     </div>
   )
