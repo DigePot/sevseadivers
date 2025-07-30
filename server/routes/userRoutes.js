@@ -28,6 +28,6 @@ router.post("/send-otp", sendOtp)
 router.post("/verify-otp", verifyOtp)
 router.post("/forgot-password", forgotPassword)
 router.post("/reset-password", resetPassword)
-router.post("/contact", contact)
+router.post("/contact", contact) // contact
 
 export default router
