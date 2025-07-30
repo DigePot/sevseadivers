@@ -5,7 +5,8 @@ import Tutorial from "../../../../assets/tutorial.png"
 import Dive from "../../../../assets/dive.png"
 import Explore from "../../../../assets/explore.png"
 import Premium from "../../../../assets/premium-banner.png"
-import HeroVideo from "../../../../assets/Hero.mp4" // Import the video asset
+// import HeroVideo from "../../../../assets/Hero.mp4" // Import the video asset
+// import HeroVideo from "../../../../assets/Hero.mp4" // Import the video asset
 import { useTrips } from "../../../trip/hooks/use-trips"
 import { motion, useScroll, useTransform } from "framer-motion"
 import { useRef } from "react"
@@ -68,7 +69,7 @@ export function HomeView() {
           className="absolute top-0 left-0 w-full h-full object-cover z-0"
           style={{ y }} // Apply the transformed y value for parallax
         >
-          <source src={HeroVideo} type="video/mp4" />
+          <source src={"/Hero.MP4"} type="video/mp4" />
           Your browser does not support the video tag.
         </motion.video>
 
