@@ -1,19 +1,3 @@
-<<<<<<< HEAD
-import { Link } from "react-router"
-import heroImg from "../../../../assets/hero.jpg"
-import { useTrips } from "../../../trip/hooks/use-trips"
-import { motion } from "framer-motion"
-
-export function HomeView() {
-  const { allTrips } = useTrips()
-
-  if (!allTrips) {
-    return (
-      <div className="flex justify-center items-center h-screen bg-black text-white">
-        Loading trips...
-      </div>
-    )
-=======
 "use client"
 import { Link } from "react-router"
 import About from "../../../../assets/about.png"
@@ -43,8 +27,11 @@ export function HomeView() {
   const opacity = useTransform(scrollYProgress, [0, 1], [1, 0]) // Fade out the overlay and content
 
   if (!allTrips) {
-    return <div className="flex justify-center items-center h-screen bg-black text-white">Loading trips...</div>
->>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
+    return (
+      <div className="flex justify-center items-center h-screen bg-black text-white">
+        Loading trips...
+      </div>
+    )
   }
 
   const featuredDestinations = (() => {
@@ -70,17 +57,6 @@ export function HomeView() {
       <section
         aria-label="Hero section"
         className="relative w-full h-screen bg-black text-white overflow-hidden"
-<<<<<<< HEAD
-      >
-        {/* Background Image */}
-        <div
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ backgroundImage: `url(${heroImg})` }}
-        />
-        {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-black/70 to-cyan-900/60 z-0" />
-
-=======
         ref={heroRef} // Assign the ref to the hero section
       >
         {/* Video Background with parallax effect */}
@@ -101,34 +77,21 @@ export function HomeView() {
           className="absolute inset-0 bg-gradient-to-br from-black/70 to-cyan-900/60 z-10" // Increased z-index to be above video
           style={{ opacity }} // Apply the transformed opacity value
         />
->>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
         {/* Hero Content */}
         <motion.main
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1 }}
-<<<<<<< HEAD
-          className="relative z-10 flex flex-col justify-center items-center text-center px-6 py-16 md:py-28 min-h-screen max-w-4xl mx-auto"
-=======
           className="relative z-20 flex flex-col justify-center items-center text-center px-6 py-16 md:py-28 min-h-screen max-w-4xl mx-auto" // Increased z-index to be above overlay
->>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
         >
           <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight leading-tight drop-shadow-lg">
             Explore the Depths with <br />
             <span className="text-cyan-400">SEVSEA DIVERS</span>
           </h1>
-<<<<<<< HEAD
-
           <p className="mt-6 text-lg md:text-xl max-w-2xl text-white/90 drop-shadow-md">
             Discover the beauty of the underwater world with expert-led diving
             and snorkeling adventures.
           </p>
-
-=======
-          <p className="mt-6 text-lg md:text-xl max-w-2xl text-white/90 drop-shadow-md">
-            Discover the beauty of the underwater world with expert-led diving and snorkeling adventures.
-          </p>
->>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
           <Link
             to="/trips"
             className="mt-10 inline-block bg-cyan-500 hover:bg-cyan-600 focus:ring-4 focus:ring-cyan-300 font-semibold px-10 py-4 rounded-full text-lg shadow-lg transition-all transform hover:scale-105 active:scale-95"
@@ -138,8 +101,6 @@ export function HomeView() {
         </motion.main>
       </section>
 
-<<<<<<< HEAD
-=======
       {/* About Sevsea Section - New Section */}
       <section aria-label="About Sevsea" className="py-20">
         <div className="container mx-auto px-6 lg:px-8">
@@ -175,20 +136,23 @@ export function HomeView() {
               transition={{ duration: 0.8, delay: 0.4 }}
               className="w-full md:w-1/2 lg:w-2/3 text-center md:text-left"
             >
-              <h3 className="text-3xl font-bold text-gray-300 mb-4">Your Gateway to the Underwater World</h3>
+              <h3 className="text-3xl font-bold text-gray-300 mb-4">
+                Your Gateway to the Underwater World
+              </h3>
               <p className="text-gray-400 leading-relaxed text-lg">
-                At Sevsea Divers, we are passionate about sharing the marvels of the ocean with enthusiasts of all
-                levels. From thrilling deep-sea explorations to serene encounters with vibrant marine life, our
-                experienced instructors and state-of-the-art equipment ensure a safe, unforgettable, and eco-conscious
-                diving experience. We offer a wide range of courses, guided tours, and personalized adventures tailored
-                to your comfort and skill.
+                At Sevsea Divers, we are passionate about sharing the marvels of
+                the ocean with enthusiasts of all levels. From thrilling
+                deep-sea explorations to serene encounters with vibrant marine
+                life, our experienced instructors and state-of-the-art equipment
+                ensure a safe, unforgettable, and eco-conscious diving
+                experience. We offer a wide range of courses, guided tours, and
+                personalized adventures tailored to your comfort and skill.
               </p>
             </motion.div>
           </div>
         </div>
       </section>
 
->>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
       {/* Featured Destinations Section */}
       <section aria-label="Featured destinations" className="py-20">
         <motion.h2
@@ -200,9 +164,7 @@ export function HomeView() {
         >
           Featured Destinations
         </motion.h2>
-<<<<<<< HEAD
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 container mx-auto px-6 lg:px-8">
           {featuredDestinations.map(
             ({ destination, imageUrl, description }, i) => (
               <motion.div
@@ -219,7 +181,7 @@ export function HomeView() {
                 >
                   {imageUrl && (
                     <img
-                      src={imageUrl}
+                      src={imageUrl || "/placeholder.svg"}
                       alt={`${destination} underwater diving scene`}
                       className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-300"
                       loading="lazy"
@@ -244,47 +206,6 @@ export function HomeView() {
               </motion.div>
             )
           )}
-        </div>
-      </section>
-=======
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 container mx-auto px-6 lg:px-8">
-          {featuredDestinations.map(({ destination, imageUrl, description }, i) => (
-            <motion.div
-              key={destination}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: i * 0.2 }}
-            >
-              <Link
-                to={`/trips?destination=${encodeURIComponent(destination)}`}
-                className="block bg-white rounded-3xl shadow-xl overflow-hidden group transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl"
-                aria-label={`View trips to ${destination}`}
-              >
-                {imageUrl && (
-                  <img
-                    src={imageUrl || "/placeholder.svg"}
-                    alt={`${destination} underwater diving scene`}
-                    className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-300"
-                    loading="lazy"
-                  />
-                )}
-                <div className="p-6">
-                  <h3 className="text-xl font-bold text-cyan-700 mb-3">{destination}</h3>
-                  <p className="text-gray-600">
-                    {description
-                      ? description.length > 100
-                        ? description.slice(0, 100) + "..."
-                        : description
-                      : "Explore this amazing destination."}
-                  </p>
-                  <span className="mt-6 inline-block bg-cyan-500 hover:bg-cyan-600 text-white font-semibold px-6 py-3 rounded-lg shadow transition-transform hover:scale-105 cursor-pointer">
-                    View Details
-                  </span>
-                </div>
-              </Link>
-            </motion.div>
-          ))}
         </div>
       </section>
 
@@ -330,8 +251,12 @@ export function HomeView() {
                 />
                 <div className="absolute inset-0 rounded-full border-4 border-cyan-500 group-hover:border-cyan-700 transition-colors duration-300"></div>
               </div>
-              <h3 className="text-2xl font-semibold text-gray-300 mb-2">LEARN</h3>
-              <p className="text-gray-300 max-w-xs">Learn to Scuba Dive! Enroll in a course!</p>
+              <h3 className="text-2xl font-semibold text-gray-300 mb-2">
+                LEARN
+              </h3>
+              <p className="text-gray-300 max-w-xs">
+                Learn to Scuba Dive! Enroll in a course!
+              </p>
             </motion.div>
             {/* Step 2: Dive */}
             <motion.div
@@ -349,8 +274,12 @@ export function HomeView() {
                 />
                 <div className="absolute inset-0 rounded-full border-4 border-cyan-500 group-hover:border-cyan-700 transition-colors duration-300"></div>
               </div>
-              <h3 className="text-2xl font-semibold text-gray-300 mb-2">DIVE</h3>
-              <p className="text-gray-300 max-w-xs">Dive in with our beginner friendly scuba lessons!</p>
+              <h3 className="text-2xl font-semibold text-gray-300 mb-2">
+                DIVE
+              </h3>
+              <p className="text-gray-300 max-w-xs">
+                Dive in with our beginner friendly scuba lessons!
+              </p>
             </motion.div>
             {/* Step 3: Explore */}
             <motion.div
@@ -368,8 +297,12 @@ export function HomeView() {
                 />
                 <div className="absolute inset-0 rounded-full border-4 border-cyan-500 group-hover:border-cyan-700 transition-colors duration-300"></div>
               </div>
-              <h3 className="text-2xl font-semibold text-gray-300 mb-2">EXPLORE</h3>
-              <p className="text-gray-300 max-w-xs">Learn to Scuba Dive & Explore the other 71% of the Earth!</p>
+              <h3 className="text-2xl font-semibold text-gray-300 mb-2">
+                EXPLORE
+              </h3>
+              <p className="text-gray-300 max-w-xs">
+                Learn to Scuba Dive & Explore the other 71% of the Earth!
+              </p>
             </motion.div>
           </div>
         </div>
@@ -383,15 +316,12 @@ export function HomeView() {
 
       {/* Image Gallery Section */}
       <ImageGallerySection />
-      
-  {/* Pricing Section */}
+
+      {/* Pricing Section */}
       <PricingSection />
 
       {/* FAQ Section */}
       <FAQSection />
-
-    
->>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
     </>
   )
 }
