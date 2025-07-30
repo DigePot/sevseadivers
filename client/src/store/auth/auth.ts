@@ -53,7 +53,6 @@ export const authApi = createApi({
         body,
       }),
     }),
-<<<<<<< HEAD
 
     sendContactMessage: builder.mutation<
       { success: boolean; message: string },
@@ -71,8 +70,6 @@ export const authApi = createApi({
         body,
       }),
     }),
-=======
->>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
   }),
 })
 
@@ -82,8 +79,5 @@ export const {
   useUpdateMyProfileMutation,
   useForgotPasswordMutation,
   useResetPasswordMutation,
-<<<<<<< HEAD
   useSendContactMessageMutation,
-=======
->>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
 } = authApi
