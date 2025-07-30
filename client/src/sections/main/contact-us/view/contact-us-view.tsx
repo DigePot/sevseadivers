@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react"
 import { motion } from "framer-motion"
+<<<<<<< HEAD
 import { useSendContactMessageMutation } from "../../../../store/auth/auth"
 
 // ---------------------------------------------------
@@ -53,17 +54,36 @@ export function ContactView() {
   const confirmationRef = useRef<HTMLDivElement>(null)
 
   // --- Client-Side Validation ---
+=======
+
+export function ContactView() {
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+  const [message, setMessage] = useState("")
+  const [errors, setErrors] = useState<{
+    name?: string
+    email?: string
+    message?: string
+  }>({})
+  const [submitted, setSubmitted] = useState(false)
+  const confirmationRef = useRef<HTMLDivElement>(null)
+
+>>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
   const validate = () => {
     const newErrors: typeof errors = {}
     if (!name.trim()) newErrors.name = "Please enter your name"
     if (!email.trim()) newErrors.email = "Please enter your email"
     else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = "Email is invalid"
+<<<<<<< HEAD
     if (!subject.trim()) newErrors.subject = "Please enter a subject"
+=======
+>>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
     if (!message.trim()) newErrors.message = "Please enter your message"
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
 
+<<<<<<< HEAD
   // --- Form Submission Handler ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -107,17 +127,50 @@ export function ContactView() {
           </h1>
 
           {isSuccess ? (
+=======
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!validate()) return
+    setSubmitted(true)
+    // Optionally clear form
+    setName("")
+    setEmail("")
+    setMessage("")
+  }
+
+  useEffect(() => {
+    if (submitted && confirmationRef.current) {
+      confirmationRef.current.focus()
+    }
+  }, [submitted])
+
+  return (
+    <section className=" mt-20 p-8 bg-white rounded-xl shadow-lg">
+      <div className="flex flex-col md:flex-row gap-10">
+        {/* Left: Form */}
+        <div className="flex-1">
+          <h1 className="text-4xl font-bold mb-8 text-blue-900 text-center md:text-left">
+            Contact Us
+          </h1>
+
+          {submitted ? (
+>>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               tabIndex={-1}
               ref={confirmationRef}
               aria-live="polite"
+<<<<<<< HEAD
               className="p-8 bg-green-100 text-green-900 rounded-lg shadow-md text-center text-xl font-semibold"
+=======
+              className="p-8 bg-green-100 text-green-900 rounded-lg shadow-lg text-center text-xl font-semibold"
+>>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
             >
               Thanks for contacting us! We'll get back to you shortly.
             </motion.div>
           ) : (
+<<<<<<< HEAD
             <form onSubmit={handleSubmit} className="space-y-4" noValidate>
               {/* Form fields remain the same... */}
               {/* Name */}
@@ -125,6 +178,14 @@ export function ContactView() {
                 <label
                   htmlFor="name"
                   className="block font-semibold text-gray-700 mb-1"
+=======
+            <form onSubmit={handleSubmit} className="space-y-6" noValidate>
+              {/* Name */}
+              <div className="flex flex-col md:flex-row md:items-center md:space-x-6">
+                <label
+                  htmlFor="name"
+                  className="md:w-32 font-semibold text-blue-800 py-1"
+>>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
                 >
                   Name
                 </label>
@@ -135,13 +196,18 @@ export function ContactView() {
                   autoFocus
                   value={name}
                   onChange={(e) => setName(e.target.value)}
+<<<<<<< HEAD
                   className={`w-full px-4 py-2 rounded-md border transition duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+=======
+                  className={`flex-grow px-4 py-2 rounded-md border transition duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ${
+>>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
                     errors.name ? "border-red-500" : "border-gray-300"
                   }`}
                   aria-invalid={!!errors.name}
                   aria-describedby="name-error"
                   required
                 />
+<<<<<<< HEAD
                 {errors.name && (
                   <p id="name-error" className="text-red-600 mt-1 text-sm">
                     {errors.name}
@@ -154,6 +220,24 @@ export function ContactView() {
                 <label
                   htmlFor="email"
                   className="block font-semibold text-gray-700 mb-1"
+=======
+              </div>
+              <motion.p
+                id="name-error"
+                className="text-red-600 mt-1 text-sm ml-32 md:ml-0"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: errors.name ? 1 : 0 }}
+                role="alert"
+              >
+                {errors.name}
+              </motion.p>
+
+              {/* Email */}
+              <div className="flex flex-col md:flex-row md:items-center md:space-x-6">
+                <label
+                  htmlFor="email"
+                  className="md:w-32 font-semibold text-blue-800 py-1"
+>>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
                 >
                   Email
                 </label>
@@ -163,13 +247,18 @@ export function ContactView() {
                   placeholder="Your Email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+<<<<<<< HEAD
                   className={`w-full px-4 py-2 rounded-md border transition duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+=======
+                  className={`flex-grow px-4 py-2 rounded-md border transition duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ${
+>>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
                     errors.email ? "border-red-500" : "border-gray-300"
                   }`}
                   aria-invalid={!!errors.email}
                   aria-describedby="email-error"
                   required
                 />
+<<<<<<< HEAD
                 {errors.email && (
                   <p id="email-error" className="text-red-600 mt-1 text-sm">
                     {errors.email}
@@ -229,6 +318,24 @@ export function ContactView() {
                 <label
                   htmlFor="message"
                   className="block font-semibold text-gray-700 mb-1"
+=======
+              </div>
+              <motion.p
+                id="email-error"
+                className="text-red-600 mt-1 text-sm ml-32 md:ml-0"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: errors.email ? 1 : 0 }}
+                role="alert"
+              >
+                {errors.email}
+              </motion.p>
+
+              {/* Message */}
+              <div className="flex flex-col md:flex-row md:items-start md:space-x-6">
+                <label
+                  htmlFor="message"
+                  className="md:w-32 font-semibold text-blue-800 pt-2"
+>>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
                 >
                   Message
                 </label>
@@ -238,13 +345,18 @@ export function ContactView() {
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   rows={5}
+<<<<<<< HEAD
                   className={`w-full px-4 py-2 rounded-md border resize-y transition duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+=======
+                  className={`flex-grow px-4 py-2 rounded-md border resize-y transition duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ${
+>>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
                     errors.message ? "border-red-500" : "border-gray-300"
                   }`}
                   aria-invalid={!!errors.message}
                   aria-describedby="message-error"
                   required
                 />
+<<<<<<< HEAD
                 {errors.message && (
                   <p id="message-error" className="text-red-600 mt-1 text-sm">
                     {errors.message}
@@ -303,17 +415,47 @@ export function ContactView() {
                 ) : (
                   "Send Message"
                 )}
+=======
+              </div>
+              <motion.p
+                id="message-error"
+                className="text-red-600 mt-1 text-sm ml-32 md:ml-0"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: errors.message ? 1 : 0 }}
+                role="alert"
+              >
+                {errors.message}
+              </motion.p>
+
+              {/* Submit */}
+              <motion.button
+                type="submit"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className="w-full bg-blue-700 text-white py-3 rounded-md font-semibold hover:bg-blue-800 transition"
+              >
+                Send Message
+>>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
               </motion.button>
             </form>
           )}
         </div>
 
+<<<<<<< HEAD
         {/* Right: Image */}
         <div className="hidden md:flex flex-1 items-center justify-center bg-gray-100 rounded-lg p-4">
           <img
             src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80"
             alt="A placeholder illustration for a contact page"
             className="rounded-xl shadow-lg object-cover w-full h-full"
+=======
+        {/* Right: Image or Info block */}
+        <div className="hidden md:flex flex-1 items-center justify-center">
+          <img
+            src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80"
+            alt="Contact illustration"
+            className="rounded-xl shadow-lg object-cover w-full h-full max-h-[400px]"
+>>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
           />
         </div>
       </div>
