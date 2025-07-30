@@ -2,7 +2,7 @@ import { motion } from "framer-motion"
 import { FaUser, FaUsers } from "react-icons/fa"
 import { useStaff } from "../hook/use-staff"
 
-const API = "http://localhost:5000" // Backend base URL
+const API = "https://api.sevseadivers.com" // Backend base URL
 
 export default function TeamSection() {
   const { staff, isLoading, isError, error } = useStaff()
