@@ -1,0 +1,32 @@
+{
+  "profileMenu": {
+    "profile": "Profile",
+    "signOut": "Sign out"
+  },
+  "nav": {
+    "home": "Home",
+    "courses": "Courses",
+    "trips": "Trips",
+    "contact": "Contact",
+    "service": "Service",
+    "gallery": "Gallery",
+    "about": "About"
+  },
+  "home": {
+    "heroTitle": "Explore the Depths with",
+    "heroSubtitle": "Discover the beauty of the underwater world with expert-led diving and snorkeling adventures.",
+    "bookAdventure": "Book Your Adventure",
+    "aboutTitle": "About Sevsea Divers",
+    "aboutHeading": "Your Gateway to the Underwater World",
+    "aboutDescription": "At Sevsea Divers, we are passionate about sharing the marvels of the ocean...",
+    "stepsTitle": "TAKE A PLUNGE INTO THE WORLD BELOW IN JUST 3 EASY STEPS!!!",
+    "learn": "LEARN",
+    "learnDesc": "Learn to Scuba Dive! Enroll in a course!",
+    "dive": "DIVE",
+    "diveDesc": "Dive in with our beginner friendly scuba lessons!",
+    "explore": "EXPLORE",
+    "exploreDesc": "Learn to Scuba Dive & Explore the other 71% of the Earth!",
+    "featuredDestinationsTitle": "Featured Destinations",
+    "viewDetails": "View Details"
+  }
+}

@@ -1,0 +1,78 @@
+name: Deploy to VPS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v3
+
+      - name: 🔧 Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      # ⬇️ FRONTEND BUILD
+      - name: 📦 Install frontend dependencies
+        working-directory: client
+        run: npm ci
+
+      - name: 🛠️ Build frontend
+        working-directory: client
+        run: npm run build
+
+      - name: 🧹 Clean frontend directory on VPS
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          script: sudo rm -rf /var/www/sevseadivers-frontend/*
+
+      - name: 🚀 Upload frontend to VPS (with index.html)
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          source: "client/dist/**"
+          target: "/var/www/sevseadivers-frontend"
+
+      # ⬇️ BACKEND DEPLOY
+      - name: 🔄 Deploy backend via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USERNAME }}
+          key: ${{ secrets.VPS_SSH_PRIVATE_KEY }}
+          script: |
+            set -e
+            cd /home/sevseadivers/server
+
+            echo "🔄 Pulling latest code..."
+            git reset --hard
+            git clean -fd -e upload/
+            git pull origin main
+
+            echo "📦 Installing backend dependencies..."
+            npm install --force
+
+            echo "📝 Writing .env file..."
+            cat > /home/sevseadivers/server/config/.env <<EOF
+            DB_URL=${{ secrets.DB_URL }}
+            JWT_SECRET=${{ secrets.JWT_SECRET }}
+            PORT=${{ secrets.PORT }}
+            STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
+            EMAIL_SERVICE=${{ secrets.EMAIL_SERVICE }}
+            EMAIL_USER=${{ secrets.EMAIL_USER }}
+            EMAIL_PASS=${{ secrets.EMAIL_PASS }}
+            EOF
+
+            echo "🚀 Restarting backend..."
+            pm2 reload sevseadivers-backend || pm2 start server.js --name sevseadivers-backend
