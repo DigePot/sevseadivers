@@ -238,18 +238,13 @@ export function ContactView() {
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   rows={5}
-<<<<<<< HEAD
                   className={`w-full px-4 py-2 rounded-md border resize-y transition duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-=======
-                  className={`flex-grow px-4 py-2 rounded-md border resize-y transition duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 ${
->>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
                     errors.message ? "border-red-500" : "border-gray-300"
                   }`}
                   aria-invalid={!!errors.message}
                   aria-describedby="message-error"
                   required
                 />
-<<<<<<< HEAD
                 {errors.message && (
                   <p id="message-error" className="text-red-600 mt-1 text-sm">
                     {errors.message}
@@ -308,47 +303,17 @@ export function ContactView() {
                 ) : (
                   "Send Message"
                 )}
-=======
-              </div>
-              <motion.p
-                id="message-error"
-                className="text-red-600 mt-1 text-sm ml-32 md:ml-0"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: errors.message ? 1 : 0 }}
-                role="alert"
-              >
-                {errors.message}
-              </motion.p>
-
-              {/* Submit */}
-              <motion.button
-                type="submit"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className="w-full bg-blue-700 text-white py-3 rounded-md font-semibold hover:bg-blue-800 transition"
-              >
-                Send Message
->>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
               </motion.button>
             </form>
           )}
         </div>
 
-<<<<<<< HEAD
         {/* Right: Image */}
         <div className="hidden md:flex flex-1 items-center justify-center bg-gray-100 rounded-lg p-4">
           <img
             src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80"
             alt="A placeholder illustration for a contact page"
             className="rounded-xl shadow-lg object-cover w-full h-full"
-=======
-        {/* Right: Image or Info block */}
-        <div className="hidden md:flex flex-1 items-center justify-center">
-          <img
-            src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80"
-            alt="Contact illustration"
-            className="rounded-xl shadow-lg object-cover w-full h-full max-h-[400px]"
->>>>>>> b8ee2abcd2348429b4c64c04c7fb14dbcd77c4cd
           />
         </div>
       </div>
