@@ -2,7 +2,7 @@
 
 import { motion, type Variants, type Transition } from "framer-motion"
 import { CheckCircle2 } from "lucide-react"
-import { Link } from "react-router-dom"
+import { Link } from "react-router"
 
 interface PricingPlan {
   title: string
@@ -20,7 +20,8 @@ const pricingPlans: PricingPlan[] = [
     title: "Free Diver",
     price: "$0.00",
     period: "/month",
-    description: "Perfect for beginners to explore basic snorkeling and learn about marine life.",
+    description:
+      "Perfect for beginners to explore basic snorkeling and learn about marine life.",
     features: [
       "Basic Snorkeling Gear Rental",
       "Access to Online Marine Life Guides",
@@ -34,7 +35,8 @@ const pricingPlans: PricingPlan[] = [
     title: "Standard Explorer",
     price: "$99.00",
     period: "/month",
-    description: "Ideal for enthusiasts ready to take their first guided dives and explore more.",
+    description:
+      "Ideal for enthusiasts ready to take their first guided dives and explore more.",
     features: [
       "Everything in Free",
       "Guided Reef Dives (2 per month)",
@@ -51,7 +53,8 @@ const pricingPlans: PricingPlan[] = [
     title: "Pro Adventurer",
     price: "$199.00",
     period: "/month",
-    description: "For experienced divers seeking advanced challenges and exclusive expeditions.",
+    description:
+      "For experienced divers seeking advanced challenges and exclusive expeditions.",
     features: [
       "Everything in Standard Explorer",
       "Unlimited Guided Dives",
@@ -78,15 +81,25 @@ const PricingSection = () => {
 
   const itemVariants: Variants = {
     hidden: { opacity: 0, y: 50 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } as Transition },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6, ease: "easeOut" } as Transition,
+    },
   }
 
   return (
-    <section id="pricing" className="py-20 px-4 text-white relative overflow-hidden">
+    <section
+      id="pricing"
+      className="py-20 px-4 text-white relative overflow-hidden"
+    >
       {/* Subtle background pattern (optional, can be an image or generated) */}
       <div
         className="absolute inset-0 opacity-10"
-        style={{ backgroundImage: 'url("/placeholder.svg?height=100&width=100")', backgroundSize: "100px 100px" }}
+        style={{
+          backgroundImage: 'url("/placeholder.svg?height=100&width=100")',
+          backgroundSize: "100px 100px",
+        }}
       ></div>
 
       <div className="max-w-7xl mx-auto relative z-10">
@@ -129,18 +142,25 @@ const PricingSection = () => {
                   Most Popular
                 </div>
               )}
-              <h3 className="text-3xl font-bold text-white mb-4 text-center">{plan.title}</h3>
+              <h3 className="text-3xl font-bold text-white mb-4 text-center">
+                {plan.title}
+              </h3>
               <div className="text-center mb-6">
-                <span className="text-5xl font-extrabold text-white">{plan.price}</span>
+                <span className="text-5xl font-extrabold text-white">
+                  {plan.price}
+                </span>
                 <span className="text-xl text-gray-400">{plan.period}</span>
               </div>
-              <p className="text-gray-300 text-center mb-8 flex-grow">{plan.description}</p>
+              <p className="text-gray-300 text-center mb-8 flex-grow">
+                {plan.description}
+              </p>
 
               {/* Changed button to Link */}
               <Link
                 to={`/trips/payment?plan=${encodeURIComponent(plan.title)}`}
                 className={`w-full py-3 rounded-full text-lg font-semibold transition-all duration-300 shadow-lg focus:outline-none focus:ring-4 text-center block ${
-                  plan.buttonClass || "bg-gray-700 hover:bg-gray-600 focus:ring-gray-500"
+                  plan.buttonClass ||
+                  "bg-gray-700 hover:bg-gray-600 focus:ring-gray-500"
                 } text-white`}
               >
                 {plan.buttonText}
@@ -152,7 +172,10 @@ const PricingSection = () => {
                 </h4>
                 <ul className="space-y-3">
                   {plan.features.map((feature, featureIndex) => (
-                    <li key={featureIndex} className="flex items-center text-gray-300">
+                    <li
+                      key={featureIndex}
+                      className="flex items-center text-gray-300"
+                    >
                       <CheckCircle2 className="w-5 h-5 text-cyan-400 mr-3 flex-shrink-0" />
                       <span>{feature}</span>
                     </li>
