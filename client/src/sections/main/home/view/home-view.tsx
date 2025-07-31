@@ -13,8 +13,10 @@ import FAQSection from "../../../../components/FAQSection"
 import PricingSection from "../../../../components/PricingSection"
 import WorkSection from "../../../../components/WorkSection"
 import Testimonial from "../../../../components/Testimonial"
+import { useTranslation } from "react-i18next"
 
 export function HomeView() {
+  const { t } = useTranslation()
   const { allTrips } = useTrips()
   const heroRef = useRef(null) // Create a ref for the hero section
   // Use useScroll and useTransform for the parallax/hide effect
@@ -84,18 +86,17 @@ export function HomeView() {
           className="relative z-20 flex flex-col justify-center items-center text-center px-6 py-16 md:py-28 min-h-screen max-w-4xl mx-auto" // Increased z-index to be above overlay
         >
           <h1 className="text-5xl md:text-6xl font-extrabold tracking-tight leading-tight drop-shadow-lg">
-            Explore the Depths with <br />
-            <span className="text-cyan-400">SEVSEA DIVERS</span>
+            {t("hero.title")} <br />
+            <span className="text-cyan-400">{t("hero.name")}</span>
           </h1>
           <p className="mt-6 text-lg md:text-xl max-w-2xl text-white/90 drop-shadow-md">
-            Discover the beauty of the underwater world with expert-led diving
-            and snorkeling adventures.
+            {t("hero.content")}
           </p>
           <Link
             to="/trips"
             className="mt-10 inline-block bg-cyan-500 hover:bg-cyan-600 focus:ring-4 focus:ring-cyan-300 font-semibold px-10 py-4 rounded-full text-lg shadow-lg transition-all transform hover:scale-105 active:scale-95"
           >
-            Book Your Adventure
+            {t("hero.button")}
           </Link>
         </motion.main>
       </section>
@@ -110,7 +111,7 @@ export function HomeView() {
             transition={{ duration: 0.8 }}
             className="text-3xl font-bold text-center text-cyan-600 mb-12 tracking-tight sm:text-4xl"
           >
-            About Sevsea Divers
+            {t("about.title")}
           </motion.h2>
           <div className="flex flex-col md:flex-row items-center justify-center gap-10">
             {/* Image Card */}
@@ -136,16 +137,10 @@ export function HomeView() {
               className="w-full md:w-1/2 lg:w-2/3 text-left"
             >
               <h3 className="text-2xl font-bold text-gray-300 mb-4 md:text-3xl">
-                Your Gateway to the Underwater World
+                {t("about.subtitle")}
               </h3>
               <p className="text-base leading-relaxed text-gray-400 md:text-lg">
-                At Sevsea Divers, we are passionate about sharing the marvels of
-                the ocean with enthusiasts of all levels. From thrilling
-                deep-sea explorations to serene encounters with vibrant marine
-                life, our experienced instructors and state-of-the-art equipment
-                ensure a safe, unforgettable, and eco-conscious diving
-                experience. We offer a wide range of courses, guided tours, and
-                personalized adventures tailored to your comfort and skill.
+                {t("about.content")}
               </p>
             </motion.div>
           </div>
@@ -160,7 +155,7 @@ export function HomeView() {
           transition={{ duration: 0.8 }}
           className="text-4xl font-bold text-center text-cyan-600 mb-12 tracking-tight"
         >
-          Featured Destinations
+          {t("features")}
         </motion.h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 container mx-auto px-6 lg:px-8">
           {featuredDestinations.map(
@@ -230,7 +225,7 @@ export function HomeView() {
             transition={{ duration: 0.8 }}
             className="text-4xl font-bold text-center text-cyan-600 mb-12 tracking-tight"
           >
-            TAKE A PLUNGE INTO THE WORLD BELOW IN JUST 3 EASY STEPS!!!
+            {t("steps.title")}
           </motion.h2>
           <div className="flex flex-col md:flex-row justify-center items-center gap-12">
             {/* Step 1: Learn */}
@@ -250,11 +245,9 @@ export function HomeView() {
                 <div className="absolute inset-0 rounded-full border-4 border-cyan-500 group-hover:border-cyan-700 transition-colors duration-300"></div>
               </div>
               <h3 className="text-2xl font-semibold text-gray-300 mb-2">
-                LEARN
+                {t("steps.step1.title")}
               </h3>
-              <p className="text-gray-300 max-w-xs">
-                Learn to Scuba Dive! Enroll in a course!
-              </p>
+              <p className="text-gray-300 max-w-xs">{t("steps.step1.text")}</p>
             </motion.div>
             {/* Step 2: Dive */}
             <motion.div
@@ -273,11 +266,9 @@ export function HomeView() {
                 <div className="absolute inset-0 rounded-full border-4 border-cyan-500 group-hover:border-cyan-700 transition-colors duration-300"></div>
               </div>
               <h3 className="text-2xl font-semibold text-gray-300 mb-2">
-                DIVE
+                {t("steps.step2.title")}
               </h3>
-              <p className="text-gray-300 max-w-xs">
-                Dive in with our beginner friendly scuba lessons!
-              </p>
+              <p className="text-gray-300 max-w-xs">{t("steps.step2.text")}</p>
             </motion.div>
             {/* Step 3: Explore */}
             <motion.div
@@ -296,11 +287,9 @@ export function HomeView() {
                 <div className="absolute inset-0 rounded-full border-4 border-cyan-500 group-hover:border-cyan-700 transition-colors duration-300"></div>
               </div>
               <h3 className="text-2xl font-semibold text-gray-300 mb-2">
-                EXPLORE
+                {t("steps.step3.title")}
               </h3>
-              <p className="text-gray-300 max-w-xs">
-                Learn to Scuba Dive & Explore the other 71% of the Earth!
-              </p>
+              <p className="text-gray-300 max-w-xs">{t("steps.step3.text")}</p>
             </motion.div>
           </div>
         </div>

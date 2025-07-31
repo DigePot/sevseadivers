@@ -1,15 +1,17 @@
 "use client"
 
+import { ExternalLink } from "lucide-react"
 import { useState } from "react"
-import { ExternalLink, Github } from "lucide-react"
-import diveImage from "../assets/dive.png" 
-import Dashboard from "../assets/dashboard-divers.png" 
-import DiversMap from "../assets/divers-mapping.png" 
-import DiversTraining from "../assets/divers-Training.png" 
-import UnderWaterVr from "../assets/underwater-vr.png" 
+import Dashboard from "../assets/dashboard-divers.png"
+import diveImage from "../assets/dive.png"
+import DiversMap from "../assets/divers-mapping.png"
+import DiversTraining from "../assets/divers-Training.png"
+import UnderWaterVr from "../assets/underwater-vr.png"
+import { useTranslation } from "react-i18next"
 const INITIAL_PROJECT_COUNT = 3
 
 const WorkSection = () => {
+  const { t } = useTranslation()
   const projects = [
     {
       id: 1,
@@ -58,7 +60,9 @@ const WorkSection = () => {
     },
   ]
 
-  const [visibleProjectsCount, setVisibleProjectsCount] = useState(INITIAL_PROJECT_COUNT)
+  const [visibleProjectsCount, setVisibleProjectsCount] = useState(
+    INITIAL_PROJECT_COUNT
+  )
   const showAllProjects = visibleProjectsCount === projects.length
 
   const handleToggleProjects = () => {
@@ -78,10 +82,11 @@ const WorkSection = () => {
     <section id="work" className="py-20 px-4">
       <div className="max-w-6xl mx-auto">
         <div className="section-fade-in">
-          <h2 className="text-4xl font-bold text-center text-cyan-600 mb-12 tracking-tight">Our Dive Expeditions</h2>
+          <h2 className="text-4xl font-bold text-center text-cyan-600 mb-12 tracking-tight">
+            {t("our.title")}
+          </h2>
           <p className="text-lg text-gray-300 text-center mb-16 max-w-2xl mx-auto">
-            Dive into our recent projects that showcase our passion for the underwater world and innovative solutions
-            for exploration and conservation.
+            {t("our.text")}
           </p>
 
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -99,9 +104,13 @@ const WorkSection = () => {
                 </div>
 
                 <div className="p-6">
-                  <h3 className="text-xl font-semibold mb-3 text-gray-800">{project.title}</h3>{" "}
+                  <h3 className="text-xl font-semibold mb-3 text-gray-800">
+                    {project.title}
+                  </h3>{" "}
                   {/* Title text dark gray */}
-                  <p className="text-gray-700 mb-4 leading-relaxed">{project.description}</p>{" "}
+                  <p className="text-gray-700 mb-4 leading-relaxed">
+                    {project.description}
+                  </p>{" "}
                   {/* Description text dark gray */}
                   <div className="flex flex-wrap gap-2 mb-6">
                     {project.technologies.map((tech) => (
@@ -117,12 +126,16 @@ const WorkSection = () => {
                     <button
                       className={`${buttonOutlineClasses} flex-1 hover:bg-gray-100 hover:text-gray-900 bg-white text-gray-800`}
                     >
-                      <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" className="flex items-center">
+                      <a
+                        href={project.liveUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center"
+                      >
                         <ExternalLink className="w-4 h-4 mr-2" />
                         Live
                       </a>
                     </button>
-                    
                   </div>
                 </div>
               </div>
@@ -132,7 +145,9 @@ const WorkSection = () => {
           {projects.length > INITIAL_PROJECT_COUNT && (
             <div className="text-center mt-12">
               <button
-                className={"t-60 inline-flex items-center bg-cyan-500 hover:bg-cyan-600 focus:ring-4 focus:ring-cyan-300 font-semibold px-8 py-2 rounded-full text-sm shadow-sm transition-all transform hover:scale-80 active:scale-65 text-white"}
+                className={
+                  "t-60 inline-flex items-center bg-cyan-500 hover:bg-cyan-600 focus:ring-4 focus:ring-cyan-300 font-semibold px-8 py-2 rounded-full text-sm shadow-sm transition-all transform hover:scale-80 active:scale-65 text-white"
+                }
                 onClick={handleToggleProjects}
               >
                 {showAllProjects ? "Show Less Projects" : "View All Projects"}

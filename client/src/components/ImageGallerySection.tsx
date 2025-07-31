@@ -11,6 +11,7 @@ import Gallery3 from "../assets/gallery3.png"
 import Gallery4 from "../assets/gallery4.png"
 import Gallery5 from "../assets/gallery5.png"
 import Gallery6 from "../assets/gallery6.png"
+import { useTranslation } from "react-i18next"
 
 const images = [
   { src: Gallery1, alt: "Diver with flashlight in underwater cave" },
@@ -22,6 +23,7 @@ const images = [
 ]
 
 const ImageGallerySection = () => {
+  const { t } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   const [currentIndex, setCurrentIndex] = useState(0)
 
@@ -39,7 +41,9 @@ const ImageGallerySection = () => {
   }
 
   const showPrevImage = () => {
-    setCurrentIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length)
+    setCurrentIndex(
+      (prevIndex) => (prevIndex - 1 + images.length) % images.length
+    )
   }
 
   const containerVariants: Variants = {
@@ -56,7 +60,11 @@ const ImageGallerySection = () => {
   const itemVariants: Variants = {
     // Explicitly type itemVariants
     hidden: { opacity: 0, x: -50 },
-    visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: "easeOut" } },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: { duration: 0.6, ease: "easeOut" },
+    },
   }
 
   return (
@@ -67,12 +75,12 @@ const ImageGallerySection = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
-          className="text-4xl font-bold text-center text-cyan-600 mb-12 tracking-tight" 
+          className="text-4xl font-bold text-center text-cyan-600 mb-12 tracking-tight"
         >
-          SEV SEA DIVERS BRAG BOARD: SEND IN YOUR BRAGS TO BE FEATURED!
+          {t("gallery.title")}
         </motion.h2>
         <p className="text-lg text-gray-300 text-center mb-16 max-w-2xl mx-auto">
-          Check out some amazing moments from our community and expeditions.
+          {t("gallery.text")}
         </p>
 
         <motion.div
@@ -95,7 +103,9 @@ const ImageGallerySection = () => {
                 className="w-full h-70 object-cover transition-transform duration-300 group-hover:scale-105"
               />
               <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <span className="text-2xl font-bold text-center text-cyan-600 mb-12 tracking-tight">View Image</span>
+                <span className="text-2xl font-bold text-center text-cyan-600 mb-12 tracking-tight">
+                  View Image
+                </span>
               </div>
             </motion.div>
           ))}

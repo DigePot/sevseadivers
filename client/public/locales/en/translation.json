@@ -11,5 +11,78 @@
     "service": "Service",
     "gallery": "Gallery",
     "about": "About"
+  },
+  "hero": {
+    "title": "Explore Somalia’s Untouched Blue with",
+    "name": "SEVSEA DIVERS",
+    "content": "Your gateway to safe, thrilling, and unforgettable diving experiences along the Somali coast.",
+    "button": "Book Your Adventure"
+  },
+  "about": {
+    "title": "About Sevsea Divers",
+    "subtitle": "Your Gateway to the Underwater World",
+    "content": "At Sevsea Divers, we are passionate about sharing the marvels of the ocean with enthusiasts of all levels. From thrilling deep-sea explorations to serene encounters with vibrant marine life, our experienced instructors and state-of-the-art equipment ensure a safe, unforgettable, and eco-conscious diving experience. We offer a wide range of courses, guided tours, and personalized adventures tailored to your comfort and skill."
+  },
+  "features": "Featured Destinations",
+  "steps": {
+    "title": "TAKE A PLUNGE INTO THE WORLD BELOW IN JUST 3 EASY STEPS!!!",
+    "step1": {
+      "title": "LEARN",
+      "text": "Learn to Scuba Dive! Enroll in a course!"
+    },
+    "step2": {
+      "title": "DIVE",
+      "text": "Dive in with our beginner friendly scuba lessons!"
+    },
+    "step3": {
+      "title": "EXPLORE",
+      "text": "Learn to Scuba Dive & Explore the other 71% of the Earth!"
+    }
+  },
+  "our": {
+    "title": "Our Dive Expeditions",
+    "text": "Dive into our recent projects that showcase our passion for the underwater world and innovative solutions for exploration and conservation."
+  },
+  "review": {
+    "title": "Reviews We Got",
+    "text": "Don't just take my word for it. Here's what some of my clients and collaborators have to say about working together."
+  },
+  "gallery": {
+    "title": "SEV SEA DIVERS BRAG BOARD: SEND IN YOUR BRAGS TO BE FEATURED!",
+    "text": "Check out some amazing moments from our community and expeditions."
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "description": "Find answers to common questions about Sevsea Divers, our services, and your underwater adventures.",
+    "items": [
+      {
+        "question": "What types of diving adventures does Sevsea Divers offer?",
+        "answer": "Sevsea Divers offers a wide range of diving and snorkeling adventures, from thrilling deep-sea explorations to serene encounters with vibrant marine life. We provide guided tours, personalized adventures, and various courses tailored to all skill levels."
+      },
+      {
+        "question": "Do I need prior diving experience to join your trips or courses?",
+        "answer": "Not at all! We offer beginner-friendly scuba lessons and courses designed for those with no prior experience. Our experienced instructors ensure a safe and comfortable learning environment, guiding you every step of the way."
+      },
+      {
+        "question": "What kind of marine life can I expect to see?",
+        "answer": "Our expeditions take you to diverse underwater ecosystems where you can encounter a rich variety of marine life, including colorful coral reefs, tropical fish, sea turtles, rays, and sometimes even larger pelagic species, depending on the destination and season."
+      },
+      {
+        "question": "Is your diving equipment safe and well-maintained?",
+        "answer": "Absolutely. We prioritize your safety above all else. Sevsea Divers uses state-of-the-art diving equipment that is regularly inspected and meticulously maintained to ensure the highest standards of safety and reliability for all our adventures."
+      },
+      {
+        "question": "Do you offer diving certifications?",
+        "answer": "Yes, we do! We have a comprehensive Diver Training & Certification Portal where you can enroll in various courses to earn your diving certifications. Our programs are designed to streamline your path to becoming a certified diver."
+      },
+      {
+        "question": "What is Sevsea Divers' approach to marine conservation?",
+        "answer": "We are deeply committed to marine conservation. All our diving experiences are conducted with an eco-conscious approach, emphasizing responsible interaction with marine environments and promoting awareness about ocean preservation. We strive to minimize our ecological footprint and support healthy marine ecosystems."
+      },
+      {
+        "question": "How can I book an adventure or course?",
+        "answer": "You can easily book your next adventure or enroll in a course by visiting our 'Trips' page. There, you'll find detailed information about our offerings and a straightforward booking process."
+      }
+    ]
   }
 }

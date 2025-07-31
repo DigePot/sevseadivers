@@ -1,12 +1,12 @@
 "use client"
 
 import type React from "react"
-import Profile from "../assets/profile.png" 
-import BoyProfile from "../assets/boy-profile.png" 
-
+import Profile from "../assets/profile.png"
+import BoyProfile from "../assets/boy-profile.png"
 
 import { useState, useRef } from "react"
 import { Plus, Quote } from "lucide-react"
+import { useTranslation } from "react-i18next"
 
 interface Testimonial {
   id: number
@@ -17,6 +17,7 @@ interface Testimonial {
 }
 
 const Testimonial = () => {
+  const { t } = useTranslation()
   const [testimonials, setTestimonials] = useState<Testimonial[]>([
     {
       id: 1,
@@ -52,7 +53,10 @@ const Testimonial = () => {
     avatarPreview: "" as string | ArrayBuffer | null, // To store the Data URL for preview
   })
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null) // For custom toast
+  const [message, setMessage] = useState<{
+    text: string
+    type: "success" | "error"
+  } | null>(null) // For custom toast
   const fileInputRef = useRef<HTMLInputElement>(null) // Ref for file input
 
   // Custom "toast" function
@@ -63,7 +67,9 @@ const Testimonial = () => {
     }, 3000) // Message disappears after 3 seconds
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target
     setFormData((prev) => ({
       ...prev,
@@ -75,7 +81,10 @@ const Testimonial = () => {
     const file = e.target.files?.[0]
     if (file) {
       if (!file.type.startsWith("image/")) {
-        showMessage("Please upload an image file (e.g., JPG, PNG, GIF).", "error")
+        showMessage(
+          "Please upload an image file (e.g., JPG, PNG, GIF).",
+          "error"
+        )
         setFormData((prev) => ({ ...prev, avatarPreview: null }))
         if (fileInputRef.current) {
           fileInputRef.current.value = "" // Clear the file input
@@ -111,11 +120,16 @@ const Testimonial = () => {
     await new Promise((resolve) => setTimeout(resolve, 1000))
 
     const newTestimonial: Testimonial = {
-      id: testimonials.length > 0 ? Math.max(...testimonials.map((t) => t.id)) + 1 : 1, // Ensure unique ID
+      id:
+        testimonials.length > 0
+          ? Math.max(...testimonials.map((t) => t.id)) + 1
+          : 1, // Ensure unique ID
       name: formData.name.trim(),
       role: formData.role.trim() || undefined,
       testimonial: formData.testimonial.trim(),
-      avatar: formData.avatarPreview ? String(formData.avatarPreview) : undefined, // Use Data URL
+      avatar: formData.avatarPreview
+        ? String(formData.avatarPreview)
+        : undefined, // Use Data URL
     }
 
     setTestimonials((prev) => [...prev, newTestimonial])
@@ -211,10 +225,11 @@ const Testimonial = () => {
       `}</style>
       <div className="max-w-6xl mx-auto">
         <div className="section-fade-in">
-          <h2 className="text-4xl font-bold text-center text-cyan-600 mb-12 tracking-tight">Reviews We Got</h2>
+          <h2 className="text-4xl font-bold text-center text-cyan-600 mb-12 tracking-tight">
+            {t("review.title")}
+          </h2>
           <p className="text-lg text-gray-300 text-center mb-16 max-w-2xl mx-auto">
-            Don't just take my word for it. Here's what some of my clients and collaborators have to say about working
-            together.
+            {t("review.text")}
           </p>
 
           {/* Testimonials Grid */}
@@ -226,9 +241,12 @@ const Testimonial = () => {
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <div className="flex items-start gap-4 mb-6">
-                  <Quote className="w-8 h-8 text-blue-500 flex-shrink-0 mt-1" /> {/* Accent color for quote icon */}
+                  <Quote className="w-8 h-8 text-blue-500 flex-shrink-0 mt-1" />{" "}
+                  {/* Accent color for quote icon */}
                 </div>
-                <p className="text-gray-700 mb-6 leading-relaxed italic">"{testimonial.testimonial}"</p>{" "}
+                <p className="text-gray-700 mb-6 leading-relaxed italic">
+                  "{testimonial.testimonial}"
+                </p>{" "}
                 {/* Testimonial text dark gray */}
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
@@ -249,8 +267,15 @@ const Testimonial = () => {
                     )}
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-800">{testimonial.name}</h4> {/* Name text dark gray */}
-                    {testimonial.role && <p className="text-sm text-gray-600">{testimonial.role}</p>}{" "}
+                    <h4 className="font-semibold text-gray-800">
+                      {testimonial.name}
+                    </h4>{" "}
+                    {/* Name text dark gray */}
+                    {testimonial.role && (
+                      <p className="text-sm text-gray-600">
+                        {testimonial.role}
+                      </p>
+                    )}{" "}
                     {/* Role text medium gray */}
                   </div>
                 </div>
@@ -276,9 +301,14 @@ const Testimonial = () => {
             <div className="custom-modal-overlay">
               <div className="custom-modal-content">
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-2xl font-bold text-center text-cyan-600 tracking-tight">Share Your Experience</h3>{" "}
+                  <h3 className="text-2xl font-bold text-center text-cyan-600 tracking-tight">
+                    Share Your Experience
+                  </h3>{" "}
                   {/* Modal title dark gray */}
-                  <button className="custom-modal-close-button" onClick={() => setIsModalOpen(false)}>
+                  <button
+                    className="custom-modal-close-button"
+                    onClick={() => setIsModalOpen(false)}
+                  >
                     &times; {/* HTML entity for 'x' */}
                   </button>
                 </div>
@@ -329,7 +359,9 @@ const Testimonial = () => {
                     {formData.avatarPreview && (
                       <div className="mt-2">
                         <img
-                          src={String(formData.avatarPreview) || "/placeholder.svg"}
+                          src={
+                            String(formData.avatarPreview) || "/placeholder.svg"
+                          }
                           alt="Avatar Preview"
                           className="w-20 h-20 rounded-full object-cover border border-gray-300"
                         />
@@ -356,7 +388,9 @@ const Testimonial = () => {
                   {message && (
                     <div
                       className={`p-3 rounded-md text-sm ${
-                        message.type === "success" ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                        message.type === "success"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-red-100 text-red-800"
                       }`}
                       role="alert"
                     >

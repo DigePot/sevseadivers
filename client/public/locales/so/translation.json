@@ -4,12 +4,85 @@
     "signOut": "Ka Bax"
   },
   "nav": {
-    "home": "Guriga",
+    "home": "Bogga Hore",
     "courses": "Koorsooyin",
     "trips": "Safarro",
     "contact": "Nala soo Xiriir",
     "service": "Adeegyada",
     "gallery": "Sawirro",
     "about": "Nagu Saabsan"
+  },
+  "hero": {
+    "title": "La kulan Quruxda Badaha Soomaaliyeed",
+    "name": "SEVSEA DIVERS",
+    "content": "Albaabkaaga u furmaya quusid ammaan ah, xiise leh, oo aan la ilaawi karin xeebaha quruxda badan ee Soomaaliya.",
+    "button": "Ballantada qabso"
+  },
+  "about": {
+    "title": "Ku Saabsan Sevsea Divers",
+    "subtitle": "Albaabkaaga Biyaha Hoose ee bada",
+    "content": "Sevsea Divers waxaanu si kalgacayl leh ugu wadaagnaa mucjisooyinka badda dadka xiiseeya, heer kasta ha joogaane. Laga bilaabo sahaminta qoto dheer ee badweynta ilaa la kulanka deggan ee noolaha badda ee midabbada leh, macallimiinteena khibradda leh iyo qalabkeena casriga ah waxay kuu xaqiijinayaan khibrad quusin oo ammaan ah, aan la ilaawi karin, isla markaana deegaanka u naxariista. Waxaan bixinaa koorsooyin kala duwan, dalxiisyo la hogaaminayo, iyo tacaburro gaar ah oo loo habeeyay si ay ugu habboonaadaan raaxadaada iyo heerka xirfadaada."
+  },
+  "features": "Meelaha Dalxiiska ee La Xushay",
+  "steps": {
+    "title": "U DALOOL ADUUNKA HOOSE EE BIYAHA KELIYA 3 TALAABO FUDUD!!!",
+    "step1": {
+      "title": "BARO",
+      "text": "Bar sida loo quuso! Isdiiwaangeli koorsadeenna!"
+    },
+    "step2": {
+      "title": "QUUS",
+      "text": "Ku quuso casharradeenna quusitaanka ee fudud oo loogu talagalay bilowga!"
+    },
+    "step3": {
+      "title": "SAHAMI",
+      "text": "Bar sida loo quuso oo u sahami qeybta kale ee 71% ee Dhulka!"
+    }
+  },
+  "our": {
+    "title": "Sahamintayada Quusitaanka",
+    "text": "Ku quuso mashruucyadeenna ugu dambeeyay oo muujinaya xiisahayaga adduunka biyaha hoostooda iyo xalalka hal-abuurka leh ee sahaminta iyo ilaalinta deegaanka."
+  },
+  "review": {
+    "title": "Faallooyinka aan Helnay",
+    "text": "Ha ku ekaanin hadalkayga kaliya. Waa kuwan waxa qaar ka mid ah macaamiishayda iyo la-hawlgalayaashaydu ka yiraahdeen wada shaqeyntayada."
+  },
+  "gallery": {
+    "title": "GUDDIGA MUUJINTA EE SEVSEA DIVERS: SOO DIR GUUSHAADA SI LAGUUGU MUUJIYO!",
+    "text": "Eeg qaar ka mid ah waqtiyada cajiibka ah ee ka dhacay bulshadeenna iyo sahamintayada."
+  },
+  "faq": {
+    "title": "Su’aalaha Inta Badan La Is Weydiiyo",
+    "description": "Ka hel jawaabo su’aalaha caamka ah ee la xiriira Sevsea Divers, adeegyada aanu bixino, iyo tacaburrada biyaha hoostooda.",
+    "items": [
+      {
+        "question": "Noocee ah tacaburrada quusitaanka ayay Sevsea Divers bixisaa?",
+        "answer": "Sevsea Divers waxay bixisaa tacaburro badan oo quusin iyo sabeyn ah, laga bilaabo sahaminta qoto dheer ee badweynta ilaa la kulanka deggan ee noolaha badda ee midabbada leh. Waxaanu bixinaa dalxiisyo la hogaaminayo, tacaburro gaar ah, iyo koorsooyin kala duwan oo loo habeeyay heerar xirfadeed oo kala duwan."
+      },
+      {
+        "question": "Ma u baahnahay khibrad hore si aan uga qayb qaato safarada ama koorsooyinka?",
+        "answer": "Maya gabi ahaanba! Waxaanu bixinaa casharro iyo koorsooyin quusitaan ah oo loogu talagalay dadka aan horey u quusin. Macallimiinteena khibradda leh waxay kuu xaqiijinayaan jawi waxbarasho oo ammaan ah oo raaxo leh, waxayna ku hagayaan tallaabo kasta."
+      },
+      {
+        "question": "Noocee ah noolaha badda ayaan filan karaa inaan arko?",
+        "answer": "Sahamintayadu waxay ku geynayaan deegaano biyo hoosaad kala duwan halkaasoo aad kula kulmi karto noocyo kala duwan oo noolaha badda ah, sida dhirta badda ee midabbada leh, kalluunka kulaylaha, qoolleyda badda, raayada, iyo xitaa xilliyada qaar, nooleyaal waaweyn oo badweynta ku nool, iyadoo ku xiran goobta iyo xilliga."
+      },
+      {
+        "question": "Qalabkiinna quusitaanka ma waa mid ammaan ah oo si fiican loo dayactiray?",
+        "answer": "Haa, dabcan. Ammaankaaga ayaa ah mudnaanta koowaad ee noo ah. Sevsea Divers waxay isticmaashaa qalab quusin oo casri ah oo si joogto ah loo hubiyo loona dayactiro si loo ilaaliyo heerarka ugu sarreeya ee badbaadada iyo kalsoonida dhammaan tacaburradeenna."
+      },
+      {
+        "question": "Ma bixisaan shahaadooyin quusitaan?",
+        "answer": "Haa, waan bixinnaa! Waxaanu leenahay Madal Dhammaystiran oo Tababarka & Shahaadooyinka Quusitaanka ah, halkaasoo aad iska diiwaan gelin karto koorsooyin kala duwan si aad u hesho shahaado quusitaan. Barnaamijyadeennu waxay fududeynayaan waddada aad ku noqonayso quuse shahaado leh."
+      },
+      {
+        "question": "Waa maxay aragtida Sevsea Divers ee ilaalinta badda?",
+        "answer": "Waxaan si qoto dheer ugu go'nahay ilaalinta badda. Dhammaan khibradaha quusitaanka waxaa lagu fuliyaa si deegaan-u-dareen leh, iyadoo la adkeynayo in lala macaamilo deegaanka badda si masuuliyad leh, lana dhiirrigeliyo wacyiga ku saabsan ilaalinta badaha. Waxaan ku dadaalnaa inaan yarayno raadkayaga deegaanka iyo inaan taageerno nidaamka deegaanka ee caafimaadka qaba."
+      },
+      {
+        "question": "Sideen ku qabsan karaa tacabur ama koorso?",
+        "answer": "Si fudud ayaad uga qabsan kartaa tacaburkaaga xiga ama ugu isdiiwaangeli kartaa koorso adigoo booqanaya bogga 'Safarada'. Halkaas waxaad ka heli doontaa faahfaahin buuxda oo ku saabsan adeegyada aan bixino iyo nidaam dalbasho oo sahlan."
+      }
+    ]
   }
 }
