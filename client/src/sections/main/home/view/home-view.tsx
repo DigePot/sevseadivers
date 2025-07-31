@@ -5,8 +5,7 @@ import Tutorial from "../../../../assets/tutorial.png"
 import Dive from "../../../../assets/dive.png"
 import Explore from "../../../../assets/explore.png"
 import Premium from "../../../../assets/premium-banner.png"
-// import HeroVideo from "../../../../assets/Hero.mp4" // Import the video asset
-// import HeroVideo from "../../../../assets/Hero.mp4" // Import the video asset
+import HeroVideo from "../../../../assets/Hero.mp4" // Import the video asset
 import { useTrips } from "../../../trip/hooks/use-trips"
 import { motion, useScroll, useTransform } from "framer-motion"
 import { useRef } from "react"
@@ -28,11 +27,7 @@ export function HomeView() {
   const opacity = useTransform(scrollYProgress, [0, 1], [1, 0]) // Fade out the overlay and content
 
   if (!allTrips) {
-    return (
-      <div className="flex justify-center items-center h-screen bg-black text-white">
-        Loading trips...
-      </div>
-    )
+    return <div className="flex justify-center items-center h-screen bg-black text-white">Loading trips...</div>
   }
 
   const featuredDestinations = (() => {
@@ -69,7 +64,7 @@ export function HomeView() {
           className="absolute top-0 left-0 w-full h-full object-cover z-0"
           style={{ y }} // Apply the transformed y value for parallax
         >
-          <source src="/Hero.MP4" type="video/mp4" />
+          <source src={HeroVideo} type="video/mp4" />
           Your browser does not support the video tag.
         </motion.video>
 
@@ -90,8 +85,7 @@ export function HomeView() {
             <span className="text-cyan-400">SEVSEA DIVERS</span>
           </h1>
           <p className="mt-6 text-lg md:text-xl max-w-2xl text-white/90 drop-shadow-md">
-            Discover the beauty of the underwater world with expert-led diving
-            and snorkeling adventures.
+            Discover the beauty of the underwater world with expert-led diving and snorkeling adventures.
           </p>
           <Link
             to="/trips"
@@ -102,58 +96,55 @@ export function HomeView() {
         </motion.main>
       </section>
 
-      {/* About Sevsea Section - New Section */}
-      <section aria-label="About Sevsea" className="py-20">
-        <div className="container mx-auto px-6 lg:px-8">
-          <motion.h2
+     {/* About Sevsea Section - New Section */}
+<section aria-label="About Sevsea" className="py-16 md:py-20">
+    <div className="container mx-auto px-6 lg:px-8">
+        <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="text-4xl font-bold text-center text-cyan-600 mb-12 tracking-tight"
-          >
+            className="text-3xl font-bold text-center text-cyan-600 mb-12 tracking-tight sm:text-4xl"
+        >
             About Sevsea Divers
-          </motion.h2>
-          <div className="flex flex-col md:flex-row items-center justify-center gap-10">
+        </motion.h2>
+        <div className="flex flex-col md:flex-row items-center justify-center gap-10">
             {/* Image Card */}
             <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="w-full md:w-1/2 lg:w-1/3 p-4 bg-white rounded-3xl shadow-xl overflow-hidden"
+                initial={{ opacity: 0, x: -50 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: 0.2 }}
+                className="w-full md:w-1/2 lg:w-1/3 p-4 bg-white rounded-3xl shadow-xl overflow-hidden"
             >
-              <img
-                src={About || "/placeholder.svg"} // Placeholder image, replace with an actual image for Sevsea
-                alt="Sevsea Divers"
-                className="w-full h-auto object-cover rounded-2xl"
-              />
+                <img
+                    src={About || "/placeholder.svg"} // Placeholder image, replace with an actual image for Sevsea
+                    alt="Sevsea Divers"
+                    className="w-full h-auto object-cover rounded-2xl"
+                />
             </motion.div>
             {/* Text Content */}
             <motion.div
-              initial={{ opacity: 0, x: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              className="w-full md:w-1/2 lg:w-2/3 text-center md:text-left"
+                initial={{ opacity: 0, x: 50 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                className="w-full md:w-1/2 lg:w-2/3 text-left"
             >
-              <h3 className="text-3xl font-bold text-gray-300 mb-4">
-                Your Gateway to the Underwater World
-              </h3>
-              <p className="text-gray-400 leading-relaxed text-lg">
-                At Sevsea Divers, we are passionate about sharing the marvels of
-                the ocean with enthusiasts of all levels. From thrilling
-                deep-sea explorations to serene encounters with vibrant marine
-                life, our experienced instructors and state-of-the-art equipment
-                ensure a safe, unforgettable, and eco-conscious diving
-                experience. We offer a wide range of courses, guided tours, and
-                personalized adventures tailored to your comfort and skill.
-              </p>
+                <h3 className="text-2xl font-bold text-gray-300 mb-4 md:text-3xl">
+                    Your Gateway to the Underwater World
+                </h3>
+                <p className="text-base leading-relaxed text-gray-400 md:text-lg">
+                    At Sevsea Divers, we are passionate about sharing the marvels of the ocean with enthusiasts of all
+                    levels. From thrilling deep-sea explorations to serene encounters with vibrant marine life, our
+                    experienced instructors and state-of-the-art equipment ensure a safe, unforgettable, and eco-conscious
+                    diving experience. We offer a wide range of courses, guided tours, and personalized adventures tailored
+                    to your comfort and skill.
+                </p>
             </motion.div>
-          </div>
         </div>
-      </section>
-
+    </div>
+</section>
       {/* Featured Destinations Section */}
       <section aria-label="Featured destinations" className="py-20">
         <motion.h2
@@ -166,62 +157,58 @@ export function HomeView() {
           Featured Destinations
         </motion.h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 container mx-auto px-6 lg:px-8">
-          {featuredDestinations.map(
-            ({ destination, imageUrl, description }, i) => (
-              <motion.div
-                key={destination}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: i * 0.2 }}
+          {featuredDestinations.map(({ destination, imageUrl, description }, i) => (
+            <motion.div
+              key={destination}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: i * 0.2 }}
+            >
+              <Link
+                to={`/trips?destination=${encodeURIComponent(destination)}`}
+                className="block bg-white rounded-3xl shadow-xl overflow-hidden group transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl"
+                aria-label={`View trips to ${destination}`}
               >
-                <Link
-                  to={`/trips?destination=${encodeURIComponent(destination)}`}
-                  className="block bg-white rounded-3xl shadow-xl overflow-hidden group transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl"
-                  aria-label={`View trips to ${destination}`}
-                >
-                  {imageUrl && (
-                    <img
-                      src={imageUrl || "/placeholder.svg"}
-                      alt={`${destination} underwater diving scene`}
-                      className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-300"
-                      loading="lazy"
-                    />
-                  )}
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-cyan-700 mb-3">
-                      {destination}
-                    </h3>
-                    <p className="text-gray-600">
-                      {description
-                        ? description.length > 100
-                          ? description.slice(0, 100) + "..."
-                          : description
-                        : "Explore this amazing destination."}
-                    </p>
-                    <span className="mt-6 inline-block bg-cyan-500 hover:bg-cyan-600 text-white font-semibold px-6 py-3 rounded-lg shadow transition-transform hover:scale-105 cursor-pointer">
-                      View Details
-                    </span>
-                  </div>
-                </Link>
-              </motion.div>
-            )
-          )}
+                {imageUrl && (
+                  <img
+                    src={imageUrl || "/placeholder.svg"}
+                    alt={`${destination} underwater diving scene`}
+                    className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-300"
+                    loading="lazy"
+                  />
+                )}
+                <div className="p-6">
+                  <h3 className="text-xl font-bold text-cyan-700 mb-3">{destination}</h3>
+                  <p className="text-gray-600">
+                    {description
+                      ? description.length > 100
+                        ? description.slice(0, 100) + "..."
+                        : description
+                      : "Explore this amazing destination."}
+                  </p>
+                  <span className="mt-6 inline-block bg-cyan-500 hover:bg-cyan-600 text-white font-semibold px-6 py-3 rounded-lg shadow transition-transform hover:scale-105 cursor-pointer">
+                    View Details
+                  </span>
+                </div>
+              </Link>
+            </motion.div>
+          ))}
         </div>
       </section>
 
-      {/* Full Width Banner */}
-      <section className="mb-16 flex justify-center">
-        <Link to="/premium-collection" className="block w-full">
-          <div className="h-[600px] w-[95%] max-w-[1900px] relative overflow-hidden rounded-2xl shadow-lg mx-auto">
-            <img
-              src={Premium || "/placeholder.svg"}
-              alt="Luxury Collection Banner"
-              className="w-full h-full object-cover rounded-2xl"
-            />
-          </div>
-        </Link>
-      </section>
+     {/* Full Width Banner */}
+<section className="mb-16 hidden md:flex justify-center">
+  <Link to="/premium-collection" className="block w-full">
+    <div className="h-[600px] w-[95%] max-w-[1900px] relative overflow-hidden rounded-2xl shadow-lg mx-auto">
+      <img
+        src={Premium || "/placeholder.svg"}
+        alt="Luxury Collection Banner"
+        className="w-full h-full object-cover rounded-2xl"
+      />
+    </div>
+  </Link>
+</section>
 
       {/* 3 Easy Steps Section */}
       <section aria-label="3 Easy Steps" className="py-20">
@@ -231,7 +218,7 @@ export function HomeView() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
-            className="text-4xl font-bold text-center text-gray-300 mb-12 tracking-tight"
+            className="text-4xl font-bold text-center text-cyan-600 mb-12 tracking-tight"
           >
             TAKE A PLUNGE INTO THE WORLD BELOW IN JUST 3 EASY STEPS!!!
           </motion.h2>
@@ -252,12 +239,8 @@ export function HomeView() {
                 />
                 <div className="absolute inset-0 rounded-full border-4 border-cyan-500 group-hover:border-cyan-700 transition-colors duration-300"></div>
               </div>
-              <h3 className="text-2xl font-semibold text-gray-300 mb-2">
-                LEARN
-              </h3>
-              <p className="text-gray-300 max-w-xs">
-                Learn to Scuba Dive! Enroll in a course!
-              </p>
+              <h3 className="text-2xl font-semibold text-gray-300 mb-2">LEARN</h3>
+              <p className="text-gray-300 max-w-xs">Learn to Scuba Dive! Enroll in a course!</p>
             </motion.div>
             {/* Step 2: Dive */}
             <motion.div
@@ -275,12 +258,8 @@ export function HomeView() {
                 />
                 <div className="absolute inset-0 rounded-full border-4 border-cyan-500 group-hover:border-cyan-700 transition-colors duration-300"></div>
               </div>
-              <h3 className="text-2xl font-semibold text-gray-300 mb-2">
-                DIVE
-              </h3>
-              <p className="text-gray-300 max-w-xs">
-                Dive in with our beginner friendly scuba lessons!
-              </p>
+              <h3 className="text-2xl font-semibold text-gray-300 mb-2">DIVE</h3>
+              <p className="text-gray-300 max-w-xs">Dive in with our beginner friendly scuba lessons!</p>
             </motion.div>
             {/* Step 3: Explore */}
             <motion.div
@@ -298,12 +277,8 @@ export function HomeView() {
                 />
                 <div className="absolute inset-0 rounded-full border-4 border-cyan-500 group-hover:border-cyan-700 transition-colors duration-300"></div>
               </div>
-              <h3 className="text-2xl font-semibold text-gray-300 mb-2">
-                EXPLORE
-              </h3>
-              <p className="text-gray-300 max-w-xs">
-                Learn to Scuba Dive & Explore the other 71% of the Earth!
-              </p>
+              <h3 className="text-2xl font-semibold text-gray-300 mb-2">EXPLORE</h3>
+              <p className="text-gray-300 max-w-xs">Learn to Scuba Dive & Explore the other 71% of the Earth!</p>
             </motion.div>
           </div>
         </div>
@@ -317,12 +292,14 @@ export function HomeView() {
 
       {/* Image Gallery Section */}
       <ImageGallerySection />
-
-      {/* Pricing Section */}
+      
+  {/* Pricing Section */}
       <PricingSection />
 
       {/* FAQ Section */}
       <FAQSection />
+
+    
     </>
   )
 }
