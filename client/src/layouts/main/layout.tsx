@@ -22,7 +22,6 @@ import { CONFIG } from "../../global-config"
 
 // --- Profile Menu ---
 const ProfileMenu = ({ user, onClose }: { user: any; onClose: () => void }) => {
-  console.log("user", user)
   const { t } = useTranslation()
   const navigate = useNavigate()
 
@@ -41,9 +40,7 @@ const ProfileMenu = ({ user, onClose }: { user: any; onClose: () => void }) => {
     >
       <div className="p-2">
         <div className="px-3 py-2">
-          <p className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
-            {user?.email || "User"}
-          </p>
+          <p className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">{user?.email || "User"}</p>
         </div>
         <div className="w-full h-px bg-gray-200 dark:bg-gray-700 my-1"></div>
         <button
@@ -178,10 +175,7 @@ const Header = () => {
   // Close menus when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (
-        profileMenuRef.current &&
-        !profileMenuRef.current.contains(e.target as Node)
-      ) {
+      if (profileMenuRef.current && !profileMenuRef.current.contains(e.target as Node)) {
         setProfileMenuOpen(false)
       }
     }
@@ -207,7 +201,7 @@ const Header = () => {
               <img
                 src={Logo}
                 alt={`${CONFIG.appName} Logo`}
-                className="h-30 w-auto transition-transform duration-300 ease-in-out hover:scale-105"
+                className="h-30 w-auto transition-transform duration-300 ease-in-out hover:scale-105 p-3"
               />
             </Link>
 
@@ -217,7 +211,7 @@ const Header = () => {
             </nav>
 
             {/* Right-side controls */}
-            <div className="flex items-center gap-2 sm:gap-4">
+            <div className="flex items-center gap-2 sm:gap-4 ">
               <LanguageSwitcher />
 
               {/* Profile Menu (Desktop) */}
@@ -235,7 +229,7 @@ const Header = () => {
                       {user?.profilePicture ? (
                         <img
                           src={user.profilePicture}
-                          alt="pic"
+                          alt={t("profileMenu.altProfilePic")}
                           className="w-full h-full object-cover"
                         />
                       ) : (
@@ -243,12 +237,7 @@ const Header = () => {
                       )}
                     </motion.button>
                     <AnimatePresence>
-                      {profileMenuOpen && (
-                        <ProfileMenu
-                          user={user}
-                          onClose={() => setProfileMenuOpen(false)}
-                        />
-                      )}
+                      {profileMenuOpen && <ProfileMenu user={user} onClose={() => setProfileMenuOpen(false)} />}
                     </AnimatePresence>
                   </>
                 ) : (
@@ -259,7 +248,7 @@ const Header = () => {
               {/* Mobile Hamburger Button */}
               <button
                 onClick={() => setMenuOpen(true)}
-                className="p-2 -mr-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors md:hidden"
+                className="p-0 pr-2 -mr-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors md:hidden"
                 aria-label={t("header.toggleMenu")}
               >
                 <FaBars size={24} />
@@ -284,9 +273,7 @@ export const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
     <div className="flex flex-col min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-500">
       <Header />
-      <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-        {children}
-      </main>
+      <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">{children}</main>
       <Footer />
     </div>
   )
