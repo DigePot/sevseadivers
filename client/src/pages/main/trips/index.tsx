@@ -7,6 +7,8 @@ import TripCard from "./components/TripCard"
 import TripPagination from "./components/TripPagination"
 import Spinner from "../../../components/Spinner"
 
+import { TripsHeader } from "./components/trip-header"
+
 const metadata = { title: `Trips | ${CONFIG.appName}` }
 
 export default function Page() {
@@ -20,6 +22,7 @@ export default function Page() {
     ).sort()
     return ["All Destinations", ...unique]
   }, [allTrips])
+
   const activityOptions = useMemo(() => {
     if (!allTrips) return ["All Activities"]
     const unique = Array.from(
@@ -32,6 +35,7 @@ export default function Page() {
   const [destination, setDestination] = useState("All Destinations")
   const [activity, setActivity] = useState("All Activities")
   const [date, setDate] = useState("")
+  
   // Pagination
   const [page, setPage] = useState(1)
   const tripsPerPage = 4
@@ -65,31 +69,51 @@ export default function Page() {
       <Helmet>
         <title>{metadata.title}</title>
       </Helmet>
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 md:px-8 py-8">
-        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-cyan-700 mb-8 text-left">
-          Explore Our Diving and Snorkeling Trips
-        </h1>
-        <TripFilters
-          destination={destination}
-          setDestination={setDestination}
-          destinationOptions={destinationOptions}
-          activity={activity}
-          setActivity={setActivity}
-          activityOptions={activityOptions}
-          date={date}
-          setDate={setDate}
-        />
-        {isLoading && <Spinner />}
-        {error && <div className="text-red-600">Failed to load trips.</div>}
-        {!isLoading && !error && paginatedTrips.length === 0 && (
-          <div className="text-gray-500 text-lg">No trips available.</div>
-        )}
-        <div className="flex flex-col gap-8">
-          {paginatedTrips.map((trip) => (
-            <TripCard key={trip.id} trip={trip} />
-          ))}
+      
+      <div className="pb-12">
+        <TripsHeader />
+        
+        <div className="container mx-auto px-4 sm:px-6">
+          <TripFilters
+            destination={destination}
+            setDestination={setDestination}
+            destinationOptions={destinationOptions}
+            activity={activity}
+            setActivity={setActivity}
+            activityOptions={activityOptions}
+            date={date}
+            setDate={setDate}
+          />
+          
+          {isLoading && <Spinner  />}
+          
+          {error && (
+            <div className="text-red-600 text-center my-8">
+              Failed to load trips. Please try again later.
+            </div>
+          )}
+          
+          {!isLoading && !error && paginatedTrips.length === 0 && (
+            <div className="text-gray-500 text-lg text-center my-12">
+              No trips match your filters.
+            </div>
+          )}
+          
+          {/* Reverted to original card display style */}
+          <div className="flex flex-col gap-8">
+            {paginatedTrips.map((trip) => (
+              <TripCard key={trip.id} trip={trip} />
+            ))}
+          </div>
+          
+          <TripPagination 
+            page={page} 
+            setPage={setPage} 
+            totalPages={totalPages} 
+          />
         </div>
-        <TripPagination page={page} setPage={setPage} totalPages={totalPages} />
+        
+       
       </div>
     </>
   )

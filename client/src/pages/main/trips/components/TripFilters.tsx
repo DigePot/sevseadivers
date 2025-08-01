@@ -11,17 +11,6 @@ interface TripFiltersProps {
   setDate: (v: string) => void
 }
 
-const dropdownStyle: React.CSSProperties = {
-  padding: '10px 24px',
-  borderRadius: 8,
-  border: '1px solid #DDD',
-  fontSize: 16,
-  background: '#F5F5F5',
-  color: '#222',
-  fontWeight: 500,
-  outline: 'none',
-}
-
 export default function TripFilters({
   destination,
   setDestination,
@@ -33,6 +22,7 @@ export default function TripFilters({
   setDate,
 }: TripFiltersProps) {
   return (
+<<<<<<< Updated upstream
     <>
       <style>
         {`
@@ -97,3 +87,35 @@ export default function TripFilters({
     </>
   )
 }
+=======
+    <div className="flex flex-col sm:flex-row gap-3 mb-8 p-4 bg-white/90 rounded-lg shadow-sm">
+      <select 
+        value={destination} 
+        onChange={e => setDestination(e.target.value)}
+        className="flex-grow p-3 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+      >
+        {destinationOptions.map(d => (
+          <option key={d} value={d}>{d}</option>
+        ))}
+      </select>
+      
+      <select 
+        value={activity} 
+        onChange={e => setActivity(e.target.value)}
+        className="flex-grow p-3 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+      >
+        {activityOptions.map(a => (
+          <option key={a} value={a}>{a}</option>
+        ))}
+      </select>
+      
+      <input
+        type="date"
+        value={date}
+        onChange={e => setDate(e.target.value)}
+        className="p-3 rounded-lg border border-gray-200 bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-cyan-500"
+      />
+    </div>
+  )
+}
+>>>>>>> Stashed changes

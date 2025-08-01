@@ -4,6 +4,7 @@ import { useCourses } from "../../../main/course/hook/use-course"
 import { CoursesHeader } from "../components/course-header"
 import { CourseFilter } from "../components/course-filter"
 import Spinner from "../../../../components/Spinner"
+import { WhyLearnUs } from "../components/why-learn"
 
 export const CourseView = () => {
   const { courses, loading, error } = useCourses()
@@ -13,7 +14,7 @@ export const CourseView = () => {
   const [search, setSearch] = useState<string>("")
 
   // Define your static categories
-  const categories = ["All", "Diving", "Snorkeling", "Swimming"]
+  const categories = ["All", "Diving", "Snorkeling", "Swimming " , "water safety"]
 
   // Filtering logic
   const filteredCourses = courses.filter((course) => {
@@ -29,7 +30,7 @@ export const CourseView = () => {
   })
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 py-12">
+    <div className="px-2 sm:px-6 lg:px-2 py-12">
       <CoursesHeader />
 
       <CourseFilter
@@ -56,6 +57,7 @@ export const CourseView = () => {
           </p>
         )}
       </div>
+      <WhyLearnUs />
     </div>
   )
 }

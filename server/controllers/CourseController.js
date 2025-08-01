@@ -3,139 +3,118 @@ import tryCatch from "../utils/tryCatch.js"
 import AppError from "../utils/appErorr.js"
 
 export const createCourse = tryCatch(async (req, res, next) => {
-  console.log("=== Course Creation Request ===")
-  console.log("Body:", req.body)
-  console.log("Files:", req.files)
-
   const baseUrl = `https://${req.get("host")}`
 
-  // Extract data from request body
   const {
     title,
     description,
     price,
+    discountedPrice,
     duration,
     category,
     level,
     instructorName,
     instructorBio,
     instructorRating,
-    learnPoints,
+    whatYouWillLearn: learnPoints, // Frontend sends this as learnPoints
     includes,
+    prerequisites,
+    minAge,
   } = req.body
 
-  console.log("Extracted data:", {
-    title,
-    description,
-    price,
-    duration,
-    category,
-    level,
-    instructorName,
-    instructorBio,
-    instructorRating,
-    learnPoints,
-    includes,
-  })
+  // Initialize media URLs
+    let imageUrl = req.body.imageUrl
+  let instructorImageUrl = req.body.instructorImageUrl
+  let videoUrl = req.body.videoUrl
 
-  // Handle file uploads
-  let imageUrl = null
-  let instructorImageUrl = null
-  let videoUrl = null
-
-  // Check for uploaded files
+  // File handling
   if (req.files) {
-    console.log("Processing files:", Object.keys(req.files))
-
-    // Handle course image
-    if (req.files.courseImage) {
+    if (req.files.courseImage?.[0]) {
       imageUrl = `${baseUrl}/upload/${req.files.courseImage[0].filename}`
-      console.log("Course image URL:", imageUrl)
+       console.log("Course image URL:", imageUrl)
     }
-
-    // Handle instructor image
-    if (req.files.instructorImage) {
+    if (req.files.instructorImage?.[0]) {
       instructorImageUrl = `${baseUrl}/upload/${req.files.instructorImage[0].filename}`
-      console.log("Instructor image URL:", instructorImageUrl)
     }
-
-    // Handle curriculum video
-    if (req.files.curriculumVideo) {
+    if (req.files.curriculumVideo?.[0]) {
       videoUrl = `${baseUrl}/upload/${req.files.curriculumVideo[0].filename}`
-      console.log("Curriculum video URL:", videoUrl)
     }
   }
 
-  // Validation
-  if (!title || !description || !category || !level || !instructorName) {
-    console.log("Validation failed - missing required fields")
+  // Required field validation
+  if (!title || !description || !category || !level || !instructorName ) {
     return next(
-      new AppError(
-        "Title, description, category, level, and instructor name are required",
-        400
-      )
+      new AppError("Title, description, category, level, instructor name and image are required", 400)
     )
   }
 
-  // Parse learnPoints if it's a string
+  // Parse learnPoints -> whatYouWillLearn
   let parsedLearnPoints = []
-  if (learnPoints) {
-    try {
-      // If learnPoints is already an array, use it directly
-      if (Array.isArray(learnPoints)) {
-        parsedLearnPoints = learnPoints
-      } else {
-        // If it's a string, try to parse it
-        parsedLearnPoints = JSON.parse(learnPoints)
-      }
-    } catch (error) {
-      console.error("Error parsing learnPoints:", error)
-      parsedLearnPoints = []
+  try {
+    if (learnPoints) {
+      parsedLearnPoints = Array.isArray(learnPoints)
+        ? learnPoints
+        : JSON.parse(learnPoints)
+    } else {
+      // Handle FormData: learnPoints[0], learnPoints[1]...
+      parsedLearnPoints = Object.keys(req.body)
+        .filter((key) => key.startsWith("learnPoints["))
+        .map((key) => req.body[key]?.trim())
+        .filter(Boolean)
     }
-  } else {
-    // Handle FormData array format (learnPoints[0], learnPoints[1], etc.)
-    const learnPointsArray = []
-    for (let key in req.body) {
-      if (key.startsWith("learnPoints[") && key.endsWith("]")) {
-        const value = req.body[key]
-        if (value && value.trim()) {
-          learnPointsArray.push(value.trim())
-        }
-      }
-    }
-    parsedLearnPoints = learnPointsArray
-    console.log("Extracted learn points from FormData:", parsedLearnPoints)
-  }
-  // Handle includes// Parse includes if provided
-  let parsedIncludes = []
-  if (includes) {
-    try {
-      parsedIncludes = Array.isArray(includes) ? includes : JSON.parse(includes)
-    } catch (err) {
-      console.error("Error parsing includes:", err)
-      parsedIncludes = []
-    }
-  } else {
-    const includesArray = []
-    for (let key in req.body) {
-      if (key.startsWith("includes[") && key.endsWith("][icon]")) {
-        const index = key.match(/includes\[(\d+)\]/)[1]
-        const icon = req.body[`includes[${index}][icon]`]
-        const text = req.body[`includes[${index}][text]`]
-        if (icon && text) {
-          includesArray.push({ icon, text })
-        }
-      }
-    }
-    parsedIncludes = includesArray
+  } catch (err) {
+    console.error("Error parsing learnPoints:", err)
+    parsedLearnPoints = []
   }
 
+  // Parse includes
+  let parsedIncludes = []
+  try {
+    if (includes) {
+      parsedIncludes = Array.isArray(includes) ? includes : JSON.parse(includes)
+    } else {
+      // Handle FormData: includes[0][icon], includes[0][text]
+      const map = {}
+      Object.keys(req.body).forEach((key) => {
+        const match = key.match(/includes\[(\d+)\]\[(icon|text)\]/)
+        if (match) {
+          const [_, index, type] = match
+          if (!map[index]) map[index] = {}
+          map[index][type] = req.body[key]
+        }
+      })
+      parsedIncludes = Object.values(map).filter(item => item.icon && item.text)
+    }
+  } catch (err) {
+    console.error("Error parsing includes:", err)
+    parsedIncludes = []
+  }
+    // Parse prerequisites
+  let parsedPrerequisites = []
+  try {
+    if (prerequisites) {
+      parsedPrerequisites = Array.isArray(prerequisites)
+        ? prerequisites
+        : JSON.parse(prerequisites)
+    } else {
+      parsedPrerequisites = Object.keys(req.body)
+        .filter((key) => key.startsWith("prerequisites["))
+        .map((key) => req.body[key]?.trim())
+        .filter(Boolean)
+    }
+  } catch (err) {
+    console.error("Error parsing prerequisites:", err)
+    parsedPrerequisites = []
+  }
+
+  // Create course
   try {
     const course = await Course.create({
       title,
       description,
       imageUrl,
       price: price ? parseFloat(price) : 0,
+      discountedPrice: discountedPrice ? parseFloat(discountedPrice) : null,
       duration: duration || "",
       category,
       level,
@@ -146,20 +125,27 @@ export const createCourse = tryCatch(async (req, res, next) => {
       videoUrl,
       whatYouWillLearn: parsedLearnPoints,
       includes: parsedIncludes,
+      prerequisites: parsedPrerequisites,
+      minAge: minAge ? parseInt(minAge) : null,
     })
 
-    console.log("Course created successfully:", course.id)
+    console.log("✅ Course created:", course.id)
     res.status(201).json(course)
   } catch (error) {
-    console.error("Database error creating course:", error)
+    console.error("❌ DB error:", error)
     return next(new AppError(`Failed to create course: ${error.message}`, 500))
   }
 })
 
 export const getAllCourses = tryCatch(async (req, res) => {
-  const courses = await Course.findAll()
-  res.json(courses)
-})
+  try {
+    const courses = await Course.findAll();
+    res.json(courses);
+  } catch (error) {
+    console.error("Error fetching courses:", error);
+    res.status(500).json({ error: "Something went wrong while fetching courses." });
+  }
+});
 
 export const getCourseById = tryCatch(async (req, res, next) => {
   const course = await Course.findByPk(req.params.id)
@@ -168,31 +154,206 @@ export const getCourseById = tryCatch(async (req, res, next) => {
 })
 
 export const updateCourse = tryCatch(async (req, res, next) => {
-  const baseUrl = `https://${req.get("host")}`
+  const baseUrl = `${req.protocol}://${req.get("host")}`
+  
   const course = await Course.findByPk(req.params.id)
   if (!course) return next(new AppError("Course not found", 404))
+
+  console.log("📝 Update request body:", req.body) // Debug log
+
   const {
     title,
     description,
-    imageUrl,
     price,
+    discountedPrice,
     duration,
     category,
     level,
     instructorName,
+    instructorBio,
+    instructorRating,
+    whatYouWillLearn: learnPoints, // Frontend sends this as learnPoints
+    includes,
+    prerequisites,
+    minAge,
   } = req.body
-  await course.update({
-    title,
-    description,
-    // imageUrl,
-    imageUrl: req.file ? `${baseUrl}/upload/${req.file.filename}` : undefined, // Full image URL
-    price,
-    duration,
-    category,
-    level,
-    instructorName,
-  })
-  res.json(course)
+
+  // Initialize media URLs - keep existing if no new files
+  let imageUrl = course.imageUrl
+  let instructorImageUrl = course.instructorImage
+  let videoUrl = course.videoUrl
+
+  // File handling
+  if (req.files) {
+    if (req.files.courseImage?.[0]) {
+      imageUrl = `${baseUrl}/upload/${req.files.courseImage[0].filename}`
+    }
+    if (req.files.instructorImage?.[0]) {
+      instructorImageUrl = `${baseUrl}/upload/${req.files.instructorImage[0].filename}`
+    }
+    if (req.files.curriculumVideo?.[0]) {
+      videoUrl = `${baseUrl}/upload/${req.files.curriculumVideo[0].filename}`
+    }
+  }
+
+  // Parse learnPoints -> whatYouWillLearn
+  let parsedLearnPoints = course.whatYouWillLearn || []
+  try {
+    if (learnPoints !== undefined) {
+      if (Array.isArray(learnPoints)) {
+        parsedLearnPoints = learnPoints.filter(point => point && point.trim() !== "")
+      } else if (typeof learnPoints === 'string' && learnPoints.trim() !== "") {
+        parsedLearnPoints = JSON.parse(learnPoints).filter(point => point && point.trim() !== "")
+      } else {
+        // Handle FormData: learnPoints[0], learnPoints[1]...
+        const formDataLearnPoints = Object.keys(req.body)
+          .filter((key) => key.startsWith("learnPoints["))
+          .map((key) => req.body[key]?.trim())
+          .filter(Boolean)
+        
+        if (formDataLearnPoints.length > 0) {
+          parsedLearnPoints = formDataLearnPoints
+        }
+      }
+    }
+  } catch (err) {
+    console.error("Error parsing learnPoints:", err)
+    // Keep existing data on parse error
+  }
+
+  // Parse includes
+  let parsedIncludes = course.includes || []
+  try {
+    if (includes !== undefined) {
+      if (Array.isArray(includes)) {
+        parsedIncludes = includes.filter(item => item.icon && item.text && item.icon.trim() !== "" && item.text.trim() !== "")
+      } else if (typeof includes === 'string' && includes.trim() !== "") {
+        const parsed = JSON.parse(includes)
+        parsedIncludes = parsed.filter(item => item.icon && item.text && item.icon.trim() !== "" && item.text.trim() !== "")
+      } else {
+        // Handle FormData: includes[0][icon], includes[0][text]
+        const map = {}
+        Object.keys(req.body).forEach((key) => {
+          const match = key.match(/includes\[(\d+)\]\[(icon|text)\]/)
+          if (match) {
+            const [_, index, type] = match
+            if (!map[index]) map[index] = {}
+            map[index][type] = req.body[key]
+          }
+        })
+        const formDataIncludes = Object.values(map).filter(item => item.icon && item.text && item.icon.trim() !== "" && item.text.trim() !== "")
+        
+        if (formDataIncludes.length > 0) {
+          parsedIncludes = formDataIncludes
+        }
+      }
+    }
+  } catch (err) {
+    console.error("Error parsing includes:", err)
+    // Keep existing data on parse error
+  }
+
+  // Parse prerequisites
+  let parsedPrerequisites = course.prerequisites || []
+  try {
+    if (prerequisites !== undefined) {
+      if (Array.isArray(prerequisites)) {
+        parsedPrerequisites = prerequisites.filter(prereq => prereq && prereq.trim() !== "")
+      } else if (typeof prerequisites === 'string' && prerequisites.trim() !== "") {
+        parsedPrerequisites = JSON.parse(prerequisites).filter(prereq => prereq && prereq.trim() !== "")
+      } else {
+        // Handle FormData: prerequisites[0], prerequisites[1]...
+        const formDataPrerequisites = Object.keys(req.body)
+          .filter((key) => key.startsWith("prerequisites["))
+          .map((key) => req.body[key]?.trim())
+          .filter(Boolean)
+        
+        if (formDataPrerequisites.length > 0) {
+          parsedPrerequisites = formDataPrerequisites
+        }
+      }
+    }
+  } catch (err) {
+    console.error("Error parsing prerequisites:", err)
+    // Keep existing data on parse error
+  }
+
+  // Prepare update data object
+  const updateData = {}
+  
+  // Simple string fields
+  if (title !== undefined && title.trim() !== "") updateData.title = title
+  if (description !== undefined && description.trim() !== "") updateData.description = description
+  if (duration !== undefined) updateData.duration = duration || ""
+  if (category !== undefined && category.trim() !== "") updateData.category = category
+  if (level !== undefined && level.trim() !== "") updateData.level = level
+  if (instructorName !== undefined && instructorName.trim() !== "") updateData.instructorName = instructorName
+
+  // Handle instructorBio - can be empty string
+  if (instructorBio !== undefined) {
+    updateData.instructorBio = instructorBio === "undefined" ? "" : (instructorBio || "")
+  }
+
+  // Handle numeric fields with proper validation
+  if (price !== undefined && price !== "") {
+    const numPrice = parseFloat(price)
+    if (!isNaN(numPrice) && numPrice >= 0) {
+      updateData.price = numPrice
+    }
+  }
+
+  if (discountedPrice !== undefined) {
+    if (discountedPrice === "" || discountedPrice === null || discountedPrice === "null") {
+      updateData.discountedPrice = null
+    } else {
+      const numDiscount = parseFloat(discountedPrice)
+      if (!isNaN(numDiscount) && numDiscount >= 0) {
+        updateData.discountedPrice = numDiscount
+      }
+    }
+  }
+
+  if (instructorRating !== undefined && instructorRating !== "") {
+    const numRating = parseFloat(instructorRating)
+    if (!isNaN(numRating) && numRating >= 0 && numRating <= 5) {
+      updateData.instructorRating = numRating
+    }
+  }
+
+  if (minAge !== undefined) {
+    if (minAge === "" || minAge === null || minAge === "null") {
+      updateData.minAge = null
+    } else {
+      const numAge = parseInt(minAge)
+      if (!isNaN(numAge) && numAge >= 0) {
+        updateData.minAge = numAge
+      }
+    }
+  }
+
+  // Handle media URLs
+  if (imageUrl !== course.imageUrl) updateData.imageUrl = imageUrl
+  if (instructorImageUrl !== course.instructorImage) updateData.instructorImage = instructorImageUrl
+  if (videoUrl !== course.videoUrl) updateData.videoUrl = videoUrl
+  
+  // Always update array fields (they're already processed)
+  updateData.whatYouWillLearn = parsedLearnPoints
+  updateData.includes = parsedIncludes
+  updateData.prerequisites = parsedPrerequisites
+
+  console.log("📊 Final update data:", updateData) // Debug log
+
+  try {
+    await course.update(updateData)
+    
+    // Fetch the updated course to return fresh data
+    const updatedCourse = await Course.findByPk(req.params.id)
+    console.log("✅ Course updated successfully:", updatedCourse.id)
+    res.json(updatedCourse)
+  } catch (error) {
+    console.error("❌ Update error:", error)
+    return next(new AppError(`Failed to update course: ${error.message}`, 500))
+  }
 })
 
 export const deleteCourse = tryCatch(async (req, res, next) => {

@@ -11,6 +11,10 @@ const defineUser = (sequelize) => {
       type: DataTypes.STRING,
       allowNull: false,
     },
+     confirmPassword: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
 
     // ✅ Updated role using STRING with validation instead of ENUM
     role: {

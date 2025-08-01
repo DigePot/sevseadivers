@@ -24,6 +24,10 @@ const defineCourse = (sequelize) => {
       allowNull: false,
       defaultValue: 0,
     },
+    discountedPrice: {
+      type: DataTypes.FLOAT,
+      allowNull: true,
+    },
     duration: {
       type: DataTypes.STRING,
       allowNull: false,
@@ -90,9 +94,20 @@ instructorName: {
         defaultValue: [],
       },
       includes: {
-        type: DataTypes.JSON, // Array of { icon, text }
+        type: DataTypes.JSON, 
         defaultValue: [],
       },
+       minAge: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+
+    
+    prerequisites: {
+      type: DataTypes.ARRAY(DataTypes.STRING), 
+      allowNull: true,
+      defaultValue: [],
+    },
     
   }, {
     timestamps: true,

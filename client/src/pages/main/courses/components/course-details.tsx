@@ -22,6 +22,15 @@ export default function CourseDetails() {
     setImgSrc("/images/course-placeholder.jpg")
   }
 
+  // Calculate discount if applicable
+  const hasDiscount = course?.discountedPrice  && 
+                      course?.price && 
+                      course.discountedPrice < course.price
+
+   const discountPercentage = hasDiscount
+    ? Math.round(100 - (course.discountedPrice as number / course.price) * 100)
+    : 0;
+
   if (isLoading)
     return (
       <div className="flex justify-center items-center h-[70vh]">
@@ -113,15 +122,30 @@ export default function CourseDetails() {
                     </svg>
                     <span>{course.duration || "8 hours"}</span>
                   </div>
-                  
                 </div>
               </div>
 
               <div className="mt-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                  <span className="text-2xl font-bold text-gray-900">
-                    {course.price} $
-                  </span>
+                <div className="flex flex-col">
+                  {hasDiscount ? (
+                    <>
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl font-bold text-gray-900">
+                          ${course.discountedPrice?.toFixed(2)}
+                        </span>
+                        <span className="bg-red-100 text-red-600 px-2 py-1 rounded-md text-sm font-bold">
+                          SAVE {discountPercentage}%
+                        </span>
+                      </div>
+                      <span className="text-gray-500 text-sm line-through">
+                        ${course.price?.toFixed(2)}
+                      </span>
+                    </>
+                  ) : (
+                    <span className="text-2xl font-bold text-gray-900">
+                      ${course.price?.toFixed(2)}
+                    </span>
+                  )}
                 </div>
                 <button
                   onClick={() => navigate(`/courses/${id}/checkout`)}
@@ -146,6 +170,7 @@ export default function CourseDetails() {
             </div>
           </div>
         </div>
+
         {/* Course Content Area */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">

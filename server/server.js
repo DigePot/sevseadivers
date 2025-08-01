@@ -59,7 +59,7 @@ app.get("/", (req, res) => {
 const PORT = process.env.PORT || 5000
 
 sequelize
-  .sync({ alter: true })
+  .sync({ alter: true }) // Use alter: true in development to update schema without dropping tables
   .then(() => {
     console.log("✅ Database synced")
     app.listen(PORT, () => {

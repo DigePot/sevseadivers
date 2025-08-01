@@ -3,19 +3,14 @@ import { z as zod } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useRef, useEffect } from "react";
 
-// Zod schema for validation - Updated to handle null initially
+// Updated Zod schema with optional video and no size limit
 const CurriculumSchema = zod.object({
   videoFile: zod
-    .instanceof(File, { message: "Please upload a video file" })
+    .instanceof(File, { message: "Please upload a valid video file" })
     .nullable()
-    .refine((file) => file !== null && file.size > 0, {
-      message: "Video file is required",
-    })
-    .refine((file) => file === null || file.size <= 100 * 1024 * 1024, {
-      message: "File size must be less than 100MB",
-    })
+    .optional()
     .refine(
-      (file) => file === null || ["video/mp4", "video/webm", "video/ogg"].includes(file.type),
+      (file) => file === null || file === undefined || ["video/mp4", "video/webm", "video/ogg"].includes(file.type),
       { message: "Only MP4, WebM, and Ogg formats are supported" }
     ),
   learnPoints: zod
@@ -55,17 +50,18 @@ export function CourseCurriculumForm({ initialData, onUpdate }: Props) {
     resolver: zodResolver(CurriculumSchema),
     defaultValues: {
       ...initialData,
+      videoFile: initialData.videoFile || null,
       includes: initialData.includes || [{ icon: '', text: '' }],
     },
     mode: "onChange",
   });
 
-  // Watch all form values using useWatch to avoid infinite loop
   const formValues = useWatch({ control });
-  
-  // Update parent when form changes and is valid
+  const watchVideoFile = watch("videoFile");
+
+  // Update parent when form changes
   useEffect(() => {
-    if (isValid && onUpdate) {
+    if (onUpdate) {
       onUpdate({
         videoFile: formValues.videoFile ?? null,
         learnPoints: formValues.learnPoints ?? [""],
@@ -75,9 +71,7 @@ export function CourseCurriculumForm({ initialData, onUpdate }: Props) {
         })),
       });
     }
-  }, [formValues, isValid]); // Removed onUpdate from dependencies since it's now memoized
-
-  const watchVideoFile = watch("videoFile");
+  }, [formValues]);
 
   // Handle video preview
   useEffect(() => {
@@ -90,11 +84,12 @@ export function CourseCurriculumForm({ initialData, onUpdate }: Props) {
     }
   }, [watchVideoFile]);
 
-  // Add/Remove includes
+  // Form actions (unchanged from your original)
   const addInclude = () => {
     const currentIncludes = watch("includes");
     setValue("includes", [...currentIncludes, { icon: '', text: '' }]);
   };
+
   const removeInclude = (index: number) => {
     const currentIncludes = watch("includes");
     if (currentIncludes.length > 1) {
@@ -147,10 +142,10 @@ export function CourseCurriculumForm({ initialData, onUpdate }: Props) {
       </h1>
 
       <div className="space-y-8">
-        {/* Video Upload */}
+        {/* Updated Video Upload Section */}
         <div>
           <label className="block font-medium mb-3 text-gray-700">
-            Upload Overview Video *
+            Upload Overview Video (Optional)
           </label>
           <Controller
             name="videoFile"
@@ -190,7 +185,7 @@ export function CourseCurriculumForm({ initialData, onUpdate }: Props) {
                       <p className="text-gray-600 font-medium">
                         <span className="text-blue-600">Click to upload</span> or drag and drop
                       </p>
-                      <p className="text-sm text-gray-500 mt-2">MP4, WebM, Ogg (Max 100MB)</p>
+                      <p className="text-sm text-gray-500 mt-2">MP4, WebM, Ogg (Optional)</p>
                     </div>
                   </div>
                 )}

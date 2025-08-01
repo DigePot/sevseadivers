@@ -30,6 +30,26 @@ export default function HighlightsSidebar() {
         )}
       </ul>
 
+      {/* Minimum Age Section */}
+      {course?.minAge && (
+        <div className="mt-6">
+          <h3 className="font-semibold text-cyan-700 mb-2">Minimum Age Requirement:</h3>
+          <p className="text-sm">{course.minAge} years old</p>
+        </div>
+      )}
+
+      {/* Prerequisites Section */}
+      {course?.prerequisites && course.prerequisites.length > 0 && (
+        <div className="mt-6">
+          <h3 className="font-semibold text-cyan-700 mb-2">Prerequisites:</h3>
+          <ul className="list-disc pl-5 space-y-1">
+            {course.prerequisites.map((prereq, i) => (
+              <li key={i} className="text-sm">{prereq}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
       <div className="mt-8">
         <h3 className="font-semibold text-cyan-700 mb-3">This course includes:</h3>
         <div className="grid grid-cols-2 gap-3">
