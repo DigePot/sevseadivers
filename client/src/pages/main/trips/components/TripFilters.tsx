@@ -1,5 +1,3 @@
-import React from "react"
-
 interface TripFiltersProps {
   destination: string
   setDestination: (v: string) => void
@@ -12,82 +10,11 @@ interface TripFiltersProps {
 }
 
 export default function TripFilters({
-  destination,
-  setDestination,
-  destinationOptions,
-  activity,
-  setActivity,
-  activityOptions,
-  date,
-  setDate,
+  destination, setDestination, destinationOptions,
+  activity, setActivity, activityOptions,
+  date, setDate
 }: TripFiltersProps) {
   return (
-<<<<<<< Updated upstream
-    <>
-      <style>
-        {`
-          @media (max-width: 768px) {
-            .trip-filters-container {
-              flex-wrap: wrap;
-            }
-            .trip-filter {
-              width: 100%;
-            }
-            .trip-date-wrapper input {
-              width: 100% !important;
-            }
-          }
-        `}
-      </style>
-
-      <div
-        className="trip-filters-container"
-        style={{
-          display: 'flex',
-          gap: 16,
-          marginBottom: 32,
-          alignItems: 'center',
-        }}
-      >
-        <select
-          className="trip-filter"
-          value={destination}
-          onChange={(e) => setDestination(e.target.value)}
-          style={dropdownStyle}
-        >
-          {destinationOptions.map((d) => (
-            <option key={d}>{d}</option>
-          ))}
-        </select>
-
-        <div
-          className="trip-date-wrapper trip-filter"
-          style={{ display: 'flex', flexDirection: 'column' }}
-        >
-          <input
-            id="trip-date"
-            type="date"
-            value={date}
-            onChange={(e) => setDate(e.target.value)}
-            style={{ ...dropdownStyle, width: 180 }}
-          />
-        </div>
-
-        <select
-          className="trip-filter"
-          value={activity}
-          onChange={(e) => setActivity(e.target.value)}
-          style={dropdownStyle}
-        >
-          {activityOptions.map((a) => (
-            <option key={a}>{a}</option>
-          ))}
-        </select>
-      </div>
-    </>
-  )
-}
-=======
     <div className="flex flex-col sm:flex-row gap-3 mb-8 p-4 bg-white/90 rounded-lg shadow-sm">
       <select 
         value={destination} 
@@ -118,4 +45,3 @@ export default function TripFilters({
     </div>
   )
 }
->>>>>>> Stashed changes
