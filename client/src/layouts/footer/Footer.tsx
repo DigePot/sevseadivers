@@ -30,8 +30,8 @@ const linksGroup = [
     links: [
       { label: "Your Account", href: "/auth/sign-in" },
       { label: "Home", href: "/" },
-      { label: "About Us", href: "/about" },
-      { label: "Help", href: "/help" },
+      { label: "About Us", href: "/about-us" },
+      { label: "Help", href: "/Contact-us" },
     ],
   },
 ]
