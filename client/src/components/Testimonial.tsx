@@ -284,7 +284,7 @@ const Testimonial = () => {
           </div>
 
           {/* Add Testimonial Button */}
-          <div className="text-center">
+          {/* <div className="text-center">
             <button
               className={
                 "t-60 inline-flex items-center bg-cyan-500 hover:bg-cyan-600 focus:ring-4 focus:ring-cyan-300 font-semibold px-8 py-2 rounded-full text-sm shadow-sm transition-all transform hover:scale-80 active:scale-65 text-white"
@@ -294,7 +294,7 @@ const Testimonial = () => {
               <Plus className="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform duration-200" />
               Add Testimonial
             </button>
-          </div>
+          </div> */}
 
           {/* Custom Modal */}
           {isModalOpen && (
