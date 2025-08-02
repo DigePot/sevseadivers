@@ -463,7 +463,7 @@ const GalleryTable: React.FC<GalleryTableProps> = ({
   isDeleting,
   deletingId,
 }) => (
-  <div className="hidden md:block overflow-x-auto">
+  <div className="hidden xl:block lg:w-[990px] overflow-x-scroll">
     <table className="min-w-full divide-y divide-gray-200">
       <thead className="bg-gray-50">
         <tr>
@@ -584,7 +584,7 @@ const GalleryCardList: React.FC<GalleryCardListProps> = ({
   isDeleting,
   deletingId,
 }) => (
-  <div className="md:hidden grid grid-cols-1 gap-4 p-4">
+  <div className="xl:hidden grid grid-cols-1 gap-4 p-4">
     {gallery.map((item) => (
       <div
         key={item.id}

@@ -435,7 +435,7 @@ const TripTable: React.FC<{
   isDeleting: boolean
   deletingId: number | null
 }> = ({ trips, onSort, sortConfig, onDelete, isDeleting, deletingId }) => (
-  <div className="hidden md:block overflow-x-auto">
+  <div className="hidden xl:block  lg:w-[990px] overflow-x-scroll">
     <table className="min-w-full divide-y divide-gray-200">
       <thead className="bg-gray-50">
         <tr>
@@ -484,7 +484,7 @@ const TripTableRow: React.FC<{
   isDeleting: boolean
 }> = ({ trip, onDelete, isDeleting }) => (
   <tr className="hover:bg-gray-50">
-    <td className="px-6 py-4 whitespace-nowrap">
+    <td className=" py-4 whitespace-nowrap">
       <div className="flex items-center">
         <img
           className="h-16 w-16 rounded-lg object-cover border flex-shrink-0"
@@ -499,33 +499,33 @@ const TripTableRow: React.FC<{
         </div>
       </div>
     </td>
-    <td className="px-6 py-4 whitespace-nowrap">
+    <td className=" py-4 whitespace-nowrap">
       <div className="flex items-center text-sm">
         <FiMapPin className="mr-1.5 h-4 w-4 text-blue-500" />
         {trip.destination}
       </div>
     </td>
-    <td className="px-6 py-4 whitespace-nowrap">
+    <td className=" py-4 whitespace-nowrap">
       <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
         {trip.activityType}
       </span>
     </td>
-    <td className="px-6 py-4 whitespace-nowrap">
+    <td className=" py-4 whitespace-nowrap">
       <div className="flex items-center text-sm">
         <FiCalendar className="mr-1.5 h-4 w-4 text-green-500" />
         {new Date(trip.date).toLocaleDateString()}
       </div>
     </td>
-    <td className="px-6 py-4 whitespace-nowrap">
+    <td className=" py-4 whitespace-nowrap">
       <div className="flex items-center text-sm font-medium">
         <FiDollarSign className="mr-1.5 h-4 w-4 text-yellow-500" />${trip.price}
-        <span className="ml-2 text-xs text-gray-500 flex items-center">
+        {/* <span className="ml-2 text-xs text-gray-500 flex items-center">
           <FiClock className="mr-1" />
           {trip.duration}
-        </span>
+        </span> */}
       </div>
     </td>
-    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+    <td className=" py-4 whitespace-nowrap text-right text-sm font-medium">
       <Link
         to={paths.shared.trip.edit(trip.id.toString())}
         className="text-blue-600 hover:text-blue-900 mr-4 cursor-pointer"
@@ -549,7 +549,7 @@ const TripCardList: React.FC<{
   isDeleting: boolean
   deletingId: number | null
 }> = ({ trips, onDelete, isDeleting, deletingId }) => (
-  <div className="md:hidden grid grid-cols-1 gap-4 p-4">
+  <div className="xl:hidden grid grid-cols-1 gap-4 p-4">
     {trips.map((trip) => (
       <TripCard
         key={trip.id}

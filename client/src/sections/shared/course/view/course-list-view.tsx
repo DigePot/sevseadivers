@@ -447,7 +447,7 @@ const CourseTable: React.FC<CourseTableProps> = ({
   isDeleting,
   deletingId,
 }) => (
-  <div className="hidden md:block overflow-x-auto">
+  <div className="hidden xl:block lg:w-[990px] overflow-x-scroll">
     <table className="min-w-full divide-y divide-gray-200">
       <thead className="bg-gray-50">
         <tr>
@@ -505,7 +505,11 @@ const CourseTableRow: React.FC<CourseTableRowProps> = ({
         {course.imageUrl ? (
           <img
             className="h-16 w-16 rounded-lg object-cover border flex-shrink-0"
-            src={course.imageUrl}
+            // src={course.imageUrl}
+            src={course.imageUrl.replace(
+              "http://localhost:5000",
+              "https://api.sevseadivers.com"
+            )}
             alt={course.title}
           />
         ) : (
@@ -568,7 +572,7 @@ const CourseCardList: React.FC<CourseCardListProps> = ({
   isDeleting,
   deletingId,
 }) => (
-  <div className="md:hidden grid grid-cols-1 gap-4 p-4">
+  <div className="xl:hidden grid grid-cols-1 gap-4 p-4">
     {courses.map((course) => (
       <CourseCard
         key={course.id}
@@ -597,7 +601,15 @@ const CourseCard: React.FC<CourseCardProps> = ({
         {course.imageUrl ? (
           <img
             className="h-16 w-16 rounded-lg object-cover border"
-            src={course.imageUrl}
+            // src={course.imageUrl}
+            // src={
+            //   `http://api.sevseadivers.com/${course.imageUrl}`
+            //   // "https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909_960_720.png"
+            // }
+            src={course.imageUrl.replace(
+              "http://localhost:5000",
+              "https://api.sevseadivers.com"
+            )}
             alt={course.title}
           />
         ) : (

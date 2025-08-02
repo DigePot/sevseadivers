@@ -422,7 +422,7 @@ const StaffTable: React.FC<{
   isDeleting,
   deletingId,
 }) => (
-  <div className="hidden md:block overflow-x-auto">
+  <div className="hidden xl:block lg:w-[990px] overflow-x-scroll">
     <table className="min-w-full divide-y divide-gray-200">
       <thead className="bg-gray-50">
         <tr>
@@ -472,7 +472,7 @@ const StaffTableRow: React.FC<{
   isDeleting: boolean
 }> = ({ staff, onDelete, isDeleting }) => (
   <tr className="hover:bg-gray-50">
-    <td className="px-6 py-4 whitespace-nowrap">
+    <td className=" py-4 whitespace-nowrap">
       <div className="flex items-center">
         <img
           className="h-10 w-10 rounded-full object-cover border"
@@ -490,30 +490,30 @@ const StaffTableRow: React.FC<{
         </div>
       </div>
     </td>
-    <td className="px-6 py-4 whitespace-nowrap">
+    <td className=" py-4 whitespace-nowrap">
       <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
         {staff.role}
       </span>
     </td>
-    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+    <td className=" py-4 whitespace-nowrap text-sm text-gray-500">
       <div className="flex items-center">
         <FiMail className="mr-1.5 h-4 w-4 text-blue-500" />
         {staff.email}
       </div>
     </td>
-    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+    <td className=" py-4 whitespace-nowrap text-sm text-gray-500">
       <div className="flex items-center">
         <FiPhone className="mr-1.5 h-4 w-4 text-green-500" />
         {staff.phoneNumber}
       </div>
     </td>
-    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+    <td className=" py-4 whitespace-nowrap text-sm text-gray-500">
       <div className="flex items-center">
         <FiCalendar className="mr-1.5 h-4 w-4 text-purple-500" />
         {new Date(staff.createdAt).toLocaleDateString()}
       </div>
     </td>
-    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+    <td className=" py-4 whitespace-nowrap text-right text-sm font-medium">
       <Link
         to={paths.dashboard.staff.edit(staff.id.toString())}
         className="text-blue-600 hover:text-blue-900 mr-4 cursor-pointer"
@@ -538,7 +538,7 @@ const StaffCardList: React.FC<{
   isDeleting: boolean
   deletingId: number | null
 }> = ({ staffMembers, onDelete, isDeleting, deletingId }) => (
-  <div className="md:hidden grid grid-cols-1 gap-4 p-4">
+  <div className="xl:hidden grid grid-cols-1 gap-4 p-4">
     {staffMembers.map((staff) => (
       <StaffCard
         key={staff.id}
@@ -561,7 +561,11 @@ const StaffCard: React.FC<{
       <div className="flex items-start">
         <img
           className="h-12 w-12 rounded-full object-cover"
-          src={staff.profilePicture || "/default-avatar.png"}
+          // src={staff.profilePicture || "/default-avatar.png"}
+          src={
+            `http://api.sevseadivers.com${staff.profilePicture}` ||
+            "https://cdn.pixabay.com/photo/2016/08/08/09/17/avatar-1577909_960_720.png"
+          }
           alt={staff.fullName}
         />
         <div className="ml-4 flex-1">
