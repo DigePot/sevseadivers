@@ -1,28 +1,30 @@
-import React from "react"
-import { motion } from "framer-motion"
+import React from "react";
+import { motion } from "framer-motion";
 import {
   FaInstagram,
   FaFacebook,
   FaTwitter,
+  FaTiktok,
   FaEnvelope,
   FaPhone,
   FaMapMarkerAlt,
-} from "react-icons/fa"
+} from "react-icons/fa";
 
+// Social Media Links
 const socialLinks = [
-  { icon: FaFacebook, href: "https://facebook.com" },
-  { icon: FaTwitter, href: "https://twitter.com" },
-  { icon: FaInstagram, href: "https://instagram.com" },
+  { icon: FaFacebook, href: "https://www.facebook.com/share/1FXqHop7fP/?mibextid=wwXIfr" },
+  { icon: FaTwitter, href: "https://x.com/sevseadivers?s=21" },
+  { icon: FaInstagram, href: "https://www.instagram.com/sevseadivers?igsh=MXdtcDg5eWZwd2QzMw%3D%3D&utm_source=qr" },
+  { icon: FaTiktok, href: "https://www.tiktok.com/@sevsea.divers?_t=ZM-8wXxWNAwMY2&_r=1" },
 ]
-
 const linksGroup = [
   {
     title: "Products",
     links: [
       { label: "Diving Courses", href: "/courses" },
-      { label: "Equipment Rental", href: "/services" },
+      { label: "Our services", href: "/services" },
       { label: "Guided Tours", href: "/trips" },
-      { label: "Certification", href: "/services" },
+
     ],
   },
   {
