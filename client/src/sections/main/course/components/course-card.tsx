@@ -62,6 +62,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
             animate={{ x: 0 }}
             transition={{ type: "spring", stiffness: 300 }}
           >
+            
             BUNDLE PACK
           </motion.div>
         ) : course.certificate ? (

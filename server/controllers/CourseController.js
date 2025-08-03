@@ -372,73 +372,91 @@ export const updateCourseOrder = tryCatch(async (req, res, next) => {
     });
   }
 
-  // Cast & validate
-  const courseIds = courses.map((id) => {
+  // Normalize, validate, and dedupe IDs
+  const courseIdsRaw = courses.map((id) => {
     const n = Number(id);
     if (isNaN(n)) throw new AppError(`Invalid course ID: ${id}`, 400);
     return n;
   });
+  const courseIds = Array.from(new Set(courseIdsRaw)); // remove duplicates
+
+  if (courseIds.length !== courseIdsRaw.length) {
+    console.warn("Duplicate course IDs in payload were removed:", courseIdsRaw);
+  }
+
+  console.log("Requested new order:", courseIds);
 
   // Verify existence
-  const found = await Course.findAll({
+  const existingCourses = await Course.findAll({
     where: { id: courseIds },
-    attributes: ["id"],
+    attributes: ["id", "orderIndex"],
     raw: true,
   });
-  if (found.length !== courseIds.length) {
-    const missing = courseIds.filter((id) => !found.some((c) => c.id === id));
+
+  if (existingCourses.length !== courseIds.length) {
+    const missing = courseIds.filter(
+      (id) => !existingCourses.some((c) => c.id === id)
+    );
     return res.status(404).json({
       success: false,
       message: `Courses not found: ${missing.join(", ")}`,
     });
   }
 
-  // Resolve table reference (schema-aware)
-  let tableRef;
-  const tn = typeof Course.getTableName === "function" ? Course.getTableName() : Course.tableName;
-  if (typeof tn === "object" && tn.tableName) {
-    tableRef = `"${tn.schema}"."${tn.tableName}"`;
-  } else if (typeof tn === "string") {
-    tableRef = `"${tn}"`;
-  } else {
-    tableRef = `"Courses"`; // fallback
-  }
+  console.log("Before update orderIndexes:", existingCourses);
 
-  // Bulk update with reliable ordinality
+  // Build and execute CASE update in a transaction
   await Course.sequelize.transaction(async (t) => {
-    const sql = `
-      WITH reordered AS (
-        SELECT id, ordinality AS new_order
-        FROM unnest($1::INT[]) WITH ORDINALITY AS t(id, ordinality)
-      )
-      UPDATE ${tableRef} AS c
-      SET "orderIndex" = reordered.new_order,
-          "updatedAt" = NOW()
-      FROM reordered
-      WHERE c.id = reordered.id;
-    `;
+    const cases = courseIds
+      .map((id, idx) => `WHEN "id" = ${id} THEN ${idx + 1}`)
+      .join(" ");
 
-    console.log("Running order update SQL:", sql.trim(), "with", courseIds);
-    await Course.sequelize.query(sql, {
-      bind: [courseIds],
-      transaction: t,
-    });
+    // Resolve table name (with schema if present)
+    const rawTableName = Course.getTableName();
+    let fullTableName;
+    if (typeof rawTableName === "object" && rawTableName.schema) {
+      fullTableName = `"${rawTableName.schema}"."${rawTableName.tableName}"`;
+    } else {
+      fullTableName = `"${String(rawTableName)}"`;
+    }
+
+    // Execute the bulk update
+    await Course.sequelize.query(
+      `
+      UPDATE ${fullTableName}
+      SET "orderIndex" = CASE ${cases} END,
+          "updatedAt" = :now
+      WHERE "id" IN (${courseIds.join(",")})
+      `,
+      {
+        replacements: { now: new Date() },
+        transaction: t,
+      }
+    );
   });
 
-  // Fetch updated and return
-  const updated = await Course.findAll({
+  // Fetch updated courses, ordered by orderIndex
+  const updatedCourses = await Course.findAll({
     where: { id: courseIds },
     order: [["orderIndex", "ASC"]],
+    include: [/* any relationships you need */],
   });
 
- const payload = updated.map((c) => c.get({ plain: true }));
+  console.log(
+    "After update orderIndexes:",
+    updatedCourses.map((c) => ({
+      id: c.id,
+      orderIndex: (c ).orderIndex,
+    }))
+  );
 
   return res.json({
     success: true,
     message: "Order updated successfully",
-    data: payload,
+    data: updatedCourses.map((c) => c.get({ plain: true })),
   });
 });
+
 
 
 export const deleteCourse = tryCatch(async (req, res, next) => {

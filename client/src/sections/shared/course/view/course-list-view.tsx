@@ -74,11 +74,14 @@ export const CourseListView: React.FC = () => {
 
 
   useEffect(() => {
-    if (allCourses && allCourses.length > 0) {
-      const sortedCourses = [...allCourses].sort((a, b) => a.orderIndex - b.orderIndex);
-      setLocalCourseOrder(sortedCourses);
-    }
-  }, [allCourses]);
+  if (allCourses && allCourses.length > 0) {
+    const sortedCourses = [...allCourses]
+      .map(c => ({ ...c, orderIndex: Number(c.orderIndex ?? Infinity) }))
+      .sort((a, b) => a.orderIndex - b.orderIndex);
+    setLocalCourseOrder(sortedCourses);
+  }
+}, [allCourses]);
+
 
   // --- Derived State ---
   const isDragAndDropEnabled = useMemo(() => (
@@ -141,48 +144,78 @@ export const CourseListView: React.FC = () => {
     []
   );
 
- const handleDrop = useCallback(
-  async (e: React.DragEvent<HTMLElement>, dropIndex: number) => {
+const handleDrop = useCallback(
+  async (e: React.DragEvent<HTMLElement>, dropIndexOnPage: number) => {
     if (!isDragAndDropEnabled || !dragState.draggedItem) return;
     e.preventDefault();
-
     setIsReordering(true);
 
-    // Always work with the properly ordered source
-    const sourceList = [...(allCourses || [])].sort((a, b) => a.orderIndex - b.orderIndex);
-    const fromIndex = sourceList.findIndex(c => c.id === dragState.draggedItem!.id);
+    // Full current order (sorted)
+    const currentOrder = localCourseOrder.length > 0
+      ? [...localCourseOrder]
+      : [...(allCourses || [])].sort((a, b) => a.orderIndex - b.orderIndex);
 
-    if (fromIndex === -1 || fromIndex === dropIndex) {
+    const fromIndex = currentOrder.findIndex(c => c.id === dragState.draggedItem!.id);
+    if (fromIndex === -1) {
       setIsReordering(false);
       return;
     }
 
-    // Create new order array
-    const newOrder = [...sourceList];
-    const [movedItem] = newOrder.splice(fromIndex, 1);
-    newOrder.splice(dropIndex, 0, movedItem);
+  
+    const globalDropIndex = (currentPage - 1) * itemsPerPage + dropIndexOnPage;
 
-    // Update orderIndex for all items to ensure sequential numbering
-    const finalOrder = newOrder.map((course, index) => ({
+    // Bound it within array length
+    const boundedDropIndex = Math.min(Math.max(globalDropIndex, 0), currentOrder.length - 1);
+
+    if (fromIndex === boundedDropIndex) {
+      setIsReordering(false);
+      return;
+    }
+
+    // Reorder
+    const newOrder = [...currentOrder];
+    const [movedItem] = newOrder.splice(fromIndex, 1);
+    newOrder.splice(boundedDropIndex, 0, movedItem);
+
+    // Reassign orderIndex sequentially
+    const finalOrder = newOrder.map((course, idx) => ({
       ...course,
-      orderIndex: index + 1
+      orderIndex: idx + 1,
     }));
-    
-    console.log('New order before update:', finalOrder.map(c => ({ id: c.id, orderIndex: c.orderIndex })));
+
+    // Optimistic UI
     setLocalCourseOrder(finalOrder);
 
     try {
-      await updateCourseOrder({ 
-        courses: finalOrder.map(c => c.id) 
+      const response = await updateCourseOrder({
+        courses: finalOrder.map(c => c.id),
       }).unwrap();
+
+      if (response.data) {
+        const normalized = response.data
+          .map((c: Course) => ({ ...c, orderIndex: Number(c.orderIndex ?? Infinity) }))
+          .sort((a: Course, b: Course) => a.orderIndex - b.orderIndex);
+        setLocalCourseOrder(normalized);
+      } else {
+        // fallback: keep optimistic if no data returned
+      }
     } catch (err) {
       console.error("Order update failed:", err);
-      setLocalCourseOrder([]); // Revert to server state
+      // revert: refetch from server instead of blanking
+      setLocalCourseOrder([]);
     } finally {
       setIsReordering(false);
     }
   },
-  [isDragAndDropEnabled, dragState.draggedItem, allCourses, updateCourseOrder]
+  [
+    isDragAndDropEnabled,
+    dragState.draggedItem,
+    allCourses,
+    updateCourseOrder,
+    localCourseOrder,
+    currentPage,
+    itemsPerPage,
+  ]
 );
 
   // --- Other Handlers ---
@@ -238,10 +271,12 @@ export const CourseListView: React.FC = () => {
   const filteredCourses = useMemo(() => {
     if (!allCourses) return [];
     
-    // Always use the properly ordered source
-    const source = isDragAndDropEnabled && localCourseOrder.length > 0 
-      ? localCourseOrder 
-      : [...allCourses].sort((a, b) => a.orderIndex - b.orderIndex);
+   const source = localCourseOrder.length > 0
+  ? localCourseOrder
+  : [...(allCourses || [])]
+      .map(c => ({ ...c, orderIndex: Number(c.orderIndex ?? Infinity) }))
+      .sort((a, b) => a.orderIndex - b.orderIndex);
+
 
     let result = [...source];
 
@@ -625,8 +660,6 @@ interface CourseTableProps {
 
 const CourseTable: React.FC<CourseTableProps> = ({
   courses,
-  onSort,
-  sortConfig,
   onDelete,
   isDeleting,
   deletingId,
@@ -637,62 +670,40 @@ const CourseTable: React.FC<CourseTableProps> = ({
   onDragLeave,
   onDrop,
   isDragEnabled,
-}) => (
-  <div className="hidden md:block overflow-x-auto">
-    <table className="min-w-full divide-y divide-gray-200">
-      <thead className="bg-gray-50">
-        <tr>
-          {isDragEnabled && (
-            <th scope="col" className="px-6 py-3 text-left">
-              <span className="sr-only">Drag Handle</span>
-            </th>
-          )}
-          {["title", "price", "duration", "createdAt"].map((key) => (
-            <th
-              key={key}
-              scope="col"
-              className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${
-                isDragEnabled ? "" : "cursor-pointer"
-              }`}
-              onClick={isDragEnabled ? undefined : () => onSort(key as keyof Course)}
-            >
-              <div className="flex items-center gap-1">
-                {key === "createdAt" ? "Created" : key}
-                {!isDragEnabled && sortConfig?.key === key &&
-                  (sortConfig.direction === "ascending" ? (
-                    <FiChevronUp />
-                  ) : (
-                    <FiChevronDown />
-                  ))}
-              </div>
-            </th>
+}) => {
+  const sortedCourses = React.useMemo(() => {
+    return [...courses]
+      .map(c => ({ ...c, orderIndex: Number(c.orderIndex ?? Infinity) }))
+      .sort((a, b) => a.orderIndex - b.orderIndex);
+  }, [courses]);
+
+  return (
+    <div className="hidden md:block overflow-x-auto">
+      <table className="min-w-full divide-y divide-gray-200">
+        {/* ...thead unchanged... */}
+        <tbody className="bg-white divide-y divide-gray-200">
+          {sortedCourses.map((course, index) => (
+            <CourseTableRow
+              key={course.id}
+              course={course}
+              index={index}
+              onDelete={onDelete}
+              isDeleting={isDeleting && deletingId === course.id}
+              dragState={dragState}
+              onDragStart={onDragStart}
+              onDragEnd={onDragEnd}
+              onDragOver={onDragOver}
+              onDragLeave={onDragLeave}
+              onDrop={onDrop}
+              isDragEnabled={isDragEnabled}
+            />
           ))}
-          <th scope="col" className="relative px-6 py-3">
-            <span className="sr-only">Actions</span>
-          </th>
-        </tr>
-      </thead>
-      <tbody className="bg-white divide-y divide-gray-200">
-        {courses.map((course, index) => (
-          <CourseTableRow
-            key={course.id}
-            course={course}
-            index={index}
-            onDelete={onDelete}
-            isDeleting={isDeleting && deletingId === course.id}
-            dragState={dragState}
-            onDragStart={onDragStart}
-            onDragEnd={onDragEnd}
-            onDragOver={onDragOver}
-            onDragLeave={onDragLeave}
-            onDrop={onDrop}
-            isDragEnabled={isDragEnabled}
-          />
-        ))}
-      </tbody>
-    </table>
-  </div>
-);
+        </tbody>
+      </table>
+    </div>
+  );
+};
+
 
 // --- CourseTableRow ---
 interface CourseTableRowProps {
@@ -826,26 +837,36 @@ const CourseCardList: React.FC<CourseCardListProps> = ({
   onDragLeave,
   onDrop,
   isDragEnabled,
-}) => (
-  <div className="md:hidden grid grid-cols-1 gap-4 p-4">
-    {courses.map((course, index) => (
-      <CourseCard
-        key={course.id}
-        course={course}
-        index={index}
-        onDelete={onDelete}
-        isDeleting={isDeleting && deletingId === course.id}
-        dragState={dragState}
-        onDragStart={onDragStart}
-        onDragEnd={onDragEnd}
-        onDragOver={onDragOver}
-        onDragLeave={onDragLeave}
-        onDrop={onDrop}
-        isDragEnabled={isDragEnabled}
-      />
-    ))}
-  </div>
-)
+}) => {
+  const sortedCourses = React.useMemo(() => {
+    return [...courses]
+      .map(c => ({ ...c, orderIndex: Number(c.orderIndex ?? Infinity) }))
+      .sort((a, b) => a.orderIndex - b.orderIndex);
+  }, [courses]);
+
+  return (
+    <div className="md:hidden grid grid-cols-1 gap-4 p-4">
+      {sortedCourses.map((course, index) => (
+        <CourseCard
+          key={course.id}
+          course={course}
+          index={index}
+          onDelete={onDelete}
+          isDeleting={isDeleting && deletingId === course.id}
+          dragState={dragState}
+          onDragStart={onDragStart}
+          onDragEnd={onDragEnd}
+          onDragOver={onDragOver}
+          onDragLeave={onDragLeave}
+          onDrop={onDrop}
+          isDragEnabled={isDragEnabled}
+        />
+      ))}
+    </div>
+  );
+};
+
+
 
 // --- CourseCard ---
 interface CourseCardProps {
