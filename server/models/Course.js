@@ -108,10 +108,18 @@ instructorName: {
       allowNull: true,
       defaultValue: [],
     },
-    
+      orderIndex: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      defaultValue: 0,
+      field: 'orderIndex'
+    }
   }, {
-    timestamps: true,
+    tableName: 'Courses',
+    freezeTableName: true,
+    timestamps: true
   });
+
 
   return Course;
 };

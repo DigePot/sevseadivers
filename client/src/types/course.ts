@@ -29,6 +29,7 @@ export interface Course {
   }[];
     bundle?: boolean;
   certificate?: string;
-  prerequisites?: string[]; // Array of strings for prerequisites
-  minAge?: number; // Minimum age requirement for the course
+  prerequisites?: string[];
+  minAge?: number; 
+  orderIndex :number;
 }

@@ -5,6 +5,7 @@ import {
   getAllCourses,
   getCourseById,
   updateCourse,
+  updateCourseOrder,
 } from "../controllers/CourseController.js"
 import authenticateToken from "../middleware/auth.js"
 import isAdminAndStaff from "../middleware/isAdminAndStaff.js"
@@ -63,6 +64,15 @@ router.put(
   uploadMultiple,
   handleUploadError,
   updateCourse
+)
+router.patch(
+  "/order",
+  authenticateToken,
+  isAdminAndStaff,
+
+  handleUploadError,
+  updateCourseOrder
+
 )
 router.delete("/:id", authenticateToken, isAdminAndStaff, deleteCourse)
 

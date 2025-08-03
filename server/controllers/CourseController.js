@@ -356,6 +356,91 @@ export const updateCourse = tryCatch(async (req, res, next) => {
   }
 })
 
+export const updateCourseOrder = tryCatch(async (req, res, next) => {
+  const { courses } = req.body;
+
+  if (!Array.isArray(courses)) {
+    return res.status(400).json({
+      success: false,
+      message: "Courses array is required",
+    });
+  }
+  if (courses.length === 0) {
+    return res.status(400).json({
+      success: false,
+      message: "Courses array cannot be empty",
+    });
+  }
+
+  // Cast & validate
+  const courseIds = courses.map((id) => {
+    const n = Number(id);
+    if (isNaN(n)) throw new AppError(`Invalid course ID: ${id}`, 400);
+    return n;
+  });
+
+  // Verify existence
+  const found = await Course.findAll({
+    where: { id: courseIds },
+    attributes: ["id"],
+    raw: true,
+  });
+  if (found.length !== courseIds.length) {
+    const missing = courseIds.filter((id) => !found.some((c) => c.id === id));
+    return res.status(404).json({
+      success: false,
+      message: `Courses not found: ${missing.join(", ")}`,
+    });
+  }
+
+  // Resolve table reference (schema-aware)
+  let tableRef;
+  const tn = typeof Course.getTableName === "function" ? Course.getTableName() : Course.tableName;
+  if (typeof tn === "object" && tn.tableName) {
+    tableRef = `"${tn.schema}"."${tn.tableName}"`;
+  } else if (typeof tn === "string") {
+    tableRef = `"${tn}"`;
+  } else {
+    tableRef = `"Courses"`; // fallback
+  }
+
+  // Bulk update with reliable ordinality
+  await Course.sequelize.transaction(async (t) => {
+    const sql = `
+      WITH reordered AS (
+        SELECT id, ordinality AS new_order
+        FROM unnest($1::INT[]) WITH ORDINALITY AS t(id, ordinality)
+      )
+      UPDATE ${tableRef} AS c
+      SET "orderIndex" = reordered.new_order,
+          "updatedAt" = NOW()
+      FROM reordered
+      WHERE c.id = reordered.id;
+    `;
+
+    console.log("Running order update SQL:", sql.trim(), "with", courseIds);
+    await Course.sequelize.query(sql, {
+      bind: [courseIds],
+      transaction: t,
+    });
+  });
+
+  // Fetch updated and return
+  const updated = await Course.findAll({
+    where: { id: courseIds },
+    order: [["orderIndex", "ASC"]],
+  });
+
+ const payload = updated.map((c) => c.get({ plain: true }));
+
+  return res.json({
+    success: true,
+    message: "Order updated successfully",
+    data: payload,
+  });
+});
+
+
 export const deleteCourse = tryCatch(async (req, res, next) => {
   const course = await Course.findByPk(req.params.id)
   if (!course) return next(new AppError("Course not found", 404))
