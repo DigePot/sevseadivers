@@ -133,11 +133,9 @@ export function HomeView() {
             >
               <h3 className="text-3xl font-bold text-gray-300 mb-4">Your Gateway to the Underwater World</h3>
               <p className="text-gray-400 leading-relaxed text-lg">
-                At Sevsea Divers, we are passionate about sharing the marvels of the ocean with enthusiasts of all
-                levels. From thrilling deep-sea explorations to serene encounters with vibrant marine life, our
-                experienced instructors and state-of-the-art equipment ensure a safe, unforgettable, and eco-conscious
-                diving experience. We offer a wide range of courses, guided tours, and personalized adventures tailored
-                to your comfort and skill.
+               SEVSEA DIVERS is a Somali-based center offering safe and professional scuba diving, snorkeling, and marine tours. We were founded to inspire Somalis to explore the beauty of their seas while creating new job opportunities and skills for youth.
+
+We believe the ocean is a national treasure that deserves protection and sustainable development through training, tourism, and environmental awareness.
               </p>
             </motion.div>
           </div>
