@@ -196,16 +196,23 @@ We believe the ocean is a national treasure that deserves protection and sustain
 
       {/* Full Width Banner */}
       <section className="mb-16 flex justify-center">
-        <Link to="/premium-collection" className="block w-full">
-          <div className="h-[600px] w-[95%] max-w-[1900px] relative overflow-hidden rounded-2xl shadow-lg mx-auto">
-            <img
-              src={Premium || "/placeholder.svg"}
-              alt="Luxury Collection Banner"
-              className="w-full h-full object-cover rounded-2xl"
-            />
-          </div>
-        </Link>
-      </section>
+  <Link to="/premium-collection" className="block w-full">
+    <div
+      className="
+        relative overflow-hidden rounded-2xl shadow-lg mx-auto
+        w-[95%] max-w-[1900px]
+        h-[200px] sm:h-[300px] md:h-[400px] lg:h-[600px]
+      "
+    >
+      <img
+        src={Premium || "/placeholder.svg"}
+        alt="Luxury Collection Banner"
+        className="w-full h-full object-cover rounded-2xl"
+      />
+    </div>
+  </Link>
+</section>
+
 
       {/* 3 Easy Steps Section */}
       <section aria-label="3 Easy Steps" className="py-20">
