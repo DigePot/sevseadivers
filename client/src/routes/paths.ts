@@ -70,6 +70,7 @@ export const paths = {
     contact: `/contact-us`,
     forgotPassword: `/forgot-password`,
     resetPassword: `/reset-password`,
+    rental: `/rental`,
   },
   // Payment
   payment: {

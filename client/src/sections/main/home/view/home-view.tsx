@@ -1,18 +1,17 @@
+import { motion, useScroll, useTransform } from "framer-motion"
+import { useRef } from "react"
 import { Link } from "react-router"
 import About from "../../../../assets/about.png"
-import Tutorial from "../../../../assets/tutorial.png"
 import Dive from "../../../../assets/dive.png"
 import Explore from "../../../../assets/explore.png"
 import Premium from "../../../../assets/premium-banner.png"
-// import HeroVideo from "../../../../assets/Hero.mp4" // Import the video asset
-import { useTrips } from "../../../trip/hooks/use-trips"
-import { motion, useScroll, useTransform } from "framer-motion"
-import { useRef } from "react"
-import ImageGallerySection from "../../../../components/ImageGallerySection"
+import Tutorial from "../../../../assets/tutorial.png"
 import FAQSection from "../../../../components/FAQSection"
+import ImageGallerySection from "../../../../components/ImageGallerySection"
 import PricingSection from "../../../../components/PricingSection"
-import WorkSection from "../../../../components/WorkSection"
 import Testimonial from "../../../../components/Testimonial"
+import WorkSection from "../../../../components/WorkSection"
+import { useTrips } from "../../../trip/hooks/use-trips"
 
 export function HomeView() {
   const { allTrips } = useTrips()
@@ -133,19 +132,19 @@ export function HomeView() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: 0.4 }}
-              className="w-full md:w-1/2 lg:w-2/3 text-center md:text-left mr-16"
+              className="w-full md:w-1/2 lg:w-2/3 text-center md:text-left mr-19"
             >
               <h3 className="text-3xl font-bold text-gray-300 mb-4">
                 Your Gateway to the Underwater World
               </h3>
               <p className="text-gray-400 leading-relaxed text-lg">
-                At Sevsea Divers, we are passionate about sharing the marvels of
-                the ocean with enthusiasts of all levels. From thrilling
-                deep-sea explorations to serene encounters with vibrant marine
-                life, our experienced instructors and state-of-the-art equipment
-                ensure a safe, unforgettable, and eco-conscious diving
-                experience. We offer a wide range of courses, guided tours, and
-                personalized adventures tailored to your comfort and skill.
+                SEVSEA DIVERS is a Somali-based center offering safe and
+                professional scuba diving, snorkeling, and marine tours. We were
+                founded to inspire Somalis to explore the beauty of their seas
+                while creating new job opportunities and skills for youth. We
+                believe the ocean is a national treasure that deserves
+                protection and sustainable development through training,
+                tourism, and environmental awareness.
               </p>
             </motion.div>
           </div>
@@ -211,7 +210,13 @@ export function HomeView() {
       {/* Full Width Banner */}
       <section className="mb-16 flex justify-center">
         <Link to="/premium-collection" className="block w-full">
-          <div className="h-[600px] w-[95%] max-w-[1900px] relative overflow-hidden rounded-2xl shadow-lg mx-auto">
+          <div
+            className="
+        relative overflow-hidden rounded-2xl shadow-lg mx-auto
+        w-[95%] max-w-[1900px]
+        h-[200px] sm:h-[300px] md:h-[400px] lg:h-[600px]
+      "
+          >
             <img
               src={Premium || "/placeholder.svg"}
               alt="Luxury Collection Banner"
@@ -317,7 +322,7 @@ export function HomeView() {
       <ImageGallerySection />
 
       {/* Pricing Section */}
-      {/* <PricingSection /> */}
+      <PricingSection />
 
       {/* FAQ Section */}
       <FAQSection />

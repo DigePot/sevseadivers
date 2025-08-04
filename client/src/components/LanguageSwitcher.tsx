@@ -3,14 +3,15 @@ import { useTranslation } from "react-i18next"
 import { AnimatePresence, motion } from "framer-motion"
 import { FaChevronDown } from "react-icons/fa"
 
-// --- SVG Flag Components (Self-contained and scalable) ---
-
+// Flags (small, round)
 const SomaliFlag = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 900 600"
-    className="w-6 h-6 rounded-full object-cover"
+    className="w-5 h-5 rounded-full object-cover"
     aria-hidden="true"
+    role="img"
+    aria-label="Somali Flag"
   >
     <rect width="900" height="600" fill="#4189DD" />
     <path
@@ -24,8 +25,10 @@ const EnglishFlag = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     viewBox="0 0 7410 3900"
-    className="w-6 h-6 rounded-full object-cover"
+    className="w-5 h-5 rounded-full object-cover"
     aria-hidden="true"
+    role="img"
+    aria-label="English Flag"
   >
     <path fill="#b22234" d="M0 0h7410v3900H0z" />
     <path
@@ -53,38 +56,30 @@ const EnglishFlag = () => (
   </svg>
 )
 
-// --- Language Options Configuration ---
-
 type LanguageOption = {
   code: "en" | "so"
-  name: string
-  flag: React.ComponentType
+  label: string
+  short: string
+  flag: React.FC
 }
 
 const languageOptions: LanguageOption[] = [
-  { code: "en", name: "English", flag: EnglishFlag },
-  { code: "so", name: "Soomaali", flag: SomaliFlag },
+  { code: "en", label: "English", short: "ENG", flag: EnglishFlag },
+  { code: "so", label: "Soomaali", short: "SOM", flag: SomaliFlag },
 ]
-
-// --- The Main Language Switcher Component ---
 
 const LanguageSwitcher: React.FC = () => {
   const { i18n } = useTranslation()
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  // Find the currently selected language option
   const currentLanguage =
-    languageOptions.find((lang) => lang.code === i18n.language) ||
-    languageOptions[0]
+    languageOptions.find((lang) => lang.code === i18n.language) || languageOptions[0]
 
-  // Close the dropdown when clicking outside of it
+  // Close dropdown on outside click
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        dropdownRef.current &&
-        !dropdownRef.current.contains(event.target as Node)
-      ) {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false)
       }
     }
@@ -92,52 +87,63 @@ const LanguageSwitcher: React.FC = () => {
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  // Handle language selection
+  // Select language and close dropdown
   const handleSelectLanguage = (code: "en" | "so") => {
     i18n.changeLanguage(code)
     setIsOpen(false)
   }
 
   return (
-    <div className="relative" ref={dropdownRef}>
-      {/* --- Trigger Button --- */}
+    <div className="relative inline-block text-left" ref={dropdownRef}>
+      {/* Button with short code + flag */}
       <motion.button
-        onClick={() => setIsOpen(!isOpen)}
+        type="button"
+        onClick={() => setIsOpen((prev) => !prev)}
         whileTap={{ scale: 0.95 }}
-        className="flex items-center justify-between w-32 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-800 focus:ring-cyan-500 transition-colors"
         aria-haspopup="listbox"
         aria-expanded={isOpen}
+        className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm text-sm font-semibold text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800 transition"
       >
-        <span className="flex items-center">
-          <currentLanguage.flag />
-          <span className="ml-3">{currentLanguage.name}</span>
-        </span>
-        <motion.div animate={{ rotate: isOpen ? 180 : 0 }}>
-          <FaChevronDown className="w-4 h-4 text-gray-400" />
-        </motion.div>
+        <currentLanguage.flag />
+        <span>{currentLanguage.short}</span>
+        <motion.span
+          animate={{ rotate: isOpen ? 180 : 0 }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+          className="text-gray-400"
+          aria-hidden="true"
+        >
+          <FaChevronDown />
+        </motion.span>
       </motion.button>
 
-      {/* --- Dropdown Panel --- */}
+      {/* Dropdown */}
       <AnimatePresence>
         {isOpen && (
           <motion.ul
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            transition={{ duration: 0.15, ease: "easeOut" }}
-            className="absolute z-10 w-full mt-2 bg-white dark:bg-gray-800 shadow-lg rounded-md ring-1 ring-black ring-opacity-5 focus:outline-none overflow-hidden"
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2 }}
+            className="absolute right-0 mt-2 w-32 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-20"
             role="listbox"
           >
-            {languageOptions.map((option) => (
+            {languageOptions.map(({ code, label, short, flag: Flag }) => (
               <li
-                key={option.code}
-                onClick={() => handleSelectLanguage(option.code)}
-                className="flex items-center px-4 py-3 text-sm text-gray-700 dark:text-gray-200 cursor-pointer hover:bg-cyan-500 hover:text-white dark:hover:bg-cyan-600 transition-colors"
+                key={code}
                 role="option"
-                aria-selected={i18n.language === option.code}
+                aria-selected={i18n.language === code}
+                onClick={() => handleSelectLanguage(code)}
+                className={`cursor-pointer flex items-center gap-2 px-4 py-2 text-sm rounded-md
+                  ${
+                    i18n.language === code
+                      ? "bg-cyan-600 text-white"
+                      : "hover:bg-cyan-500 hover:text-white dark:hover:bg-cyan-600"
+                  }
+                  transition-colors`}
               >
-                <option.flag />
-                <span className="ml-3">{option.name}</span>
+                <Flag />
+                <span>{short}</span>
+                <span className="sr-only"> - {label}</span>
               </li>
             ))}
           </motion.ul>
