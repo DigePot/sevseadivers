@@ -5,9 +5,11 @@ import { Outlet } from "react-router"
 
 import { MainLayout } from "../../layouts/main"
 import Spinner from "../../components/Spinner"
-import { Elements } from "@stripe/react-stripe-js";
-import { loadStripe } from "@stripe/stripe-js";
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || "");
+import { Elements } from "@stripe/react-stripe-js"
+import { loadStripe } from "@stripe/stripe-js"
+const stripePromise = loadStripe(
+  import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || ""
+)
 
 // ----------------------------------------------------------------------
 
@@ -29,17 +31,26 @@ const CourseEnrolledPage = lazy(
   () => import("../../pages/main/courses/components/course-checkout")
 )
 const EnrollmentSuccessPage = lazy(() => import("../../payment/payment-succes"))
-const TripStripePaymentForm = lazy(() => import("../../payment/trip-stripe-payment-form"));
-const PaymentSuccessPage = lazy(() => import("../../payment/payment-succes"));
+const TripStripePaymentForm = lazy(
+  () => import("../../payment/trip-stripe-payment-form")
+)
+const PaymentSuccessPage = lazy(() => import("../../payment/payment-succes"))
 
 const ForgotPasswordPage = lazy(
   () => import("../../pages/main/forgot-password")
 )
 const ResetPasswordPage = lazy(() => import("../../pages/main/reset-password"))
-const BookingSummaryPage = lazy(() => import("../../pages/main/booking/booking-summary"));
-const BookConfirmPage = lazy(() => import("../../pages/main/booking/book-confirm"));
-import { AuthGuard } from "../../sections/auth/guard";
-const MyBookingsPage = lazy(() => import("../../pages/main/booking/my-bookings"));
+const BookingSummaryPage = lazy(
+  () => import("../../pages/main/booking/booking-summary")
+)
+const BookConfirmPage = lazy(
+  () => import("../../pages/main/booking/book-confirm")
+)
+import { AuthGuard } from "../../sections/auth/guard"
+const MyBookingsPage = lazy(
+  () => import("../../pages/main/booking/my-bookings")
+)
+const RentalPage = lazy(() => import("../../pages/main/rental"))
 
 // ------------------------------------------------------------------------
 
@@ -62,6 +73,7 @@ export const mainRoutes: RouteObject[] = [
           { path: "contact-us", element: <ContactPage /> },
           { path: "trips", element: <TripsPage /> },
           { path: "courses", element: <CoursePage /> },
+          { path: "rental", element: <RentalPage /> },
           { path: "services", element: <ServicePage /> },
           { path: "gallery", element: <GalleryPage /> },
           { path: "courses/:id", element: <CourseDetailsPage /> },
@@ -72,16 +84,22 @@ export const mainRoutes: RouteObject[] = [
           { path: "forgot-password", element: <ForgotPasswordPage /> },
           { path: "reset-password", element: <ResetPasswordPage /> },
           { path: "trips/booking-summary", element: <BookingSummaryPage /> },
-          { path: "trips/book-confirm", element: (
-            <AuthGuard allowedRoles={["admin", "staff", "client"]}>
-              <BookConfirmPage />
-            </AuthGuard>
-          ) },
-          { path: "trips/payment", element: (
-            <Elements stripe={stripePromise}>
-              <TripStripePaymentForm />
-            </Elements>
-          ) },
+          {
+            path: "trips/book-confirm",
+            element: (
+              <AuthGuard allowedRoles={["admin", "staff", "client"]}>
+                <BookConfirmPage />
+              </AuthGuard>
+            ),
+          },
+          {
+            path: "trips/payment",
+            element: (
+              <Elements stripe={stripePromise}>
+                <TripStripePaymentForm />
+              </Elements>
+            ),
+          },
           { path: "trips/booking-success", element: <PaymentSuccessPage /> },
           { path: "mybooking", element: <MyBookingsPage /> },
         ],
