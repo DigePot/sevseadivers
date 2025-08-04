@@ -92,10 +92,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
         <motion.div className="h-48 overflow-hidden" variants={cardVariants}>
           <img
             // src={course.imageUrl || course.posterUrl || "/images/default-course.png"}
-            src={course.imageUrl.replace(
-              "http://localhost:5000",
-              "https://api.sevseadivers.com"
-            )}
+           src={course.imageUrl}
             alt={course.title}
             className="w-full h-full object-cover"
           />

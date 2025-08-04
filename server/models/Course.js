@@ -48,6 +48,14 @@ const defineCourse = (sequelize) => {
           notEmpty: { msg: "Level cannot be empty" },
         },
       },
+       staffUserId: {
+    type: DataTypes.INTEGER,
+    references: {
+      model: 'Users', // Reference to Users table
+      key: 'id',
+    },
+    allowNull: true, // Allow null for courses without staff assignment
+  },
       instructorName: {
         type: DataTypes.STRING,
         allowNull: false,

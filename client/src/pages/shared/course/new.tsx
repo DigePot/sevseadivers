@@ -1,42 +1,35 @@
-import { Helmet } from "react-helmet-async";
-import { CONFIG } from "../../../global-config";
-import { CourseNewCreateForm, type NewCourseSchemaType } from "../../../sections/shared/course/course-new-create-form";
-import { CourseCurriculumForm } from "../../../sections/shared/course/course-curriculum-form";
-import CourseInstructorDetails from "../../../sections/shared/course/course-instructor-detials";
-import { useState, useCallback, useMemo } from "react";
-import { useCreateCourseMutation } from "../../../store/course";
-import { useRouter } from "../../../routes/hooks";
-import { paths } from "../../../routes/paths";
+import { Helmet } from "react-helmet-async"
+import { CONFIG } from "../../../global-config"
+import { CourseNewCreateForm, type NewCourseSchemaType } from "../../../sections/shared/course/course-new-create-form"
+import { CourseCurriculumForm } from "../../../sections/shared/course/course-curriculum-form"
+import CourseInstructorDetails, { type InstructorFormData } from "../../../sections/shared/course/course-instructor-detials"
+import { useState, useCallback, useMemo } from "react"
+import { useCreateCourseMutation } from "../../../store/course"
+import { useRouter } from "../../../routes/hooks"
+import { paths } from "../../../routes/paths"
 
 // Type definitions
 type CurriculumFormData = {
-  videoFile?: File | null; 
-  learnPoints: string[];
-  includes: { icon: string; text: string }[];
-};
-
-type InstructorFormData = {
-  instructorName: string;
-  instructorBio: string;
-  instructorRating: number;
-  instructorImage: File | null;
-};
+  videoFile?: File | null
+  learnPoints: string[]
+  includes: { icon: string; text: string }[]
+}
 
 type CourseData = {
-  details: NewCourseSchemaType;
-  curriculum: CurriculumFormData;
-  instructor: InstructorFormData;
-};
+  details: NewCourseSchemaType
+  curriculum: CurriculumFormData
+  instructor: InstructorFormData
+}
 
 const metadata = {
   title: `Create a new Course | Dashboard - ${CONFIG.appName}`,
-};
+}
 
 export default function Page() {
-  const [activeTab, setActiveTab] = useState<"details" | "curriculum" | "instructor">("details");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [createCourse] = useCreateCourseMutation();
-  const router = useRouter();
+  const [activeTab, setActiveTab] = useState<"details" | "curriculum" | "instructor">("details")
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [createCourse] = useCreateCourseMutation()
+  const router = useRouter()
 
   // Initialize form state with proper types
   const [courseData, setCourseData] = useState<CourseData>({
@@ -58,175 +51,216 @@ export default function Page() {
       includes: [],
     },
     instructor: {
-      instructorName: "",
-      instructorBio: "",
-      instructorRating: 4.5,
-      instructorImage: null,
+      staffId: "",
+      instructorName: undefined,
+      instructorBio: undefined,
+      instructorRating: undefined,
     },
-  });
+  })
 
   // Update handlers
   const updateDetails = useCallback((data: NewCourseSchemaType) => {
-    setCourseData(prev => ({ ...prev, details: data }));
-  }, []);
+    setCourseData(prev => ({ ...prev, details: data }))
+  }, [])
 
   const updateCurriculum = useCallback((data: CurriculumFormData) => {
-    setCourseData(prev => ({ ...prev, curriculum: data }));
-  }, []);
+    setCourseData(prev => ({ ...prev, curriculum: data }))
+  }, [])
 
   const updateInstructor = useCallback((data: InstructorFormData) => {
-    setCourseData(prev => ({ ...prev, instructor: data }));
-  }, []);
+    setCourseData(prev => ({ ...prev, instructor: data }))
+  }, [])
 
   // Helper: missing required fields per tab
   const getMissingFields = (tab: "details" | "curriculum" | "instructor"): string[] => {
     if (tab === "details") {
-      const missing: string[] = [];
-      if (!courseData.details.title.trim()) missing.push("title");
-      if (!courseData.details.description.trim()) missing.push("description");
-      if (!courseData.details.category) missing.push("category");
-      if (!courseData.details.level) missing.push("level");
-      if (!courseData.details.imageUrl) missing.push("image");
-      return missing;
+      const missing: string[] = []
+      if (!courseData.details.title.trim()) missing.push("title")
+      if (!courseData.details.description.trim()) missing.push("description")
+      if (!courseData.details.category) missing.push("category")
+      if (!courseData.details.level) missing.push("level")
+      if (!courseData.details.imageUrl) missing.push("image")
+      return missing
     }
     if (tab === "curriculum") {
-      const missing: string[] = [];
-      if (!courseData.curriculum.learnPoints.some(p => p.trim())) missing.push("learning points");
-      return missing;
+      const missing: string[] = []
+      if (!courseData.curriculum.learnPoints.some(p => p.trim())) missing.push("learning points")
+      return missing
     }
     if (tab === "instructor") {
-      const missing: string[] = [];
-      if (!courseData.instructor.instructorName.trim()) missing.push("instructor name");
-      if (!courseData.instructor.instructorBio.trim()) missing.push("instructor bio");
-      if (!courseData.instructor.instructorImage) missing.push("instructor image");
-      return missing;
+      const missing: string[] = []
+      if (!courseData.instructor.staffId) missing.push("staff selection")
+      return missing
     }
-    return [];
-  };
+    return []
+  }
 
   // Derived completeness
   const isTabComplete = (tab: "details" | "curriculum" | "instructor") => {
-    return getMissingFields(tab).length === 0;
-  };
+    return getMissingFields(tab).length === 0
+  }
 
   const allMissing = useMemo(() => {
     return {
       details: getMissingFields("details"),
       curriculum: getMissingFields("curriculum"),
       instructor: getMissingFields("instructor"),
-    };
-  }, [courseData]);
+    }
+  }, [courseData])
 
   // Navigation helpers
   const canProceedToNext = () => {
-    if (activeTab === "details") return isTabComplete("details");
-    if (activeTab === "curriculum") return isTabComplete("curriculum");
-    return true;
-  };
+    if (activeTab === "details") return isTabComplete("details")
+    if (activeTab === "curriculum") return isTabComplete("curriculum")
+    return true
+  }
 
   const getNextTab = () => {
-    if (activeTab === "details") return "curriculum";
-    if (activeTab === "curriculum") return "instructor";
-    return "instructor";
-  };
+    if (activeTab === "details") return "curriculum"
+    if (activeTab === "curriculum") return "instructor"
+    return "instructor"
+  }
 
   const getPreviousTab = () => {
-    if (activeTab === "curriculum") return "details";
-    if (activeTab === "instructor") return "curriculum";
-    return "details";
-  };
+    if (activeTab === "curriculum") return "details"
+    if (activeTab === "instructor") return "curriculum"
+    return "details"
+  }
 
-  // Form submission handler
-  const handleSubmitAll = async () => {
-    try {
-      setIsSubmitting(true);
+// Form submission handler 
 
-      // Log for debugging
-      console.log("Submitting courseData:", courseData);
+const handleSubmitAll = async () => {
+  try {
+    setIsSubmitting(true)
 
-      const missingDetails = getMissingFields("details");
-      if (missingDetails.length > 0) {
-        setActiveTab("details");
-        alert(`Please complete: ${missingDetails.join(", ")}`);
-        return;
+    // Debug: Check authentication
+    const token = localStorage.getItem("auth_token");
+    console.log("🔑 Token exists:", !!token);
+    console.log("🔑 Token preview:", token ? token.substring(0, 50) + "..." : "No token");
+    
+    // Debug: Check if token is expired (if it's a JWT)
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const isExpired = payload.exp * 1000 < Date.now();
+        console.log("🔑 Token expired:", isExpired);
+        console.log("🔑 Token expires at:", new Date(payload.exp * 1000));
+      } catch (e) {
+        console.log("🔑 Token is not a valid JWT or couldn't decode");
       }
-
-      const missingCurriculum = getMissingFields("curriculum");
-      if (missingCurriculum.length > 0) {
-        setActiveTab("curriculum");
-        alert(`Please complete: ${missingCurriculum.join(", ")}`);
-        return;
-      }
-
-      const missingInstructor = getMissingFields("instructor");
-      if (missingInstructor.length > 0) {
-        setActiveTab("instructor");
-        alert(`Please complete: ${missingInstructor.join(", ")}`);
-        return;
-      }
-
-      // Build FormData
-      const formData = new FormData();
-
-      // 1. Append course details
-      formData.append("title", courseData.details.title);
-      formData.append("description", courseData.details.description);
-      formData.append("category", courseData.details.category);
-      formData.append("level", courseData.details.level);
-
-      if (courseData.details.price !== undefined) {
-        formData.append("price", courseData.details.price.toString());
-      }
-      if (courseData.details.discountedPrice !== undefined) {
-        formData.append("discountedPrice", courseData.details.discountedPrice.toString());
-      }
-      if (courseData.details.duration) {
-        formData.append("duration", courseData.details.duration);
-      }
-      if (courseData.details.minAge !== undefined) {
-        formData.append("minAge", courseData.details.minAge.toString());
-      }
-
-      courseData.details.prerequisites
-        .filter(p => p.trim())
-        .forEach((item, index) => {
-          formData.append(`prerequisites[${index}]`, item);
-        });
-
-      // 2. Append files
-      if (courseData.details.imageUrl instanceof File) {
-        formData.append("courseImage", courseData.details.imageUrl);
-      }
-      if (courseData.curriculum.videoFile instanceof File) {
-        formData.append("curriculumVideo", courseData.curriculum.videoFile);
-      }
-
-      if (courseData.instructor.instructorImage instanceof File) {
-        formData.append("instructorImage", courseData.instructor.instructorImage);
-      }
-
-      // 3. Curriculum learn points
-      courseData.curriculum.learnPoints
-        .filter(point => point.trim())
-        .forEach((point, index) => {
-          formData.append(`learnPoints[${index}]`, point);
-        });
-
-      // 4. Instructor
-      formData.append("instructorName", courseData.instructor.instructorName);
-      formData.append("instructorBio", courseData.instructor.instructorBio);
-      formData.append("instructorRating", courseData.instructor.instructorRating.toString());
-
-      await createCourse(formData).unwrap();
-      router.push(paths.shared.course.list);
-    } catch (error: any) {
-      console.error("Error submitting course:", error);
-      alert(error?.message || "Failed to create course");
-    } finally {
-      setIsSubmitting(false);
     }
-  };
 
+    // Log for debugging
+    console.log("Submitting courseData:", courseData)
+
+    const missingDetails = getMissingFields("details")
+    if (missingDetails.length > 0) {
+      setActiveTab("details")
+      alert(`Please complete: ${missingDetails.join(", ")}`)
+      return
+    }
+
+    const missingCurriculum = getMissingFields("curriculum")
+    if (missingCurriculum.length > 0) {
+      setActiveTab("curriculum")
+      alert(`Please complete: ${missingCurriculum.join(", ")}`)
+      return
+    }
+
+    const missingInstructor = getMissingFields("instructor")
+    if (missingInstructor.length > 0) {
+      setActiveTab("instructor")
+      alert(`Please complete: ${missingInstructor.join(", ")}`)
+      return
+    }
+
+    // Build FormData
+    const formData = new FormData()
+
+    // 1. Append course details
+    formData.append("title", courseData.details.title)
+    formData.append("description", courseData.details.description)
+    formData.append("category", courseData.details.category)
+    formData.append("level", courseData.details.level)
+
+    if (courseData.details.price !== undefined) {
+      formData.append("price", courseData.details.price.toString())
+    }
+    if (courseData.details.discountedPrice !== undefined) {
+      formData.append("discountedPrice", courseData.details.discountedPrice.toString())
+    }
+    if (courseData.details.duration) {
+      formData.append("duration", courseData.details.duration)
+    }
+    if (courseData.details.minAge !== undefined) {
+      formData.append("minAge", courseData.details.minAge.toString())
+    }
+
+    courseData.details.prerequisites
+      .filter(p => p.trim())
+      .forEach((item, index) => {
+        formData.append(`prerequisites[${index}]`, item)
+      })
+
+    // 2. Append files
+    if (courseData.details.imageUrl instanceof File) {
+      formData.append("courseImage", courseData.details.imageUrl)
+    }
+    if (courseData.curriculum.videoFile instanceof File) {
+      formData.append("curriculumVideo", courseData.curriculum.videoFile)
+    }
+
+    // 3. Curriculum learn points
+    courseData.curriculum.learnPoints
+      .filter(point => point.trim())
+      .forEach((point, index) => {
+        formData.append(`learnPoints[${index}]`, point)
+      })
+
+    // 4. Instructor data - send both staffId and instructorRating
+formData.append("staffUserId", courseData.instructor.staffId);
+
+    
+    // Add the instructor rating that the user set in the form
+    if (courseData.instructor.instructorRating !== undefined) {
+      formData.append("instructorRating", courseData.instructor.instructorRating.toString())
+    }
+
+    console.log("🚀 About to submit FormData");
+    
+    // Debug: Log FormData contents
+    for (let [key, value] of formData.entries()) {
+      console.log(`📤 FormData: ${key} =`, value);
+    }
+
+    await createCourse(formData).unwrap()
+    router.push(paths.shared.course.list)
+  } catch (error: any) {
+    console.error("❌ Error submitting course:", error)
+    
+    // Enhanced error logging
+    if (error.status === 403) {
+      console.error("🚫 403 Forbidden - Check authentication and permissions");
+      console.error("🚫 Full error object:", error);
+      
+      // Check if user has proper role
+      const token = localStorage.getItem("auth_token");
+      if (token) {
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          console.error("🚫 User role from token:", payload.role);
+          console.error("🚫 User ID from token:", payload.id || payload.userId);
+        } catch (e) {
+          console.error("🚫 Could not decode token payload");
+        }
+      }
+    }
+    
+    alert(error?.data?.message || error?.message || "Failed to create course")
+  } finally {
+    setIsSubmitting(false)
+  }
+}
   return (
     <>
       <Helmet>
@@ -338,16 +372,16 @@ export default function Page() {
             {activeTab !== "instructor" ? (
               <button
                 onClick={() => {
-                  const missing = getMissingFields(activeTab);
+                  const missing = getMissingFields(activeTab)
                   if (missing.length) {
                     alert(
                       `Please complete the following in the ${activeTab} section: ${missing.join(
                         ", "
                       )}`
-                    );
-                    return;
+                    )
+                    return
                   }
-                  setActiveTab(getNextTab());
+                  setActiveTab(getNextTab())
                 }}
                 className="px-6 py-3 bg-cyan-600 text-white rounded-lg font-medium hover:bg-cyan-700"
               >
@@ -370,14 +404,15 @@ export default function Page() {
         </div>
 
         {/* Summary of all missing if trying to submit prematurely */}
-        {activeTab === "instructor" && (allMissing.details.length || allMissing.curriculum.length || allMissing.instructor.length) > 0 && (
-          <div className="mt-4 text-xs text-gray-600">
-            <div>Details missing: {allMissing.details.join(", ") || "none"}</div>
-            <div>Curriculum missing: {allMissing.curriculum.join(", ") || "none"}</div>
-            <div>Instructor missing: {allMissing.instructor.join(", ") || "none"}</div>
-          </div>
-        )}
+        {activeTab === "instructor" &&
+          (allMissing.details.length || allMissing.curriculum.length || allMissing.instructor.length) > 0 && (
+            <div className="mt-4 text-xs text-gray-600">
+              <div>Details missing: {allMissing.details.join(", ") || "none"}</div>
+              <div>Curriculum missing: {allMissing.curriculum.join(", ") || "none"}</div>
+              <div>Instructor missing: {allMissing.instructor.join(", ") || "none"}</div>
+            </div>
+          )}
       </div>
     </>
-  );
+  )
 }

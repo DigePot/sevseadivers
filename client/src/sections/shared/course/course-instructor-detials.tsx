@@ -1,92 +1,80 @@
-import { useForm, useWatch } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
+import { useGetAllStaffQuery } from "../../../store/staff";
 
-// Zod Schema - Updated to handle null initially
 const InstructorSchema = z.object({
-  instructorName: z.string().min(1, "Name is required"),
-  instructorImage: z
-    .instanceof(File)
-    .nullable()
-    .refine((file) => file !== null && file.size > 0, "Image is required")
-    .refine(
-      (file) => file === null || ["image/jpeg", "image/png", "image/webp"].includes(file.type),
-      "Only JPG, PNG, or WEBP allowed"
-    )
-    .refine((file) => file === null || file.size < 5 * 1024 * 1024, "Max size 5MB"),
-  instructorBio: z
-    .string()
-    .min(1, "Bio is required")
-    .max(500, "Bio must be under 500 characters"),
+  staffId: z.string().min(1, "Staff selection is required"),
+  instructorName: z.string().optional(),
+  instructorBio: z.string().max(500, "Bio must be under 500 characters").optional(),
   instructorRating: z
     .number({ invalid_type_error: "Must be a number" })
     .min(0)
-    .max(5),
+    .max(5)
+    .optional(),
+  instructorImageUrl: z.string().optional(),
 });
 
-export type InstructorFormValues = z.infer<typeof InstructorSchema>;
+export type InstructorFormData = z.infer<typeof InstructorSchema>;
 
 type Props = {
-  initialData: InstructorFormValues;
-  onUpdate: (data: InstructorFormValues) => void;
+  initialData: InstructorFormData;
+  onUpdate: (data: InstructorFormData) => void;
 };
 
 export default function CourseInstructorDetails({ initialData, onUpdate }: Props) {
-  const [preview, setPreview] = useState<string | null>(null);
+  const { data: staffList } = useGetAllStaffQuery();
 
   const {
     register,
-    watch, 
+    watch,
     setValue,
     formState: { errors, isValid },
-    control,
-  } = useForm<InstructorFormValues>({
+  } = useForm<InstructorFormData>({
     resolver: zodResolver(InstructorSchema),
     defaultValues: initialData,
     mode: "onChange",
   });
 
-  // Watch all form values using useWatch to avoid infinite loop
-  const formValues = useWatch({
-    control,
-    defaultValue: {
-      instructorName: initialData.instructorName || "",
-      instructorImage: initialData.instructorImage ?? null,
-      instructorBio: initialData.instructorBio || "",
-      instructorRating: initialData.instructorRating ?? 0,
-    },
-  });
-  
-  // Update parent when form changes and is valid
+  const staffId = watch("staffId");
+  const instructorName = watch("instructorName");
+  const instructorBio = watch("instructorBio");
+  const instructorRating = watch("instructorRating");
+  const instructorImageUrl = watch("instructorImageUrl");
+
   useEffect(() => {
     if (isValid && onUpdate) {
       onUpdate({
-        instructorName: formValues.instructorName ?? "",
-        instructorImage: formValues.instructorImage ?? null,
-        instructorBio: formValues.instructorBio ?? "",
-        instructorRating: formValues.instructorRating ?? 0,
+        staffId,
+        instructorName,
+        instructorBio,
+        instructorRating,
+        instructorImageUrl,
       });
     }
-  }, [formValues, isValid]); // Removed onUpdate from dependencies since it's now memoized
+  }, [staffId, instructorName, instructorBio, instructorRating, instructorImageUrl, isValid, onUpdate]);
 
-  const imageFile = watch("instructorImage");
+  const handleStaffSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newStaffId = e.target.value;
+    setValue("staffId", newStaffId, { shouldValidate: true });
 
-  // Update preview when image changes
-  useEffect(() => {
-    if (imageFile instanceof File) {
-      const url = URL.createObjectURL(imageFile);
-      setPreview(url);
-      return () => URL.revokeObjectURL(url);
-    } else {
-      setPreview(null);
-    }
-  }, [imageFile]);
+    const selectedStaff = staffList?.find((s) => s.id.toString() === newStaffId);
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setValue("instructorImage", file);
+    if (selectedStaff) {
+      setValue("instructorName", selectedStaff.fullName, { shouldValidate: true });
+      setValue("instructorBio", selectedStaff.bio || "", { shouldValidate: true });
+      setValue("instructorRating", 4.5, { shouldValidate: true });
+
+      const baseUrl = "https://api.sevseadivers.com";
+      if (selectedStaff.profilePicture) {
+        const profilePic = selectedStaff.profilePicture.startsWith("/") 
+          ? selectedStaff.profilePicture 
+          : `/${selectedStaff.profilePicture}`;
+        setValue("instructorImageUrl", `${baseUrl}${profilePic}`, { shouldValidate: true });
+      } else {
+        setValue("instructorImageUrl", "", { shouldValidate: true });
+      }
     }
   };
 
@@ -94,100 +82,140 @@ export default function CourseInstructorDetails({ initialData, onUpdate }: Props
     <div className="space-y-8 max-w-3xl mx-auto mt-10">
       <h2 className="text-2xl font-bold text-cyan-700">Instructor Details</h2>
 
-      <div className="space-y-6">
-        {/* Name */}
+      {/* Staff Selection */}
+      {staffList && staffList.length > 0 && (
         <div>
-          <label className="block font-medium mb-2 text-gray-700">Instructor Name *</label>
-          <input
-            type="text"
-            {...register("instructorName")}
+          <label className="block font-medium mb-2 text-gray-700">Select Instructor *</label>
+          <select
+            {...register("staffId")}
+            onChange={handleStaffSelect}
             className="w-full border p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
-          />
-          {errors.instructorName && (
-            <p className="text-red-600 text-sm mt-1">{errors.instructorName.message}</p>
-          )}
-        </div>
-
-        {/* Bio */}
-        <div>
-          <label className="block font-medium mb-2 text-gray-700">Instructor Bio *</label>
-          <textarea
-            rows={4}
-            {...register("instructorBio")}
-            className="w-full border p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
-          />
-          {errors.instructorBio && (
-            <p className="text-red-600 text-sm mt-1">{errors.instructorBio.message}</p>
-          )}
-        </div>
-
-        {/* Rating */}
-        <div>
-          <label className="block font-medium mb-2 text-gray-700">Instructor Rating (0-5) *</label>
-          <input
-            type="number"
-            step="0.1"
-            min="0"
-            max="5"
-            {...register("instructorRating", { valueAsNumber: true })}
-            className="w-full border p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
-          />
-          {errors.instructorRating && (
-            <p className="text-red-600 text-sm mt-1">{errors.instructorRating.message}</p>
-          )}
-        </div>
-
-        {/* Image Upload with Circular Preview */}
-        <div>
-          <label className="block font-medium mb-2 text-gray-700">Instructor Image *</label>
-
-          <div
-            onClick={() => document.getElementById("instructor-image-input")?.click()}
-            className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 p-6 rounded-xl cursor-pointer hover:border-blue-400 transition"
+            value={staffId || ""}
           >
-            {preview ? (
-              <img
-                src={preview}
-                alt="Instructor Preview"
-                className="w-32 h-32 object-cover rounded-full border"
-              />
-            ) : (
-              <>
-                <div className="w-24 h-24 flex items-center justify-center rounded-full bg-gray-100 border mb-4">
-                  <svg
-                    className="w-8 h-8 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M12 4v16m8-8H4"
-                    />
+            <option value="">Select a staff member</option>
+            {staffList.map((staff) => (
+              <option key={staff.id} value={staff.id}>
+                {staff.fullName}
+              </option>
+            ))}
+          </select>
+          {errors.staffId && (
+            <p className="text-red-600 text-sm mt-1">{errors.staffId.message}</p>
+          )}
+        </div>
+      )}
+
+      {/* Instructor Info Box - Always visible */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="flex items-start gap-4">
+          {/* Image Section */}
+          {staffId ? (
+            instructorImageUrl ? (
+              <div className="relative">
+                <img
+                  src={instructorImageUrl}
+                  alt={`${instructorName || 'Instructor'} profile`}
+                  className="w-16 h-16 rounded-full object-cover border-2 border-blue-200"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = 'none';
+                    const fallback = document.getElementById(`staff-${staffId}-fallback`);
+                    if (fallback) fallback.style.display = 'flex';
+                  }}
+                />
+                <div 
+                  id={`staff-${staffId}-fallback`}
+                  style={{ display: 'none' }}
+                  className="w-16 h-16 rounded-full bg-blue-100 border-2 border-blue-200 flex items-center justify-center absolute top-0"
+                >
+                  <svg className="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                   </svg>
                 </div>
-                <p className="text-gray-600 font-medium text-sm">
-                  Click or drag image here
+              </div>
+            ) : (
+              <div className="w-16 h-16 rounded-full bg-blue-100 border-2 border-blue-200 flex items-center justify-center">
+                <svg className="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </div>
+            )
+          ) : (
+            <div className="w-16 h-16 rounded-full bg-gray-100 border-2 border-gray-200 flex items-center justify-center">
+              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
+          )}
+          
+          {/* Text Section */}
+          <div className="flex-1">
+            {staffId ? (
+              <>
+                <div className="flex items-center gap-2 mb-1">
+                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  <span className="text-blue-800 font-medium">Using Staff Member Data</span>
+                </div>
+                <p className="text-blue-700 text-sm">
+                  Instructor details are populated from the selected staff member's profile.
                 </p>
-                <p className="text-xs text-gray-500 mt-1">JPG, PNG, or WEBP up to 5MB</p>
               </>
+            ) : (
+              <p className="text-gray-600 text-sm">
+                Select an instructor from the dropdown above to populate their details.
+              </p>
             )}
           </div>
-
-          <input
-            id="instructor-image-input"
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            onChange={handleImageChange}
-            className="hidden"
-          />
-
-          {errors.instructorImage && (
-            <p className="text-red-600 text-sm mt-1">{errors.instructorImage.message}</p>
-          )}
         </div>
+      </div>
+
+      {/* Name */}
+      <div>
+        <label className="block font-medium mb-2 text-gray-700">
+          Instructor Name
+        </label>
+        <input
+          type="text"
+          {...register("instructorName")}
+          className="w-full border p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 bg-gray-50"
+          readOnly={!!staffId}
+          value={instructorName || ""}
+        />
+      </div>
+
+      {/* Bio */}
+      <div>
+        <label className="block font-medium mb-2 text-gray-700">Instructor Bio</label>
+        <textarea
+          rows={4}
+          {...register("instructorBio")}
+          className="w-full border p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 bg-gray-50"
+          readOnly={!!staffId}
+          value={instructorBio || ""}
+        />
+        {errors.instructorBio && (
+          <p className="text-red-600 text-sm mt-1">{errors.instructorBio.message}</p>
+        )}
+      </div>
+
+      {/* Rating */}
+      <div>
+        <label className="block font-medium mb-2 text-gray-700">
+          Instructor Rating (0-5) *
+        </label>
+        <input
+          type="number"
+          step="0.1"
+          min="0"
+          max="5"
+          {...register("instructorRating", { valueAsNumber: true })}
+          className="w-full border p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+          value={instructorRating || ""}
+        />
+        {errors.instructorRating && (
+          <p className="text-red-600 text-sm mt-1">{errors.instructorRating.message}</p>
+        )}
       </div>
     </div>
   );
