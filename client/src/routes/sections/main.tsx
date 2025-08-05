@@ -50,7 +50,7 @@ import { AuthGuard } from "../../sections/auth/guard"
 const MyBookingsPage = lazy(
   () => import("../../pages/main/booking/my-bookings")
 )
-const RentalPage = lazy(() => import("../../pages/main/rental"))
+const RentalPage = lazy(() => import("../../pages/main/rental/index"))
 
 // ------------------------------------------------------------------------
 
