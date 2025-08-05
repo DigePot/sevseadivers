@@ -6,11 +6,11 @@ import { courseApi } from "./course"
 import { galleryApi } from "./gallery"
 import { bookingApi } from "./booking"
 import authReducer from "./auth/auth-slice"
-import { paymentApi } from "./payment";
-import { enrollmentApi } from "./enrollment";
+import { paymentApi } from "./payment"
+import { enrollmentApi } from "./enrollment"
 import { staffApi } from "./staff"
-import bookingReducer from "./booking-slice";
-
+import { rentalApi } from "./rental"
+import bookingReducer from "./booking-slice"
 
 export const store = configureStore({
   reducer: {
@@ -24,6 +24,7 @@ export const store = configureStore({
     [paymentApi.reducerPath]: paymentApi.reducer,
     [enrollmentApi.reducerPath]: enrollmentApi.reducer,
     [staffApi.reducerPath]: staffApi.reducer,
+    [rentalApi.reducerPath]: rentalApi.reducer,
     booking: bookingReducer,
   },
   devTools: false,
@@ -35,8 +36,9 @@ export const store = configureStore({
       courseApi.middleware,
       galleryApi.middleware,
       bookingApi.middleware,
+      rentalApi.middleware,
       paymentApi.middleware,
-     enrollmentApi.middleware,
+      enrollmentApi.middleware,
       staffApi.middleware
     ),
 })

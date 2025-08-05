@@ -1,58 +1,10 @@
 import { motion } from "framer-motion"
-import { FiCheck, FiMapPin } from "react-icons/fi"
+import { FiClock, FiMapPin } from "react-icons/fi"
+import { useRentals } from "../../../shared/rental/hooks"
 
 export function RentalView() {
-  const equipmentList = [
-    {
-      name: "BCD",
-      price: "$10",
-      image: "/equipment/bcd.jpg",
-      location: "Mogadishu",
-      duration: "1–2 hours",
-    },
-    {
-      name: "Mask & Snorkel",
-      price: "$5",
-      image: "/equipment/mask-snorkel.jpg",
-      location: "Bosaso",
-      duration: "1–3 hours",
-    },
-    {
-      name: "Fins",
-      price: "$5",
-      image: "/equipment/fins.jpg",
-      location: "Kismayo",
-      duration: "1–2 hours",
-    },
-    {
-      name: "Wetsuit",
-      price: "$8",
-      image: "/equipment/wetsuit.jpg",
-      location: "Mogadishu",
-      duration: "1–4 hours",
-    },
-    {
-      name: "Dive Tank",
-      price: "$10",
-      image: "/equipment/dive-tank.jpg",
-      location: "Bosaso",
-      duration: "2–3 hours",
-    },
-    {
-      name: "Regulator Set",
-      price: "$12",
-      image: "/equipment/regulator.jpg",
-      location: "Kismayo",
-      duration: "1–3 hours",
-    },
-    {
-      name: "Full Equipment Set",
-      price: "$40",
-      image: "/equipment/full-set.jpg",
-      location: "Mogadishu",
-      duration: "3–5 hours",
-    },
-  ].filter((item) => item.name && item.image && item.price) // <- filter out bad data
+  const { allRentals } = useRentals()
+
   return (
     <section className="relative bg-gradient-to-tr from-cyan-100 via-white to-cyan-200 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 px-6 md:px-12 py-24 rounded-3xl max-w-7xl mx-auto shadow-xl space-y-12">
       <motion.div
@@ -71,8 +23,7 @@ export function RentalView() {
       </motion.div>
 
       <div className="grid grid-cols-1 gap-10">
-        {equipmentList.map((item, idx) => {
-          const { name, price, image, location, duration } = item || {}
+        {allRentals.map((item, idx) => {
           return (
             <motion.div
               key={`equipment-${idx}`}
@@ -89,19 +40,19 @@ export function RentalView() {
               <div className="flex flex-col justify-between p-8 flex-grow space-y-5">
                 <div>
                   <h3 className="text-3xl font-bold text-gray-900 dark:text-white">
-                    {name}
+                    {item.title}
                   </h3>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-4 mt-4">
-                  {location && (
+                  {item.location && (
                     <span className="flex items-center gap-2 bg-cyan-100 text-cyan-700 dark:bg-cyan-800 dark:text-cyan-300 rounded-full px-4 py-1 text-sm font-medium select-none">
-                      <FiMapPin aria-hidden="true" /> {location}
+                      <FiMapPin aria-hidden="true" /> {item.location}
                     </span>
                   )}
-                  {duration && (
+                  {item.duration && (
                     <span className="flex items-center gap-2 bg-yellow-100 text-yellow-700 dark:bg-yellow-800 dark:text-yellow-300 rounded-full px-4 py-1 text-sm font-medium select-none">
-                      <FiCheck aria-hidden="true" /> {duration}
+                      <FiClock aria-hidden="true" /> {item.duration}
                     </span>
                   )}
                 </div>
@@ -115,19 +66,19 @@ export function RentalView() {
               </div>
 
               {/* Image side */}
-              {image && (
+              {item.imageUrl && (
                 <img
-                  src={image}
+                  src={item.imageUrl}
                   alt={`${name} rental equipment`}
                   loading="lazy"
-                  className="w-full md:w-80 h-56 md:h-auto object-cover rounded-tr-3xl rounded-br-3xl"
+                  className="w-full md:w-80 h-66 object-cover rounded-tr-3xl rounded-br-3xl"
                 />
               )}
 
               {/* Price badge */}
-              {price && (
+              {item.price && (
                 <div className="absolute top-6 right-6 bg-cyan-600 text-white font-bold text-xl select-none px-4 py-1 rounded-full shadow-lg">
-                  {price}
+                  {item.price}
                 </div>
               )}
             </motion.div>

@@ -33,6 +33,10 @@ const CourseListPage = lazy(() => import("../../pages/shared/course/list"))
 const CourseCreatePage = lazy(() => import("../../pages/shared/course/new"))
 const CourseEditPage = lazy(() => import("../../pages/shared/course/edit"))
 
+const RentalListPage = lazy(() => import("../../pages/shared/rental/list"))
+const RentalCreatePage = lazy(() => import("../../pages/shared/rental/new"))
+const RentalEditPage = lazy(() => import("../../pages/shared/rental/edit"))
+
 const BookingPage = lazy(() => import("../../pages/shared/booking/index"))
 
 const role = localStorage.getItem("role")
@@ -287,6 +291,69 @@ export const routesSection: RouteObject[] = [
     ),
   },
   // course ...........
+
+  // rental ...........
+  {
+    path: paths.shared.rental.list,
+    element: (
+      <AuthGuard allowedRoles={["admin", "staff"]}>
+        {role === "admin" ? (
+          <Suspense fallback={<Spinner />}>
+            <DashboardLayout>
+              <RentalListPage />
+            </DashboardLayout>
+          </Suspense>
+        ) : role === "staff" ? (
+          <Suspense fallback={<Spinner />}>
+            <StaffLayout>
+              <RentalListPage />
+            </StaffLayout>
+          </Suspense>
+        ) : null}
+      </AuthGuard>
+    ),
+  },
+  {
+    path: paths.shared.rental.new,
+    element: (
+      <AuthGuard allowedRoles={["admin", "staff"]}>
+        {role === "admin" ? (
+          <Suspense fallback={<Spinner />}>
+            <DashboardLayout>
+              <RentalCreatePage />
+            </DashboardLayout>
+          </Suspense>
+        ) : role === "staff" ? (
+          <Suspense fallback={<Spinner />}>
+            <StaffLayout>
+              <RentalCreatePage />
+            </StaffLayout>
+          </Suspense>
+        ) : null}
+      </AuthGuard>
+    ),
+  },
+  {
+    path: paths.shared.rental.edit(":id"), // Use ":id" as a dynamic parameter
+    element: (
+      <AuthGuard allowedRoles={["admin", "staff"]}>
+        {role === "admin" ? (
+          <Suspense fallback={<Spinner />}>
+            <DashboardLayout>
+              <RentalEditPage />
+            </DashboardLayout>
+          </Suspense>
+        ) : role === "staff" ? (
+          <Suspense fallback={<Spinner />}>
+            <StaffLayout>
+              <RentalEditPage />
+            </StaffLayout>
+          </Suspense>
+        ) : null}
+      </AuthGuard>
+    ),
+  },
+  // rental ...........
 
   // Auth
   ...authRoutes,

@@ -12,6 +12,7 @@ import galleryRoutes from "./routes/GalleryRoutes.js"
 import enrollmentRoutes from "./routes/enrollmentRoutes.js"
 import paymentRoutes from "./routes/paymentRoutes.js"
 import staffRoutes from "./routes/staffRoutes.js"
+import rentalRoutes from "./routes/rentalRoutes.js"
 
 import path from "path"
 import { fileURLToPath } from "url"
@@ -24,7 +25,7 @@ app.use(
   cors({
     origin: ["https://www.sevseadivers.com", "http://localhost:5173"],
     credentials: true,
-    methods: ["GET", "POST", "PUT", "PATCH","DELETE"],
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 )
@@ -50,6 +51,7 @@ app.use("/api/gallery", galleryRoutes)
 app.use("/api/enrollments", enrollmentRoutes)
 app.use("/api/payments", paymentRoutes)
 app.use("/api/staff", staffRoutes)
+app.use("/api/rental", rentalRoutes)
 
 app.get("/", (req, res) => {
   res.send("✅ Server is running and connected to Sequelize")

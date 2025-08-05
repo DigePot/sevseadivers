@@ -7,6 +7,7 @@ import {
   FiGlobe,
   FiHome,
   FiImage,
+  FiTool,
   FiUser,
   FiUsers,
 } from "react-icons/fi"
@@ -82,6 +83,15 @@ export const navData: NavSection[] = [
         children: [
           { title: "List", path: paths.shared.gallery.list },
           { title: "Create", path: paths.shared.gallery.new },
+        ],
+      },
+      {
+        title: "Equipment Rental",
+        path: paths.shared.rental.root,
+        icon: <FiTool />,
+        children: [
+          { title: "List", path: paths.shared.rental.list },
+          { title: "Create", path: paths.shared.rental.new },
         ],
       },
       {

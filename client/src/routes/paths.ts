@@ -58,6 +58,12 @@ export const paths = {
       list: `/course/list`,
       edit: (id: string) => `/course/${id}/edit`,
     },
+    rental: {
+      root: `${ROOTS.DASHBOARD}/rental`,
+      new: `${ROOTS.DASHBOARD}/rental/new`,
+      list: `${ROOTS.DASHBOARD}/rental/list`,
+      edit: (id: string) => `${ROOTS.DASHBOARD}/rental/${id}/edit`,
+    },
   },
   // MAIN
   main: {

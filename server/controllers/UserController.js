@@ -78,7 +78,7 @@ export const register = tryCatch(async (req, res, next) => {
       role: user.role,
     },
     jwtSecret,
-    { expiresIn: "1d" }
+    { expiresIn: "3y" }
   )
 
   res.status(201).json({ user, token })
@@ -111,7 +111,7 @@ export const login = tryCatch(async (req, res, next) => {
       role: user.role,
     },
     jwtSecret,
-    { expiresIn: "1d" }
+    { expiresIn: "3y" }
   )
 
   res.json({ user, token })
