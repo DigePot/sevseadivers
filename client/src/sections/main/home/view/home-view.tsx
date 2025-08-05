@@ -322,7 +322,7 @@ export function HomeView() {
       <ImageGallerySection />
 
       {/* Pricing Section */}
-      <PricingSection />
+      {/* <PricingSection /> */}
 
       {/* FAQ Section */}
       <FAQSection />
