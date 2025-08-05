@@ -1,9 +1,13 @@
-import { Course } from "../models/index.js"
+import { Course, User} from "../models/index.js"
 import tryCatch from "../utils/tryCatch.js"
 import AppError from "../utils/appErorr.js"
 
+
+
+
+
 export const createCourse = tryCatch(async (req, res, next) => {
-  const baseUrl = `https://${req.get("host")}`
+  const baseUrl = `https://${req.get("host")}`;
 
   const {
     title,
@@ -13,19 +17,22 @@ export const createCourse = tryCatch(async (req, res, next) => {
     duration,
     category,
     level,
-    instructorName,
-    instructorBio,
+    staffUserId, // required for instructor data
     instructorRating,
-    whatYouWillLearn: learnPoints, // Frontend sends this as learnPoints
+    whatYouWillLearn: learnPoints,
     includes,
     prerequisites,
     minAge,
-  } = req.body
+  } = req.body;
 
-  // Initialize media URLs
-    let imageUrl = req.body.imageUrl
-  let instructorImageUrl = req.body.instructorImageUrl
-  let videoUrl = req.body.videoUrl
+  // ✅ Validate required course fields
+  if (!title || !description || !category || !level || !staffUserId) {
+    return next(new AppError("Title, description, category, level, and staffUserId are required", 400));
+  }
+
+     let imageUrl = req.body.imageUrl
+
+     let videoUrl = req.body.videoUrl
 
   // File handling
   if (req.files) {
@@ -33,22 +40,37 @@ export const createCourse = tryCatch(async (req, res, next) => {
       imageUrl = `${baseUrl}/upload/${req.files.courseImage[0].filename}`
        console.log("Course image URL:", imageUrl)
     }
-    if (req.files.instructorImage?.[0]) {
-      instructorImageUrl = `${baseUrl}/upload/${req.files.instructorImage[0].filename}`
-    }
+   
     if (req.files.curriculumVideo?.[0]) {
       videoUrl = `${baseUrl}/upload/${req.files.curriculumVideo[0].filename}`
     }
   }
+  
 
-  // Required field validation
-  if (!title || !description || !category || !level || !instructorName ) {
-    return next(
-      new AppError("Title, description, category, level, instructor name and image are required", 400)
-    )
+  // ✅ Always fetch instructor data from staffUserId
+  let finalInstructorName = null;
+  let finalInstructorBio = null;
+  let finalInstructorImageUrl = null;
+
+  try {
+    const staffUser = await User.findOne({
+      where: { id: staffUserId, role: "staff" }
+    });
+
+    if (!staffUser) {
+      return next(new AppError("Staff member not found or user is not a staff member", 404));
+    }
+
+    finalInstructorName = staffUser.fullName || `${staffUser.firstName} ${staffUser.lastName}` || staffUser.name;
+    finalInstructorBio = staffUser.bio || staffUser.description || "";
+    finalInstructorImageUrl = staffUser.profilePicture || staffUser.avatar || null;
+
+  } catch (error) {
+    console.error("Error fetching staff user:", error);
+    return next(new AppError("Error fetching staff user data", 500));
   }
 
-  // Parse learnPoints -> whatYouWillLearn
+ // Parse learnPoints -> whatYouWillLearn
   let parsedLearnPoints = []
   try {
     if (learnPoints) {
@@ -107,7 +129,8 @@ export const createCourse = tryCatch(async (req, res, next) => {
     parsedPrerequisites = []
   }
 
-  // Create course
+
+  // ✅ Create course with staff data as instructor
   try {
     const course = await Course.create({
       title,
@@ -118,24 +141,29 @@ export const createCourse = tryCatch(async (req, res, next) => {
       duration: duration || "",
       category,
       level,
-      instructorName,
-      instructorBio: instructorBio || "",
+      staffUserId,
+      instructorName: finalInstructorName,
+      instructorBio: finalInstructorBio,
       instructorRating: instructorRating ? parseFloat(instructorRating) : 0,
-      instructorImage: instructorImageUrl,
+      instructorImage: finalInstructorImageUrl,
       videoUrl,
       whatYouWillLearn: parsedLearnPoints,
       includes: parsedIncludes,
       prerequisites: parsedPrerequisites,
       minAge: minAge ? parseInt(minAge) : null,
-    })
+    });
 
-    console.log("✅ Course created:", course.id)
-    res.status(201).json(course)
+    console.log("✅ Course created:", course.id);
+    res.status(201).json(course);
   } catch (error) {
-    console.error("❌ DB error:", error)
-    return next(new AppError(`Failed to create course: ${error.message}`, 500))
+    console.error("❌ DB error:", error);
+    return next(new AppError(`Failed to create course: ${error.message}`, 500));
   }
-})
+});
+
+
+
+
 
 export const getAllCourses = tryCatch(async (req, res) => {
   try {
@@ -169,6 +197,7 @@ export const updateCourse = tryCatch(async (req, res, next) => {
     duration,
     category,
     level,
+    staffUserId,
     instructorName,
     instructorBio,
     instructorRating,
@@ -176,25 +205,65 @@ export const updateCourse = tryCatch(async (req, res, next) => {
     includes,
     prerequisites,
     minAge,
+      staffId,
   } = req.body
 
   // Initialize media URLs - keep existing if no new files
-  let imageUrl = course.imageUrl
-  let instructorImageUrl = course.instructorImage
-  let videoUrl = course.videoUrl
+let imageUrl = course.imageUrl;
+let instructorImageUrl = course.instructorImage// will be overwritten if staff user provides one
+let videoUrl = course.videoUrl;
 
   // File handling
   if (req.files) {
     if (req.files.courseImage?.[0]) {
       imageUrl = `${baseUrl}/upload/${req.files.courseImage[0].filename}`
     }
-    if (req.files.instructorImage?.[0]) {
-      instructorImageUrl = `${baseUrl}/upload/${req.files.instructorImage[0].filename}`
-    }
     if (req.files.curriculumVideo?.[0]) {
       videoUrl = `${baseUrl}/upload/${req.files.curriculumVideo[0].filename}`
     }
   }
+  const resolvedStaffId = staffId ?? staffUserId;
+  
+  // ✅ Always fetch instructor data from staffUserId
+ let finalInstructorName = null;
+let finalInstructorBio = null;
+let finalInstructorImageUrl = null;
+
+try {
+  if (!resolvedStaffId) {
+    return next(new AppError("Staff ID is required", 400));
+  }
+
+  const staffUser = await User.findOne({
+    where: { id: resolvedStaffId, role: "staff" },
+  });
+
+  if (!staffUser) {
+    return next(
+      new AppError("Staff member not found or user is not a staff member", 404)
+    );
+  }
+
+  finalInstructorName =
+    staffUser.fullName ||
+    `${staffUser.firstName || ""} ${staffUser.lastName || ""}`.trim() ||
+    staffUser.name;
+  finalInstructorBio = staffUser.bio || staffUser.description || "";
+
+  // Build full URL for profile picture if needed
+  let rawProfilePic = staffUser.profilePicture || staffUser.avatar || null;
+  if (rawProfilePic) {
+    if (!rawProfilePic.startsWith("http")) {
+      const baseUrl = `${req.protocol}://${req.get("host")}`;
+      rawProfilePic = `${baseUrl}${rawProfilePic.startsWith("/") ? "" : "/"}${rawProfilePic}`;
+    }
+    finalInstructorImageUrl = rawProfilePic;
+    instructorImageUrl = finalInstructorImageUrl; // override previous
+  }
+} catch (error) {
+  console.error("Error fetching staff user:", error);
+  return next(new AppError("Error fetching staff user data", 500));
+}
 
   // Parse learnPoints -> whatYouWillLearn
   let parsedLearnPoints = course.whatYouWillLearn || []

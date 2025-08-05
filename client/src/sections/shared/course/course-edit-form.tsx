@@ -6,7 +6,7 @@ import { useRouter } from "../../../routes/hooks"
 import { paths } from "../../../routes/paths"
 import { useUpdateCourseMutation } from "../../../store/course"
 import type { Course } from "../../../types/course"
-
+import { useGetAllStaffQuery } from "../../../store/staff";
 
 // ----------------------------------------------------------------------
 // VALIDATION SCHEMA
@@ -31,16 +31,15 @@ export const CourseSchema = zod.object({
   duration: zod.string().optional(),
   category: zod.string().min(1, { message: "Category is required!" }),
   level: zod.string().min(1, { message: "Level is required!" }),
-  instructorName: zod.string().min(1, { message: "Instructor name is required!" }),
-  instructorRating: zod.preprocess(
-    (val) => {
-      if (val === "" || val === null || val === undefined) return 0;
-      const num = Number(val);
-      return isNaN(num) ? 0 : num;
-    },
-    zod.number().min(0).max(5).default(0)
-  ),
-  instructorBio: zod.string().default(""),
+  staffId: zod.string().min(1, "Staff selection is required"),
+  instructorName: zod.string().optional(),
+  instructorBio: zod.string().max(500, "Bio must be under 500 characters").optional(),
+  instructorRating: zod
+    .number({ invalid_type_error: "Must be a number" })
+    .min(0)
+    .max(5)
+    .optional(),
+  instructorImageUrl: zod.string().optional(),
   minAge: zod.preprocess(
     (val) => {
       if (val === "" || val === null || val === undefined) return undefined;
@@ -49,14 +48,6 @@ export const CourseSchema = zod.object({
     },
     zod.number().min(0).optional()
   ),
-  instructorImage: zod
-    .instanceof(File)
-    .nullable()
-    .optional()
-    .refine(
-      (file) => file === null || file === undefined || ["image/jpeg", "image/png", "image/webp"].includes(file.type),
-      "Only JPG, PNG, or WEBP allowed"
-    ),
   videoFile: zod
     .instanceof(File)
     .nullable()
@@ -108,9 +99,9 @@ type Props = {
 }
 
 export function CourseEditForm({ currentCourse }: Props) {
-  console.log(currentCourse)
   const router = useRouter()
   const [updateCourse] = useUpdateCourseMutation()
+  const { data: staffList } = useGetAllStaffQuery();
 
   // Course Image States
   const [courseImagePreview, setCourseImagePreview] = useState<string | null>(null)
@@ -130,73 +121,76 @@ export function CourseEditForm({ currentCourse }: Props) {
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   // Initialize form
-const {
-  register,
-  handleSubmit,
-  watch,
-  setValue,
-  formState: { errors },
-  reset,
-  setError,
-} = useForm<CourseSchemaType>({
-  resolver: zodResolver(CourseSchema) as any,
-  defaultValues: {
-    title: "",
-    description: "",
-    price: undefined,
-    discountedPrice: undefined,
-    duration: "",
-    category: "",
-    level: "",
-    instructorName: "",
-    instructorBio: "",
-    instructorRating: 0,
-    learnPoints: [""],
-    includes: [{ icon: "", text: "" }],
-    prerequisites: [""],
-    minAge: undefined,
-  },
-})
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+    reset,
+    setError,
+  } = useForm<CourseSchemaType>({
+    resolver: zodResolver(CourseSchema) as any,
+    defaultValues: {
+      title: "",
+      description: "",
+      price: undefined,
+      discountedPrice: undefined,
+      duration: "",
+      category: "",
+      level: "",
+      staffId: "",
+      instructorName: "",
+      instructorBio: "",
+      instructorRating: 0,
+      instructorImageUrl: "",
+      learnPoints: [""],
+      includes: [{ icon: "", text: "" }],
+      prerequisites: [""],
+      minAge: undefined,
+    },
+  })
 
   // Reset form when currentCourse changes
-useEffect(() => {
-  if (currentCourse) {
-    console.log("Resetting form with course data:", currentCourse);
-    reset({
-      title: currentCourse.title || "",
-      description: currentCourse.description || "",
-      price: currentCourse.price || undefined,
-      duration: currentCourse.duration || "",
-      category: currentCourse.category || "",
-      level: currentCourse.level || "",
-      instructorName: currentCourse.instructorName || "",
-      instructorBio: currentCourse.instructorBio || "", // ✅ Fixed: ensure it's a string
-      instructorRating: currentCourse.instructorRating || 0, // ✅ Fixed: provide default
-      discountedPrice: currentCourse.discountedPrice || undefined, // ✅ Fixed: handle null/undefined
-      learnPoints: Array.isArray(currentCourse.whatYouWillLearn) && currentCourse.whatYouWillLearn.length > 0 
-        ? currentCourse.whatYouWillLearn 
-        : [""],
-      includes: Array.isArray(currentCourse.includes) && currentCourse.includes.length > 0 
-        ? currentCourse.includes 
-        : [{ icon: "", text: "" }],
-      prerequisites: Array.isArray(currentCourse.prerequisites) && currentCourse.prerequisites.length > 0 
-        ? currentCourse.prerequisites 
-        : [""],
-      minAge: currentCourse.minAge || undefined, // ✅ Fixed: handle null
-    });
+  useEffect(() => {
+    if (currentCourse) {
+      reset({
+        title: currentCourse.title || "",
+        description: currentCourse.description || "",
+        price: currentCourse.price || undefined,
+        discountedPrice: currentCourse.discountedPrice || undefined,
+        duration: currentCourse.duration || "",
+        category: currentCourse.category || "",
+        level: currentCourse.level || "",
+        staffId: currentCourse.staffId?.toString() || "",
+        instructorName: currentCourse.instructorName || "",
+        instructorBio: currentCourse.instructorBio || "",
+        instructorRating: currentCourse.instructorRating || 0,
+        instructorImageUrl: currentCourse.instructorImage || "",
+        learnPoints: Array.isArray(currentCourse.whatYouWillLearn) && currentCourse.whatYouWillLearn.length > 0 
+          ? currentCourse.whatYouWillLearn 
+          : [""],
+        includes: Array.isArray(currentCourse.includes) && currentCourse.includes.length > 0 
+          ? currentCourse.includes 
+          : [{ icon: "", text: "" }],
+        prerequisites: Array.isArray(currentCourse.prerequisites) && currentCourse.prerequisites.length > 0 
+          ? currentCourse.prerequisites 
+          : [""],
+        minAge: currentCourse.minAge || undefined,
+      });
 
-    // Set image previews from current course
-    if (currentCourse.imageUrl) {
-      setCourseImagePreview(currentCourse.imageUrl);
+      // Set image previews from current course
+      if (currentCourse.imageUrl) {
+        setCourseImagePreview(currentCourse.imageUrl);
+      }
+      if (currentCourse.instructorImage) {
+        setInstructorImagePreview(currentCourse.instructorImage);
+      }
+      if (currentCourse.videoUrl) {
+        setVideoPreview(currentCourse.videoUrl);
+      }
     }
-    if (currentCourse.instructorImage) {
-      setInstructorImagePreview(currentCourse.instructorImage);
-    }
-    if (currentCourse.videoUrl) {
-      setVideoPreview(currentCourse.videoUrl);
-    }
-  }
-}, [currentCourse, reset]);
+  }, [currentCourse, reset]);
 
   // Course Image Handlers
   const handleCourseFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -232,6 +226,32 @@ useEffect(() => {
     }
   }
 
+  // Staff selection
+  const handleStaffSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newStaffId = e.target.value;
+    setValue("staffId", newStaffId, { shouldValidate: true });
+
+    const selectedStaff = staffList?.find((s) => s.id.toString() === newStaffId);
+
+    if (selectedStaff) {
+      setValue("instructorName", selectedStaff.fullName, { shouldValidate: true });
+      setValue("instructorBio", selectedStaff.bio || "", { shouldValidate: true });
+      setValue("instructorRating", 4.5, { shouldValidate: true });
+
+      const baseUrl = "https://api.sevseadivers.com";
+      if (selectedStaff.profilePicture) {
+        const profilePic = selectedStaff.profilePicture.startsWith("/") 
+          ? selectedStaff.profilePicture 
+          : `/${selectedStaff.profilePicture}`;
+        setValue("instructorImageUrl", `${baseUrl}${profilePic}`, { shouldValidate: true });
+        setInstructorImagePreview(`${baseUrl}${profilePic}`);
+      } else {
+        setValue("instructorImageUrl", "", { shouldValidate: true });
+        setInstructorImagePreview(null);
+      }
+    }
+  };
+
   // Instructor Image Handlers
   const handleInstructorFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -255,15 +275,14 @@ useEffect(() => {
 
       setSelectedInstructorFile(file)
       setInstructorImagePreview(URL.createObjectURL(file))
-      // Set the form value for validation
-      setValue("instructorImage", file)
+      setValue("instructorImageUrl", URL.createObjectURL(file))
     }
   }
 
   const handleRemoveInstructorImage = () => {
     setSelectedInstructorFile(null)
     setInstructorImagePreview(null)
-    setValue("instructorImage", null)
+    setValue("instructorImageUrl", "")
     if (instructorFileInputRef.current) {
       instructorFileInputRef.current.value = ""
     }
@@ -299,7 +318,7 @@ useEffect(() => {
     if (file && file.type.startsWith("image/")) {
       setSelectedInstructorFile(file)
       setInstructorImagePreview(URL.createObjectURL(file))
-      setValue("instructorImage", file)
+      setValue("instructorImageUrl", URL.createObjectURL(file))
     }
   }
 
@@ -357,72 +376,75 @@ useEffect(() => {
       setValue("includes", currentIncludes.filter((_, i) => i !== index))
     }
   }
+
   // Prerequisites Handlers
-const addPrerequisite = () => {
-  const currentPrerequisites = watch("prerequisites");
-  setValue("prerequisites", [...currentPrerequisites, ""]);
-}
-
-const removePrerequisite = (index: number) => {
-  const currentPrerequisites = watch("prerequisites");
-  if (currentPrerequisites.length > 1) {
-    setValue("prerequisites", currentPrerequisites.filter((_, i) => i !== index));
+  const addPrerequisite = () => {
+    const currentPrerequisites = watch("prerequisites");
+    setValue("prerequisites", [...currentPrerequisites, ""]);
   }
-}
 
-const onSubmit = handleSubmit(async (data) => {
-  try {
-    setIsSubmitting(true);
-    console.log("Form data before processing:", data);
-
-    const formData = new FormData();
-
-    // Required fields - always append
-    formData.append("title", data.title);
-    formData.append("description", data.description);
-    formData.append("category", data.category);
-    formData.append("level", data.level);
-    formData.append("instructorName", data.instructorName);
-
-    // Numeric fields - handle undefined/null cases
-    formData.append("price", data.price?.toString() ?? "");
-    formData.append("discountedPrice", data.discountedPrice?.toString() ?? "");
-    formData.append("instructorRating", data.instructorRating?.toString() ?? "0");
-    formData.append("minAge", data.minAge?.toString() ?? "");
-
-    // Optional text fields
-    if (data.duration) formData.append("duration", data.duration);
-    formData.append("instructorBio", data.instructorBio || "");
-
-    // Array fields - send empty arrays if no valid data
-    formData.append("learnPoints", JSON.stringify(data.learnPoints || []));
-    formData.append("includes", JSON.stringify(data.includes || []));
-    formData.append("prerequisites", JSON.stringify(data.prerequisites || []));
-
-    // File uploads - only if files exist
-    if (selectedCourseFile) formData.append("courseImage", selectedCourseFile);
-    if (selectedInstructorFile) formData.append("instructorImage", selectedInstructorFile);
-    if (videoFile) formData.append("curriculumVideo", videoFile);
-
-    // Debug output
-    console.log("FormData contents:");
-    for (let [key, value] of formData.entries()) {
-      console.log(key, value);
+  const removePrerequisite = (index: number) => {
+    const currentPrerequisites = watch("prerequisites");
+    if (currentPrerequisites.length > 1) {
+      setValue("prerequisites", currentPrerequisites.filter((_, i) => i !== index));
     }
-
-    if (currentCourse?.id) {
-      await updateCourse({ id: currentCourse.id, formData }).unwrap();
-      router.push(paths.shared.course.list);
-    }
-  } catch (error: any) {
-    console.error("Error updating course:", error);
-    setError("root", {
-      message: error.data?.message || "Failed to update course",
-    });
-  } finally {
-    setIsSubmitting(false);
   }
-});
+
+  const onSubmit = handleSubmit(async (data) => {
+    try {
+      setIsSubmitting(true);
+      console.log("Form data before processing:", data);
+
+      const formData = new FormData();
+
+      // Required fields - always append
+      formData.append("title", data.title);
+      formData.append("description", data.description);
+      formData.append("category", data.category);
+      formData.append("level", data.level);
+      formData.append("staffUserId", data.staffId);
+      formData.append("instructorName", data.instructorName || "");
+
+      // Numeric fields - handle undefined/null cases
+      formData.append("price", data.price?.toString() ?? "");
+      formData.append("discountedPrice", data.discountedPrice?.toString() ?? "");
+      formData.append("instructorRating", data.instructorRating?.toString() ?? "0");
+      formData.append("minAge", data.minAge?.toString() ?? "");
+
+      // Optional text fields
+      if (data.duration) formData.append("duration", data.duration);
+      formData.append("instructorBio", data.instructorBio || "");
+      formData.append("instructorImageUrl", data.instructorImageUrl || "");
+
+      // Array fields - send empty arrays if no valid data
+      formData.append("whatYouWillLearn", JSON.stringify(data.learnPoints || []));
+      formData.append("includes", JSON.stringify(data.includes || []));
+      formData.append("prerequisites", JSON.stringify(data.prerequisites || []));
+
+      // File uploads - only if files exist
+      if (selectedCourseFile) formData.append("courseImage", selectedCourseFile);
+      if (selectedInstructorFile) formData.append("instructorImage", selectedInstructorFile);
+      if (videoFile) formData.append("curriculumVideo", videoFile);
+
+      // Debug output
+      console.log("FormData contents:");
+      for (let [key, value] of formData.entries()) {
+        console.log(key, value);
+      }
+
+      if (currentCourse?.id) {
+        await updateCourse({ id: currentCourse.id, formData }).unwrap();
+        router.push(paths.shared.course.list);
+      }
+    } catch (error: any) {
+      console.error("Error updating course:", error);
+      setError("root", {
+        message: error.data?.message || "Failed to update course",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  });
 
   if (!currentCourse) {
     return (
@@ -712,6 +734,36 @@ const onSubmit = handleSubmit(async (data) => {
           </div>
         </div>
 
+        {/* Staff Selection */}
+        <div className="space-y-2">
+          <label
+            htmlFor="staffId"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Instructor (Staff Member) *
+          </label>
+          <select
+            id="staffId"
+            {...register("staffId")}
+            onChange={handleStaffSelect}
+            className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:outline-none ${
+              errors.staffId
+                ? "border-red-300 focus:ring-red-200"
+                : "border-gray-300 focus:border-blue-500 focus:ring-blue-200"
+            }`}
+          >
+            <option value="">Select an instructor</option>
+            {staffList?.map((staff) => (
+              <option key={staff.id} value={staff.id.toString()}>
+                {staff.fullName}
+              </option>
+            ))}
+          </select>
+          {errors.staffId && (
+            <p className="text-red-500 text-sm">{errors.staffId.message}</p>
+          )}
+        </div>
+
         {/* Instructor Section */}
         <div className="space-y-6 p-6 bg-gray-50 rounded-lg">
           <h3 className="text-lg font-semibold text-gray-800">Instructor Information</h3>
@@ -727,9 +779,7 @@ const onSubmit = handleSubmit(async (data) => {
             <input
               id="instructorName"
               type="text"
-              {...register("instructorName", {
-                required: "Instructor name is required",
-              })}
+              {...register("instructorName")}
               className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:outline-none ${
                 errors.instructorName
                   ? "border-red-300 focus:ring-red-200"
@@ -824,7 +874,7 @@ const onSubmit = handleSubmit(async (data) => {
                       <path
                         strokeLinecap="round"
                         strokeLinejoin="round"
-                      d="M12 4v16m8-8H4"
+                        d="M12 4v16m8-8H4"
                       />
                     </svg>
                   </div>
@@ -844,8 +894,8 @@ const onSubmit = handleSubmit(async (data) => {
               className="hidden"
             />
 
-            {errors.instructorImage && (
-              <p className="text-red-600 text-sm mt-1">{errors.instructorImage.message}</p>
+            {errors.instructorImageUrl && (
+              <p className="text-red-600 text-sm mt-1">{errors.instructorImageUrl.message}</p>
             )}
           </div>
         </div>
@@ -947,7 +997,7 @@ const onSubmit = handleSubmit(async (data) => {
         <div>
           <label className="block font-medium mb-3 text-gray-700">What You Will Learn *</label>
           <div className="space-y-3">
-           {(watch("learnPoints") || []).map((_, index) => (
+            {(watch("learnPoints") || []).map((_, index) => (
               <div key={index} className="flex items-center gap-3">
                 <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
                   <div className="w-2 h-2 rounded-full bg-blue-600" />
@@ -1094,100 +1144,99 @@ const onSubmit = handleSubmit(async (data) => {
           )}
         </div>
 
-          
-      {/* Minimum Age */}
-      <div className="space-y-2">
-        <label
-          htmlFor="minAge"
-          className="block text-sm font-medium text-gray-700"
-        >
-          Minimum Age (Optional)
-        </label>
-        <input
-          id="minAge"
-          type="number"
-          min="0"
-          max="120"
-          {...register("minAge", { valueAsNumber: true })}
-          className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:outline-none ${
-            errors.minAge
-              ? "border-red-300 focus:ring-red-200"
-              : "border-gray-300 focus:border-blue-500 focus:ring-blue-200"
-          }`}
-          placeholder="Leave empty for no age restriction"
-        />
-        {errors.minAge && (
-          <p className="text-red-500 text-sm">{errors.minAge.message}</p>
-        )}
-      </div>
-
-      {/* Prerequisites Section */}
-      <div className="space-y-4">
-        <label className="block font-medium text-gray-700">Prerequisites *</label>
-        
-        <div className="space-y-3">
-          {(watch("prerequisites") || []).map((_, index) => (
-            <div key={index} className="flex items-center gap-3">
-              <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-                <div className="w-2 h-2 rounded-full bg-blue-600" />
-              </div>
-              <input
-                type="text"
-                placeholder={`Prerequisite ${index + 1}`}
-                {...register(`prerequisites.${index}`)}
-                className={`flex-grow border ${
-                  errors.prerequisites?.[index] ? "border-red-300" : "border-gray-300"
-                } p-3 rounded-lg focus:ring-2 focus:ring-blue-200`}
-              />
-              {watch("prerequisites").length > 1 && (
-                <button
-                  type="button"
-                  onClick={() => removePrerequisite(index)}
-                  className="text-red-500 hover:text-red-700 p-1 transition-colors"
-                  title="Remove prerequisite"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    viewBox="0 0 20 20"
-                    fill="currentColor"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </button>
-              )}
-            </div>
-          ))}
+        {/* Minimum Age */}
+        <div className="space-y-2">
+          <label
+            htmlFor="minAge"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Minimum Age (Optional)
+          </label>
+          <input
+            id="minAge"
+            type="number"
+            min="0"
+            max="120"
+            {...register("minAge", { valueAsNumber: true })}
+            className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:outline-none ${
+              errors.minAge
+                ? "border-red-300 focus:ring-red-200"
+                : "border-gray-300 focus:border-blue-500 focus:ring-blue-200"
+            }`}
+            placeholder="Leave empty for no age restriction"
+          />
+          {errors.minAge && (
+            <p className="text-red-500 text-sm">{errors.minAge.message}</p>
+          )}
         </div>
 
-        <button
-          type="button"
-          onClick={addPrerequisite}
-          className="flex items-center mt-2 text-blue-600 font-medium hover:text-blue-800 transition-colors"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5 mr-1"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fillRule="evenodd"
-              d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-              clipRule="evenodd"
-            />
-          </svg>
-          Add another prerequisite
-        </button>
+        {/* Prerequisites Section */}
+        <div className="space-y-4">
+          <label className="block font-medium text-gray-700">Prerequisites *</label>
+          
+          <div className="space-y-3">
+            {(watch("prerequisites") || []).map((_, index) => (
+              <div key={index} className="flex items-center gap-3">
+                <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                  <div className="w-2 h-2 rounded-full bg-blue-600" />
+                </div>
+                <input
+                  type="text"
+                  placeholder={`Prerequisite ${index + 1}`}
+                  {...register(`prerequisites.${index}`)}
+                  className={`flex-grow border ${
+                    errors.prerequisites?.[index] ? "border-red-300" : "border-gray-300"
+                  } p-3 rounded-lg focus:ring-2 focus:ring-blue-200`}
+                />
+                {watch("prerequisites").length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => removePrerequisite(index)}
+                    className="text-red-500 hover:text-red-700 p-1 transition-colors"
+                    title="Remove prerequisite"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      viewBox="0 0 20 20"
+                      fill="currentColor"
+                    >
+                      <path
+                        fillRule="evenodd"
+                        d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                        clipRule="evenodd"
+                      />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
 
-        {errors.prerequisites && (
-          <p className="text-red-600 text-sm mt-2">{errors.prerequisites.message}</p>
-        )}
-      </div>
+          <button
+            type="button"
+            onClick={addPrerequisite}
+            className="flex items-center mt-2 text-blue-600 font-medium hover:text-blue-800 transition-colors"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-5 w-5 mr-1"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                clipRule="evenodd"
+              />
+            </svg>
+            Add another prerequisite
+          </button>
+
+          {errors.prerequisites && (
+            <p className="text-red-600 text-sm mt-2">{errors.prerequisites.message}</p>
+          )}
+        </div>
 
         {/* Submit Button */}
         <div className="pt-4 flex justify-between">

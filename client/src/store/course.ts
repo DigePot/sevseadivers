@@ -6,12 +6,18 @@ export const courseApi = createApi({
   reducerPath: "courseApi",
   baseQuery: fetchBaseQuery({
     baseUrl: API,
-    prepareHeaders: (headers) => {
+    prepareHeaders: (headers, { endpoint }) => {
       const token = localStorage.getItem("auth_token");
       if (token) {
         headers.set("Authorization", `Bearer ${token}`);
       }
-      headers.set("Content-Type", "application/json");
+      
+      // Only set Content-Type for non-FormData requests
+      // FormData requests should not have Content-Type header (browser sets it automatically with boundary)
+      if (endpoint !== "createCourse" && endpoint !== "updateCourse") {
+        headers.set("Content-Type", "application/json");
+      }
+      
       return headers;
     },
   }),
@@ -46,6 +52,7 @@ export const courseApi = createApi({
         url: `/courses/add`,
         method: "POST",
         body: formData,
+        // Don't set Content-Type - let browser set it automatically for FormData
       }),
       invalidatesTags: ["Course"],
     }),
@@ -55,56 +62,58 @@ export const courseApi = createApi({
         url: `/courses/${id}`,
         method: "PUT",
         body: formData,
+        // Don't set Content-Type - let browser set it automatically for FormData
       }),
       invalidatesTags: ["Course"],
     }),
-updateCourseOrder: builder.mutation<
-  { success: boolean; message?: string; data?: Course[] },
-  { courses: number[] }
->({
-  query: ({ courses }) => ({
-    url: `/courses/order`,
-    method: "PATCH",
-    body: { courses },
-  }),
-  invalidatesTags: ["Course"],
-  
-  async onQueryStarted({ courses }, { dispatch, queryFulfilled, getState }) {
-    // Get current state
-    const state = getState() as any;
-    const currentCourses = courseApi.endpoints.getCourses.select()(state).data || [];
-    
-    // Create optimistic update
-    const optimisticOrder = [...currentCourses].sort((a, b) => {
-      return courses.indexOf(a.id) - courses.indexOf(b.id);
-    });
 
-    // Dispatch optimistic update
-    const patchResult = dispatch(
-      courseApi.util.updateQueryData(
-        "getCourses",
-        undefined,
-        () => optimisticOrder
-      )
-    );
+    updateCourseOrder: builder.mutation<
+      { success: boolean; message?: string; data?: Course[] },
+      { courses: number[] }
+    >({
+      query: ({ courses }) => ({
+        url: `/courses/order`,
+        method: "PATCH",
+        body: { courses },
+      }),
+      invalidatesTags: ["Course"],
+      
+      async onQueryStarted({ courses }, { dispatch, queryFulfilled, getState }) {
+        // Get current state
+        const state = getState() as any;
+        const currentCourses = courseApi.endpoints.getCourses.select()(state).data || [];
+        
+        // Create optimistic update
+        const optimisticOrder = [...currentCourses].sort((a, b) => {
+          return courses.indexOf(a.id) - courses.indexOf(b.id);
+        });
 
-    try {
-      const { data } = await queryFulfilled;
-      // If server returns updated data, use it
-      if (data?.data) {
-        dispatch(
+        // Dispatch optimistic update
+        const patchResult = dispatch(
           courseApi.util.updateQueryData(
             "getCourses",
             undefined,
-            () => data.data
+            () => optimisticOrder
           )
         );
-      }
-    } catch {
-      patchResult.undo();
-    }
-  },
-}),
+
+        try {
+          const { data } = await queryFulfilled;
+          // If server returns updated data, use it
+          if (data?.data) {
+            dispatch(
+              courseApi.util.updateQueryData(
+                "getCourses",
+                undefined,
+                () => data.data
+              )
+            );
+          }
+        } catch {
+          patchResult.undo();
+        }
+      },
+    }),
   }),
 });
 
