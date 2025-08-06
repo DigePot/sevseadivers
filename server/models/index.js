@@ -10,6 +10,7 @@ import defineTrip from "./Trip.js"
 import defineGallery from "./Gallery.js"
 import defineEnrollment from "./Enrollment.js"
 import defineRental from "./Rental.js"
+import defineRentalBooking from "./RentalBooking.js"
 
 dotenv.config({ path: "./config/.env" })
 
@@ -49,6 +50,7 @@ const Trip = defineTrip(sequelize)
 const Gallery = defineGallery(sequelize)
 const Enrollment = defineEnrollment(sequelize)
 const Rental = defineRental(sequelize)
+const RentalBooking = defineRentalBooking(sequelize)
 
 // Associations...
 Booking.belongsTo(User, { foreignKey: "userId" })
@@ -57,7 +59,12 @@ Booking.belongsTo(Trip, { foreignKey: "tripId" })
 Trip.hasMany(Booking, { foreignKey: "tripId" })
 User.hasMany(Booking, { foreignKey: "userId" })
 Course.hasMany(Booking, { foreignKey: "courseId" })
-Rental.belongsTo(User, { foreignKey: "userId" })
+
+// Rental.belongsTo(User, { foreignKey: "userId" })
+Rental.hasMany(RentalBooking, { foreignKey: "rentalId" })
+RentalBooking.belongsTo(Rental, { foreignKey: "rentalId" })
+User.hasMany(RentalBooking, { foreignKey: "userId" })
+RentalBooking.belongsTo(User, { foreignKey: "userId" })
 
 Gallery.belongsTo(User, { foreignKey: "uploadedBy", as: "uploader" })
 User.hasMany(Gallery, { foreignKey: "uploadedBy", as: "galleryItems" })
@@ -72,5 +79,6 @@ export {
   Gallery,
   Enrollment,
   Rental,
+  RentalBooking,
 }
 export default sequelize

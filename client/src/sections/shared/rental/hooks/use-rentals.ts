@@ -3,6 +3,7 @@ import type { Rental } from "../../../../types/rental"
 
 export const useRentals = () => {
   const { data, isLoading, error } = useGetRentalsQuery()
+  console.log("error", error)
   const allRentals: Rental[] = data?.data?.rentals ?? []
   console.log("data", data)
 
