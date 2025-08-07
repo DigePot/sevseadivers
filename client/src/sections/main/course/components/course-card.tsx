@@ -56,7 +56,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
         {/* Bundle or Certificate Header */}
         {bundle ? (
           <motion.div
-            className="absolute top-0 left-0 bg-blue-600 text-white px-2 py-1 sm:p-2 text-xs sm:text-sm font-bold z-10 rounded-br-lg"
+            className="absolute top-0 left-0 bg-blue-600 text-white px-3 py-1.5 text-sm font-bold z-10 rounded-br-lg"
             initial={{ x: -50 }}
             animate={{ x: 0 }}
             transition={{ type: "spring", stiffness: 300 }}
@@ -65,7 +65,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
           </motion.div>
         ) : course.certificate ? (
           <motion.div
-            className="absolute top-0 left-0 bg-gray-800 text-white px-2 py-1 sm:p-2 text-xs sm:text-sm font-bold z-10 rounded-br-lg"
+            className="absolute top-0 left-0 bg-gray-800 text-white px-3 py-1.5 text-sm font-bold z-10 rounded-br-lg"
             initial={{ x: -50 }}
             animate={{ x: 0 }}
             transition={{ type: "spring", stiffness: 300 }}
@@ -77,7 +77,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
         {/* Flash Sale Banner - Only shows when there's a valid discount */}
         {showDiscount && (
           <motion.div
-            className="bg-gradient-to-r from-red-600 to-red-500 text-white p-1 sm:p-2 text-xs sm:text-xs font-medium"
+            className="bg-gradient-to-r from-red-600 to-red-500 text-white p-2 text-sm font-medium"
             initial={{ y: -20 }}
             animate={{ y: 0 }}
             transition={{ type: "spring", stiffness: 300 }}
@@ -87,7 +87,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
         )}
 
         {/* Course Image */}
-        <motion.div className="h-40 sm:h-48 overflow-hidden" variants={cardVariants}>
+        <motion.div className="h-48 sm:h-52 overflow-hidden" variants={cardVariants}>
           <img
             src={course.imageUrl.replace(
               "http://localhost:5000",
@@ -100,12 +100,12 @@ export const CourseCard: React.FC<CourseCardProps> = ({
       </div>
 
       {/* Course Content */}
-      <div className="p-3 sm:p-4 md:p-5">
+      <div className="p-4 sm:p-5">
         {/* Badges */}
-        <div className="flex flex-wrap gap-1 sm:gap-2 mb-2 sm:mb-3">
+        <div className="flex flex-wrap gap-2 mb-3">
           {course.level && (
             <motion.span
-              className="bg-blue-100 text-blue-800 text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full font-medium"
+              className="bg-blue-100 text-blue-800 text-sm px-3 py-1 rounded-full font-medium"
               whileHover={{ scale: 1.05 }}
             >
               {course.level}
@@ -113,7 +113,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
           )}
           {course.category && (
             <motion.span
-              className="bg-green-100 text-green-800 text-xs px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full font-medium"
+              className="bg-green-100 text-green-800 text-sm px-3 py-1 rounded-full font-medium"
               whileHover={{ scale: 1.05 }}
             >
               {course.category}
@@ -123,7 +123,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
 
         {/* Course Title */}
         <motion.h3
-          className="text-lg sm:text-xl font-bold text-cyan-700 mb-1 sm:mb-2 line-clamp-2"
+          className="text-xl font-bold text-cyan-700 mb-2 line-clamp-2"
           whileHover={{ color: "#0369a1" }}
         >
           {course.title}
@@ -131,18 +131,18 @@ export const CourseCard: React.FC<CourseCardProps> = ({
 
         {/* Course Description */}
         <motion.p
-          className="text-gray-600 text-sm sm:text-base mb-3 sm:mb-4 line-clamp-3"
+          className="text-gray-700 text-base mb-4 line-clamp-3"
           whileHover={{ color: "#4b5563" }}
         >
           {course.description}
         </motion.p>
 
         {/* Duration and Instructor */}
-        <div className="flex flex-col gap-1 text-xs sm:text-sm text-gray-500 mb-3 sm:mb-4">
+        <div className="flex flex-col gap-2 text-sm text-gray-600 mb-4">
           {course.duration && (
             <motion.div className="flex items-center" whileHover={{ x: 3 }}>
               <svg
-                className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-cyan-600"
+                className="w-4 h-4 mr-2 text-cyan-600"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -161,7 +161,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
           {course.instructorName && (
             <motion.div className="flex items-center" whileHover={{ x: 3 }}>
               <svg
-                className="w-3 h-3 sm:w-4 sm:h-4 mr-1 text-cyan-600"
+                className="w-4 h-4 mr-2 text-cyan-600"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -180,9 +180,9 @@ export const CourseCard: React.FC<CourseCardProps> = ({
 
         {/* Prerequisites - Only show if prerequisites exist */}
         {course.prerequisites && course.prerequisites.length > 0 && (
-          <div className="flex items-start mb-1 sm:mb-2">
+          <div className="flex items-start mb-3">
             <svg
-              className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 mt-0.5 text-orange-600 flex-shrink-0"
+              className="w-4 h-4 mr-2 mt-0.5 text-orange-600 flex-shrink-0"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -195,10 +195,10 @@ export const CourseCard: React.FC<CourseCardProps> = ({
               />
             </svg>
             <div className="flex-1">
-              <span className="text-orange-700 font-medium text-xs sm:text-sm">
+              <span className="text-orange-700 font-medium text-sm">
                 Prerequisites:
               </span>
-              <div className="ml-1 text-gray-600 text-xs sm:text-sm">
+              <div className="ml-1 text-gray-700 text-sm">
                 {course.prerequisites.slice(0, 2).join(", ")}
                 {course.prerequisites.length > 2 && "..."}
               </div>
@@ -208,9 +208,9 @@ export const CourseCard: React.FC<CourseCardProps> = ({
 
         {/* Age Limit - Only show if minAge exists and is greater than 0 */}
         {(course.minAge ?? 0) > 0 && (
-          <div className="flex items-start">
+          <div className="flex items-start mb-4">
             <svg
-              className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2 mt-0.5 text-orange-600 flex-shrink-0"
+              className="w-4 h-4 mr-2 mt-0.5 text-orange-600 flex-shrink-0"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -223,18 +223,18 @@ export const CourseCard: React.FC<CourseCardProps> = ({
               />
             </svg>
             <div className="flex-1">
-              <span className="text-orange-700 font-medium text-xs sm:text-sm">Age Limit:</span>
-              <span className="ml-1 text-gray-600 text-xs sm:text-sm">{course.minAge} years</span>
+              <span className="text-orange-700 font-medium text-sm">Age Limit:</span>
+              <span className="ml-1 text-gray-700 text-sm">{course.minAge} years</span>
             </div>
           </div>
         )}
 
         {/* Pricing Section */}
-        <div className="mb-3 sm:mb-4 space-y-1 mt-3 sm:mt-4">
+        <div className="mb-4 space-y-2">
           {showDiscount ? (
             <>
               <motion.p
-                className="text-gray-500 text-xs sm:text-sm"
+                className="text-gray-600 text-sm"
                 initial={{ opacity: 0.8 }}
                 animate={{ opacity: 1 }}
                 transition={{
@@ -250,7 +250,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
                 USD
               </motion.p>
               <motion.p
-                className="text-green-600 text-xs sm:text-sm font-medium"
+                className="text-green-600 text-sm font-medium"
                 animate={{
                   scale: [1, 1.02, 1],
                   opacity: [0.8, 1, 0.8],
@@ -263,7 +263,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
                 Today's Discount: {discountPercentage}% off
               </motion.p>
               <motion.p
-                className="text-blue-600 font-bold text-sm sm:text-base"
+                className="text-blue-600 font-bold text-lg"
                 whileHover={{ scale: 1.02 }}
               >
                 Price: ${course.discountedPrice?.toFixed(2)} USD
@@ -271,7 +271,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
             </>
           ) : (
             <motion.p
-              className="text-blue-600 font-bold text-sm sm:text-base"
+              className="text-blue-600 font-bold text-lg"
               whileHover={{ scale: 1.02 }}
             >
               Price: ${course.price?.toFixed(2)} USD
@@ -280,9 +280,9 @@ export const CourseCard: React.FC<CourseCardProps> = ({
         </div>
 
         {/* CTA Button */}
-        <Link to={`/courses/${course.id}`} className="mt-2 sm:mt-3 block">
+        <Link to={`/courses/${course.id}`} className="mt-4 block">
           <motion.button
-            className="w-full bg-white border-2 border-blue-600 text-blue-600 font-bold py-1.5 sm:py-2 px-3 sm:px-4 rounded-md flex items-center justify-center text-sm sm:text-base"
+            className="w-full bg-white border-2 border-blue-600 text-blue-600 font-bold py-2 px-4 rounded-md flex items-center justify-center text-base"
             whileHover={{
               backgroundColor: "#2563eb",
               color: "#fff",
@@ -292,7 +292,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
           >
             <span>VIEW DETAILS</span>
             <motion.svg
-              className="w-3 h-3 sm:w-4 sm:h-4 ml-1 sm:ml-2"
+              className="w-4 h-4 ml-2"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
