@@ -30,7 +30,7 @@ export const CourseView = () => {
   })
 
   return (
-    <div className="px-2 sm:px-6 lg:px-2 py-12">
+<div className="w-full px-4 sm:px-6 lg:px-8 py-12 max-w-screen-2xl mx-auto">
       <CoursesHeader />
 
       <CourseFilter
