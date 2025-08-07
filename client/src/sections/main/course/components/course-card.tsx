@@ -131,7 +131,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
 
         {/* Course Description */}
         <motion.p
-          className="text-gray-700 text-base mb-4 line-clamp-3"
+          className="text-gray-700 text-base mb-4 "
           whileHover={{ color: "#4b5563" }}
         >
           {course.description}
