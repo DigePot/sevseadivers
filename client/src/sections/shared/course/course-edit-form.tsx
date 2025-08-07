@@ -12,7 +12,7 @@ import { useGetAllStaffQuery } from "../../../store/staff";
 // VALIDATION SCHEMA
 // ----------------------------------------------------------------------
 
-export const CourseSchema = zod.object({
+ export const CourseSchema = zod.object({
   title: zod.string().min(1, { message: "Title is required!" }),
   description: zod.string().min(1, { message: "Description is required!" }),
   price: zod.preprocess((val) => {
@@ -31,7 +31,7 @@ export const CourseSchema = zod.object({
   duration: zod.string().optional(),
   category: zod.string().min(1, { message: "Category is required!" }),
   level: zod.string().min(1, { message: "Level is required!" }),
-  staffId: zod.string().min(1, "Staff selection is required"),
+  staffUserId: zod.string().min(1, "Staff selection is required"), // Changed from staffId
   instructorName: zod.string().optional(),
   instructorBio: zod.string().max(500, "Bio must be under 500 characters").optional(),
   instructorRating: zod
@@ -74,19 +74,8 @@ export const CourseSchema = zod.object({
     .transform(arr => arr.filter(item => item.trim() !== ""))
     .optional()
     .default([]),
-}).superRefine((data, ctx) => {
-  if (
-    typeof data.price === "number" &&
-    typeof data.discountedPrice === "number" &&
-    data.discountedPrice >= data.price
-  ) {
-    ctx.addIssue({
-      code: zod.ZodIssueCode.custom,
-      message: "Discounted price must be less than regular price",
-      path: ["discountedPrice"],
-    });
-  }
 });
+
 
 export type CourseSchemaType = zod.infer<typeof CourseSchema>
 
@@ -139,7 +128,7 @@ export function CourseEditForm({ currentCourse }: Props) {
       duration: "",
       category: "",
       level: "",
-      staffId: "",
+      staffUserId: "", 
       instructorName: "",
       instructorBio: "",
       instructorRating: 0,
@@ -152,45 +141,49 @@ export function CourseEditForm({ currentCourse }: Props) {
   })
 
   // Reset form when currentCourse changes
-  useEffect(() => {
-    if (currentCourse) {
-      reset({
-        title: currentCourse.title || "",
-        description: currentCourse.description || "",
-        price: currentCourse.price || undefined,
-        discountedPrice: currentCourse.discountedPrice || undefined,
-        duration: currentCourse.duration || "",
-        category: currentCourse.category || "",
-        level: currentCourse.level || "",
-        staffId: currentCourse.staffId?.toString() || "",
-        instructorName: currentCourse.instructorName || "",
-        instructorBio: currentCourse.instructorBio || "",
-        instructorRating: currentCourse.instructorRating || 0,
-        instructorImageUrl: currentCourse.instructorImage || "",
-        learnPoints: Array.isArray(currentCourse.whatYouWillLearn) && currentCourse.whatYouWillLearn.length > 0 
-          ? currentCourse.whatYouWillLearn 
-          : [""],
-        includes: Array.isArray(currentCourse.includes) && currentCourse.includes.length > 0 
-          ? currentCourse.includes 
-          : [{ icon: "", text: "" }],
-        prerequisites: Array.isArray(currentCourse.prerequisites) && currentCourse.prerequisites.length > 0 
-          ? currentCourse.prerequisites 
-          : [""],
-        minAge: currentCourse.minAge || undefined,
-      });
+ useEffect(() => {
+  if (currentCourse) {
+    console.log("🔍 Current course object:", currentCourse);
+    console.log("🔍 Available properties:", Object.keys(currentCourse));
+    
+    reset({
+      title: currentCourse.title || "",
+      description: currentCourse.description || "",
+      price: currentCourse.price || undefined,
+      discountedPrice: currentCourse.discountedPrice || undefined,
+      duration: currentCourse.duration || "",
+      category: currentCourse.category || "",
+      level: currentCourse.level || "",
+      // Try multiple possible property names for staff ID
+      staffUserId:currentCourse.staffUserId?.toString() ||  "",
+      instructorName: currentCourse.instructorName || "",
+      instructorBio: currentCourse.instructorBio || "",
+      instructorRating: currentCourse.instructorRating || 0,
+      instructorImageUrl: currentCourse.instructorImage || "",
+      learnPoints: Array.isArray(currentCourse.whatYouWillLearn) && currentCourse.whatYouWillLearn.length > 0 
+        ? currentCourse.whatYouWillLearn 
+        : [""],
+      includes: Array.isArray(currentCourse.includes) && currentCourse.includes.length > 0 
+        ? currentCourse.includes 
+        : [{ icon: "", text: "" }],
+      prerequisites: Array.isArray(currentCourse.prerequisites) && currentCourse.prerequisites.length > 0 
+        ? currentCourse.prerequisites 
+        : [""],
+      minAge: currentCourse.minAge || undefined,
+    });
 
-      // Set image previews from current course
-      if (currentCourse.imageUrl) {
-        setCourseImagePreview(currentCourse.imageUrl);
-      }
-      if (currentCourse.instructorImage) {
-        setInstructorImagePreview(currentCourse.instructorImage);
-      }
-      if (currentCourse.videoUrl) {
-        setVideoPreview(currentCourse.videoUrl);
-      }
+    // Set image previews from current course
+    if (currentCourse.imageUrl) {
+      setCourseImagePreview(currentCourse.imageUrl);
     }
-  }, [currentCourse, reset]);
+    if (currentCourse.instructorImage) {
+      setInstructorImagePreview(currentCourse.instructorImage);
+    }
+    if (currentCourse.videoUrl) {
+      setVideoPreview(currentCourse.videoUrl);
+    }
+  }
+}, [currentCourse, reset]);
 
   // Course Image Handlers
   const handleCourseFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -227,30 +220,48 @@ export function CourseEditForm({ currentCourse }: Props) {
   }
 
   // Staff selection
-  const handleStaffSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newStaffId = e.target.value;
-    setValue("staffId", newStaffId, { shouldValidate: true });
+   const handleStaffSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const newStaffUserId = e.target.value;
+  
+  console.log("🔄 Staff selection changed:");
+  console.log("🔄 Previous staffUserId:", watch("staffUserId"));
+  console.log("🔄 New staffUserId:", newStaffUserId);
+  
+  setValue("staffUserId", newStaffUserId, { shouldValidate: true, shouldDirty: true });
 
-    const selectedStaff = staffList?.find((s) => s.id.toString() === newStaffId);
+  const selectedStaff = staffList?.find((s) => s.id.toString() === newStaffUserId);
+  console.log("🔄 Selected staff:", selectedStaff);
 
-    if (selectedStaff) {
-      setValue("instructorName", selectedStaff.fullName, { shouldValidate: true });
-      setValue("instructorBio", selectedStaff.bio || "", { shouldValidate: true });
-      setValue("instructorRating", 4.5, { shouldValidate: true });
+  if (selectedStaff) {
+    setValue("instructorName", selectedStaff.fullName, { shouldValidate: true, shouldDirty: true });
+    setValue("instructorBio", selectedStaff.bio || "", { shouldValidate: true, shouldDirty: true });
+    setValue("instructorRating", 4.5, { shouldValidate: true, shouldDirty: true });
 
-      const baseUrl = "https://api.sevseadivers.com";
-      if (selectedStaff.profilePicture) {
-        const profilePic = selectedStaff.profilePicture.startsWith("/") 
-          ? selectedStaff.profilePicture 
-          : `/${selectedStaff.profilePicture}`;
-        setValue("instructorImageUrl", `${baseUrl}${profilePic}`, { shouldValidate: true });
-        setInstructorImagePreview(`${baseUrl}${profilePic}`);
-      } else {
-        setValue("instructorImageUrl", "", { shouldValidate: true });
-        setInstructorImagePreview(null);
-      }
+    const baseUrl = "https://api.sevseadivers.com";
+    if (selectedStaff.profilePicture) {
+      const profilePic = selectedStaff.profilePicture.startsWith("/") 
+        ? selectedStaff.profilePicture 
+        : `/${selectedStaff.profilePicture}`;
+      const fullImageUrl = `${baseUrl}${profilePic}`;
+      setValue("instructorImageUrl", fullImageUrl, { shouldValidate: true, shouldDirty: true });
+      setInstructorImagePreview(fullImageUrl);
+      
+      console.log("🔄 Set instructor image:", fullImageUrl);
+    } else {
+      setValue("instructorImageUrl", "", { shouldValidate: true, shouldDirty: true });
+      setInstructorImagePreview(null);
     }
-  };
+  } else {
+    // Clear instructor fields if no staff selected
+    setValue("instructorName", "", { shouldValidate: true, shouldDirty: true });
+    setValue("instructorBio", "", { shouldValidate: true, shouldDirty: true });
+    setValue("instructorRating", 0, { shouldValidate: true, shouldDirty: true });
+    setValue("instructorImageUrl", "", { shouldValidate: true, shouldDirty: true });
+    setInstructorImagePreview(null);
+  }
+};
+
+
 
   // Instructor Image Handlers
   const handleInstructorFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -402,7 +413,12 @@ export function CourseEditForm({ currentCourse }: Props) {
       formData.append("description", data.description);
       formData.append("category", data.category);
       formData.append("level", data.level);
-      formData.append("staffUserId", data.staffId);
+       if (data.staffUserId) {
+      formData.append("staffUserId", data.staffUserId);
+      console.log("✅ Added staffUserId to FormData:", data.staffUserId);
+    } else {
+      console.log("❌ No staffUserId in form data!");
+    }
       formData.append("instructorName", data.instructorName || "");
 
       // Numeric fields - handle undefined/null cases
@@ -734,39 +750,41 @@ export function CourseEditForm({ currentCourse }: Props) {
           </div>
         </div>
 
-        {/* Staff Selection */}
-        <div className="space-y-2">
-          <label
-            htmlFor="staffId"
-            className="block text-sm font-medium text-gray-700"
-          >
-            Instructor (Staff Member) *
-          </label>
-          <select
-            id="staffId"
-            {...register("staffId")}
-            onChange={handleStaffSelect}
-            className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:outline-none ${
-              errors.staffId
-                ? "border-red-300 focus:ring-red-200"
-                : "border-gray-300 focus:border-blue-500 focus:ring-blue-200"
-            }`}
-          >
-            <option value="">Select an instructor</option>
-            {staffList?.map((staff) => (
-              <option key={staff.id} value={staff.id.toString()}>
-                {staff.fullName}
-              </option>
-            ))}
-          </select>
-          {errors.staffId && (
-            <p className="text-red-500 text-sm">{errors.staffId.message}</p>
-          )}
-        </div>
 
         {/* Instructor Section */}
         <div className="space-y-6 p-6 bg-gray-50 rounded-lg">
           <h3 className="text-lg font-semibold text-gray-800">Instructor Information</h3>
+
+          
+        {/* Staff Selection */}
+       <div className="space-y-2">
+  <label
+    htmlFor="staffUserId"
+    className="block text-sm font-medium text-gray-700"
+  >
+    Instructor (Staff Member) *
+  </label>
+  <select
+    id="staffUserId"
+    value={watch("staffUserId")}
+    onChange={handleStaffSelect}
+    className={`w-full px-4 py-2 rounded-lg border focus:ring-2 focus:outline-none ${
+      errors.staffUserId
+        ? "border-red-300 focus:ring-red-200"
+        : "border-gray-300 focus:border-blue-500 focus:ring-blue-200"
+    }`}
+  >
+    <option value="">Select an instructor</option>
+    {staffList?.map((staff) => (
+      <option key={staff.id} value={staff.id.toString()}>
+        {staff.fullName}
+      </option>
+    ))}
+  </select>
+  {errors.staffUserId && (
+    <p className="text-red-500 text-sm">{errors.staffUserId.message}</p>
+  )}
+</div>
           
           {/* Instructor Name */}
           <div className="space-y-2">

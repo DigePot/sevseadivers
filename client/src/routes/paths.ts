@@ -35,6 +35,7 @@ export const paths = {
   // STAFF
   staff: {
     root: `${ROOTS.STAFF}`,
+    myCourses: `${ROOTS.STAFF}/my-courses`,
   },
   // SHARED
   shared: {

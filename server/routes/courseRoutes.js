@@ -6,6 +6,7 @@ import {
   getCourseById,
   updateCourse,
   updateCourseOrder,
+getCoursesByStaff
 } from "../controllers/CourseController.js"
 import authenticateToken from "../middleware/auth.js"
 import isAdminAndStaff from "../middleware/isAdminAndStaff.js"
@@ -57,6 +58,9 @@ router.post(
 )
 router.get("/all", getAllCourses)
 router.get("/:id", getCourseById)
+// routes/courseRoutes.js or similar
+router.get('/staff/:staffUserId', getCoursesByStaff);
+
 router.put(
   "/:id",
   authenticateToken,

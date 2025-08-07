@@ -5,7 +5,7 @@ import AppError from "../utils/appErorr.js"
 
 
 
-
+// create courses
 export const createCourse = tryCatch(async (req, res, next) => {
   const baseUrl = `https://${req.get("host")}`;
 
@@ -164,7 +164,7 @@ export const createCourse = tryCatch(async (req, res, next) => {
 
 
 
-
+// get all course
 export const getAllCourses = tryCatch(async (req, res) => {
   try {
     const courses = await Course.findAll();
@@ -174,13 +174,46 @@ export const getAllCourses = tryCatch(async (req, res) => {
     res.status(500).json({ error: "Something went wrong while fetching courses." });
   }
 });
-
+// course by id
 export const getCourseById = tryCatch(async (req, res, next) => {
   const course = await Course.findByPk(req.params.id)
   if (!course) return next(new AppError("Course not found", 404))
   res.json(course)
 })
 
+// Get courses by staff ID
+ export const getCoursesByStaff = async (req, res) => {
+  try {
+    const staffUserId = req.params.staffUserId;
+
+    if (!staffUserId) {
+      return res.status(400).json({ message: 'Missing staffUserId in params' });
+    }
+
+    const courses = await Course.findAll({
+      where: { staffUserId },
+      include: [
+        {
+          model: User,
+          as: 'staff',
+          attributes: ['id',  'email', 'role'],
+        },
+      ],
+    });
+
+    res.status(200).json(courses);
+  } catch (err) {
+    res.status(500).json({
+      message: 'Error fetching courses',
+      error: err.message,
+    });
+  }
+};
+
+
+
+
+// update
 export const updateCourse = tryCatch(async (req, res, next) => {
   const baseUrl = `${req.protocol}://${req.get("host")}`
   
@@ -205,13 +238,13 @@ export const updateCourse = tryCatch(async (req, res, next) => {
     includes,
     prerequisites,
     minAge,
-      staffId,
+    staffId,
   } = req.body
 
   // Initialize media URLs - keep existing if no new files
-let imageUrl = course.imageUrl;
-let instructorImageUrl = course.instructorImage// will be overwritten if staff user provides one
-let videoUrl = course.videoUrl;
+  let imageUrl = course.imageUrl;
+  let instructorImageUrl = course.instructorImage;
+  let videoUrl = course.videoUrl;
 
   // File handling
   if (req.files) {
@@ -222,48 +255,50 @@ let videoUrl = course.videoUrl;
       videoUrl = `${baseUrl}/upload/${req.files.curriculumVideo[0].filename}`
     }
   }
+
+  // Resolve staff ID
   const resolvedStaffId = staffId ?? staffUserId;
   
   // ✅ Always fetch instructor data from staffUserId
- let finalInstructorName = null;
-let finalInstructorBio = null;
-let finalInstructorImageUrl = null;
+  let finalInstructorName = null;
+  let finalInstructorBio = null;
+  let finalInstructorImageUrl = null;
 
-try {
-  if (!resolvedStaffId) {
-    return next(new AppError("Staff ID is required", 400));
-  }
-
-  const staffUser = await User.findOne({
-    where: { id: resolvedStaffId, role: "staff" },
-  });
-
-  if (!staffUser) {
-    return next(
-      new AppError("Staff member not found or user is not a staff member", 404)
-    );
-  }
-
-  finalInstructorName =
-    staffUser.fullName ||
-    `${staffUser.firstName || ""} ${staffUser.lastName || ""}`.trim() ||
-    staffUser.name;
-  finalInstructorBio = staffUser.bio || staffUser.description || "";
-
-  // Build full URL for profile picture if needed
-  let rawProfilePic = staffUser.profilePicture || staffUser.avatar || null;
-  if (rawProfilePic) {
-    if (!rawProfilePic.startsWith("http")) {
-      const baseUrl = `${req.protocol}://${req.get("host")}`;
-      rawProfilePic = `${baseUrl}${rawProfilePic.startsWith("/") ? "" : "/"}${rawProfilePic}`;
+  try {
+    if (!resolvedStaffId) {
+      return next(new AppError("Staff ID is required", 400));
     }
-    finalInstructorImageUrl = rawProfilePic;
-    instructorImageUrl = finalInstructorImageUrl; // override previous
+
+    const staffUser = await User.findOne({
+      where: { id: resolvedStaffId, role: "staff" },
+    });
+
+    if (!staffUser) {
+      return next(
+        new AppError("Staff member not found or user is not a staff member", 404)
+      );
+    }
+
+    finalInstructorName =
+      staffUser.fullName ||
+      `${staffUser.firstName || ""} ${staffUser.lastName || ""}`.trim() ||
+      staffUser.name;
+    finalInstructorBio = staffUser.bio || staffUser.description || "";
+
+    // Build full URL for profile picture if needed
+    let rawProfilePic = staffUser.profilePicture || staffUser.avatar || null;
+    if (rawProfilePic) {
+      if (!rawProfilePic.startsWith("http")) {
+        const baseUrl = `${req.protocol}://${req.get("host")}`;
+        rawProfilePic = `${baseUrl}${rawProfilePic.startsWith("/") ? "" : "/"}${rawProfilePic}`;
+      }
+      finalInstructorImageUrl = rawProfilePic;
+      instructorImageUrl = finalInstructorImageUrl; // Update instructor image
+    }
+  } catch (error) {
+    console.error("Error fetching staff user:", error);
+    return next(new AppError("Error fetching staff user data", 500));
   }
-} catch (error) {
-  console.error("Error fetching staff user:", error);
-  return next(new AppError("Error fetching staff user data", 500));
-}
 
   // Parse learnPoints -> whatYouWillLearn
   let parsedLearnPoints = course.whatYouWillLearn || []
@@ -350,18 +385,24 @@ try {
   // Prepare update data object
   const updateData = {}
   
+  // ✅ CRITICAL: Save the staffUserId to the database
+  if (resolvedStaffId !== undefined && resolvedStaffId !== "") {
+    updateData.staffUserId = resolvedStaffId;
+    console.log("📝 Setting staffUserId in updateData:", resolvedStaffId);
+  }
+  
   // Simple string fields
   if (title !== undefined && title.trim() !== "") updateData.title = title
   if (description !== undefined && description.trim() !== "") updateData.description = description
   if (duration !== undefined) updateData.duration = duration || ""
   if (category !== undefined && category.trim() !== "") updateData.category = category
   if (level !== undefined && level.trim() !== "") updateData.level = level
-  if (instructorName !== undefined && instructorName.trim() !== "") updateData.instructorName = instructorName
-
-  // Handle instructorBio - can be empty string
-  if (instructorBio !== undefined) {
-    updateData.instructorBio = instructorBio === "undefined" ? "" : (instructorBio || "")
-  }
+  
+  // Use staff user data for instructor info, but allow override from request body
+  updateData.instructorName = instructorName || finalInstructorName || course.instructorName
+  updateData.instructorBio = instructorBio !== undefined 
+    ? (instructorBio === "undefined" ? "" : (instructorBio || ""))
+    : (finalInstructorBio || course.instructorBio)
 
   // Handle numeric fields with proper validation
   if (price !== undefined && price !== "") {
@@ -425,6 +466,7 @@ try {
   }
 })
 
+// order update
 export const updateCourseOrder = tryCatch(async (req, res, next) => {
   const { courses } = req.body;
 
@@ -527,7 +569,7 @@ export const updateCourseOrder = tryCatch(async (req, res, next) => {
 });
 
 
-
+// delete course
 export const deleteCourse = tryCatch(async (req, res, next) => {
   const course = await Course.findByPk(req.params.id)
   if (!course) return next(new AppError("Course not found", 404))

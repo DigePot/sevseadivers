@@ -1,5 +1,6 @@
 import type { JSX } from "react"
 import {
+  FiBook,
   FiBookmark,
   FiBookOpen,
   FiGlobe,
@@ -8,6 +9,7 @@ import {
   FiUser,
 } from "react-icons/fi"
 import { paths } from "../routes/paths"
+
 
 export interface NavItem {
   title: string
@@ -57,20 +59,17 @@ export const navData: NavSection[] = [
           { title: "Create", path: paths.shared.course.new },
         ],
       },
-      {
-        title: "Equipment Rental",
-        path: paths.shared.rental.root,
-        icon: <FiTool />,
-        children: [
-          { title: "List", path: paths.shared.rental.list },
-          { title: "Create", path: paths.shared.rental.new },
-        ],
+       {
+        title: "My Courses",
+        path: paths.staff.myCourses,
+        icon: <FiBook />,
       },
       {
         title: "Profile",
         path: paths.shared.root,
         icon: <FiUser />,
       },
+        
     ],
   },
 ]

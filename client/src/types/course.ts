@@ -32,5 +32,5 @@ export interface Course {
   prerequisites?: string[];
   minAge?: number; 
   orderIndex :number;
-  staffId:string;
+staffUserId:string;
 }

@@ -10,6 +10,8 @@ import Spinner from "../../components/Spinner"
 // ----------------------------------------------------------------------
 
 const IndexPage = lazy(() => import("../../pages/shared/booking"))
+const MycoursesPage = lazy(() => import("../../pages/staff/my-courses"))
+
 
 // ----------------------------------------------------------------------
 
@@ -26,6 +28,13 @@ export const staffRoutes: RouteObject[] = [
     path: "staff-dashboard",
     element: <AuthGuard allowedRoles={["staff"]}>{staffLayout()}</AuthGuard>,
 
-    children: [{ index: true, element: <IndexPage /> }],
+    children: [
+      { index: true, element: <IndexPage /> },
+
+      {
+        path: "my-courses", 
+        element: <MycoursesPage />,
+      },
+  ],
   },
 ]

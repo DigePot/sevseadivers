@@ -12,8 +12,7 @@ export const courseApi = createApi({
         headers.set("Authorization", `Bearer ${token}`);
       }
       
-      // Only set Content-Type for non-FormData requests
-      // FormData requests should not have Content-Type header (browser sets it automatically with boundary)
+
       if (endpoint !== "createCourse" && endpoint !== "updateCourse") {
         headers.set("Content-Type", "application/json");
       }
@@ -39,6 +38,14 @@ export const courseApi = createApi({
       providesTags: ["Course"],
     }),
 
+    // staff-specific courses
+    getStaffCourses: builder.query<Course[], number>({
+      query: (staffUserId) => ({
+        url: `/courses/staff/${staffUserId}`,
+        method: "GET",
+      }),
+      providesTags: ["Course"],
+    }),
     deleteCourse: builder.mutation<void, number>({
       query: (id) => ({
         url: `/courses/${id}`,
@@ -120,6 +127,7 @@ export const courseApi = createApi({
 export const {
   useGetCoursesQuery,
   useGetCourseQuery,
+   useGetStaffCoursesQuery,
   useDeleteCourseMutation,
   useCreateCourseMutation,
   useUpdateCourseMutation,

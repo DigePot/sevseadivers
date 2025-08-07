@@ -66,8 +66,21 @@ RentalBooking.belongsTo(Rental, { foreignKey: "rentalId" })
 User.hasMany(RentalBooking, { foreignKey: "userId" })
 RentalBooking.belongsTo(User, { foreignKey: "userId" })
 
-Gallery.belongsTo(User, { foreignKey: "uploadedBy", as: "uploader" })
-User.hasMany(Gallery, { foreignKey: "uploadedBy", as: "galleryItems" })
+Gallery.belongsTo(User, { foreignKey: 'uploadedBy', as: 'uploader' });
+User.hasMany(Gallery, { foreignKey: 'uploadedBy', as: 'galleryItems' });
+
+// A Course belongs to a User as 'staff'
+  Course.belongsTo(User, {
+  foreignKey: 'staffUserId',
+  as: 'staff', 
+});
+
+User.hasMany(Course, {
+  foreignKey: 'staffUserId',
+  as: 'assignedCourses', // or any name
+});
+
+
 
 export {
   sequelize,
