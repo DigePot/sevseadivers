@@ -4,11 +4,9 @@ import { Link } from "react-router"
 import About from "../../../../assets/about.png"
 import Dive from "../../../../assets/dive.png"
 import Explore from "../../../../assets/explore.png"
-import Premium from "../../../../assets/premium-banner.png"
 import Tutorial from "../../../../assets/tutorial.png"
 import FAQSection from "../../../../components/FAQSection"
 import ImageGallerySection from "../../../../components/ImageGallerySection"
-import PricingSection from "../../../../components/PricingSection"
 import Testimonial from "../../../../components/Testimonial"
 import WorkSection from "../../../../components/WorkSection"
 import { useTrips } from "../../../trip/hooks/use-trips"
@@ -153,60 +151,58 @@ export function HomeView() {
       </section>
 
       {/* Featured Destinations Section */}
-      <section aria-label="Featured destinations" className="py-20">
+<section aria-label="Featured destinations" className="py-20">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <motion.h2
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="text-4xl font-bold text-center text-cyan-600 mb-12 tracking-tight"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+            className="text-4xl font-bold text-center text-cyan-600 mb-12 tracking-tight"
         >
-          Featured Destinations
+            Featured Destinations
         </motion.h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 container mx-auto px-6 lg:px-8">
-          {featuredDestinations.map(
-            ({ destination, imageUrl, description }, i) => (
-              <motion.div
-                key={destination}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: i * 0.2 }}
-              >
-                <Link
-                  to={`/trips?destination=${encodeURIComponent(destination)}`}
-                  className="block bg-white rounded-3xl shadow-xl overflow-hidden group transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl"
-                  aria-label={`View trips to ${destination}`}
+
+        {/* This logic dynamically sets the grid class based on the number of items.
+          It defaults to a responsive grid for 5 or more items.
+        */}
+        <div 
+          className={`grid ${
+            {
+              1: "grid-cols-1",
+              2: "grid-cols-1 md:grid-cols-2",
+              3: "grid-cols-1 md:grid-cols-3", // This will be used now for your 3 items
+              4: "grid-cols-2 lg:grid-cols-4",
+            }[featuredDestinations.length] || "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5"
+          } gap-8`}
+        >
+            {featuredDestinations.map(
+                ({ destination, imageUrl }, i) => (
+                <motion.div
+                    key={destination}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.6, delay: i * 0.1 }}
                 >
-                  {imageUrl && (
+                    <Link
+                        to={`/trips?destination=${encodeURIComponent(destination)}`}
+                        className="block relative w-full aspect-square rounded-2xl shadow-lg overflow-hidden group transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl"
+                        aria-label={`View trips to ${destination}`}
+                    >
                     <img
-                      src={imageUrl || "/placeholder.svg"}
-                      alt={`${destination} underwater diving scene`}
-                      className="w-full h-56 object-cover group-hover:scale-105 transition-transform duration-300"
-                      loading="lazy"
+                        src={imageUrl || "/placeholder.svg"}
+                        alt={`${destination} underwater diving scene`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        loading="lazy"
                     />
-                  )}
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold text-cyan-700 mb-3">
-                      {destination}
-                    </h3>
-                    <p className="text-gray-600">
-                      {description
-                        ? description.length > 100
-                          ? description.slice(0, 100) + "..."
-                          : description
-                        : "Explore this amazing destination."}
-                    </p>
-                    <span className="mt-6 inline-block bg-cyan-500 hover:bg-cyan-600 text-white font-semibold px-6 py-3 rounded-lg shadow transition-transform hover:scale-105 cursor-pointer">
-                      View Details
-                    </span>
-                  </div>
-                </Link>
-              </motion.div>
-            )
-          )}
+                    </Link>
+                </motion.div>
+                )
+            )}
         </div>
-      </section>
+    </div>
+</section>
 
       <ServiceView />
 
