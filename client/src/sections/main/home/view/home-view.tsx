@@ -10,7 +10,7 @@ import ImageGallerySection from "../../../../components/ImageGallerySection"
 import Testimonial from "../../../../components/Testimonial"
 import WorkSection from "../../../../components/WorkSection"
 import { useTrips } from "../../../trip/hooks/use-trips"
-import { ServiceView } from "../../service/service/view"
+import { ServiceView } from "../service/service/view"
 
 export function HomeView() {
   const { allTrips } = useTrips()
