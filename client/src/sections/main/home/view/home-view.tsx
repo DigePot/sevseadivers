@@ -12,6 +12,7 @@ import PricingSection from "../../../../components/PricingSection"
 import Testimonial from "../../../../components/Testimonial"
 import WorkSection from "../../../../components/WorkSection"
 import { useTrips } from "../../../trip/hooks/use-trips"
+import { ServiceView } from "../../service/service/view"
 
 export function HomeView() {
   const { allTrips } = useTrips()
@@ -207,24 +208,7 @@ export function HomeView() {
         </div>
       </section>
 
-      {/* Full Width Banner */}
-      <section className="mb-16 flex justify-center">
-        <Link to="/premium-collection" className="block w-full">
-          <div
-            className="
-        relative overflow-hidden rounded-2xl shadow-lg mx-auto
-        w-[95%] max-w-[1900px]
-        h-[200px] sm:h-[300px] md:h-[400px] lg:h-[600px]
-      "
-          >
-            <img
-              src={Premium || "/placeholder.svg"}
-              alt="Luxury Collection Banner"
-              className="w-full h-full object-cover rounded-2xl"
-            />
-          </div>
-        </Link>
-      </section>
+      <ServiceView />
 
       {/* 3 Easy Steps Section */}
       <section aria-label="3 Easy Steps" className="py-20">
